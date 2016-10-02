@@ -6,24 +6,21 @@ public class BaseCharacter : MonoBehaviour {
 
     protected string name;
     protected int baseHealth = 100;
-    protected int health = 0;
+    protected int health = 100;
     protected int maxHealth = 100;
     protected int gearLevel = 0;
     protected int skillLevel = 0;
     protected Enums.CharacterRole role;
     protected int movementModifier;
     protected int flags;
-    protected Text text;
 
     public int GetHealth() { return health; }
+    public int GetMaxHealth() { return maxHealth; }
     public int GetGearLevel() { return gearLevel; }
     public int GetSkillLevel() { return skillLevel; }
     public Enums.CharacterRole GetRole() { return role; }
     int GetMovementModifier() { return movementModifier; }
 
-    void SetText() {
-      //  text.text = name + "\n" + GetHealth().ToString() + "/" + maxHealth.ToString();
-    }
 
 	// Use this for initialization
 	void Start () {
@@ -56,8 +53,6 @@ public class BaseCharacter : MonoBehaviour {
             OnDeath();
             this.gameObject.SetActive(false);
         }
-
-        SetText();
     }
 
     public void ModifySkillLevel(int amount) {

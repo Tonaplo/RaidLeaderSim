@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,7 +7,7 @@ public class RaidSceneController : MonoBehaviour {
 
     public GameObject damageDealer;
     public GameObject healer;
-    public Canvas canvas;
+    public Text text;
 
     List<BaseCharacter> allCharacters = new List<BaseCharacter>();
     List<DamageDealer> damageDealers = new List<DamageDealer>();
@@ -14,6 +15,9 @@ public class RaidSceneController : MonoBehaviour {
 
     float healInterval;
     float healProgress = 0.0f;
+
+    float damageInterval = 1.1f;
+    float damageProgress = 0.0f;
     int currentHealer = 0;
 
     bool encounterStarted = false;
@@ -50,10 +54,13 @@ public class RaidSceneController : MonoBehaviour {
         healers.Add(h1.GetComponent<Healer>());
         healers.Add(h2.GetComponent<Healer>());
         healProgress = 0.0f;
+        damageInterval = 1.1f;
+        damageProgress = 0.0f;
+        ComputeHealInterval();
 	}
 
     public void ComputeHealInterval() {
-        healInterval = (1.0f / (float)healers.Count);
+        healInterval = (2.0f / (float)healers.Count);
     }
 	
 	// Update is called once per frame
@@ -62,27 +69,42 @@ public class RaidSceneController : MonoBehaviour {
         //    return;
 
         healProgress += Time.deltaTime;
+        damageProgress += Time.deltaTime;
 
         //If it's more than the interval amount of time since we healed, HEAL!
         if (healProgress > healInterval) {
 
             int healing = healers[currentHealer].GetHealing();
-
-            print(healers[currentHealer].name + " gonna heal for " + healing.ToString());
-
+            print(healing);
             for (int i = 0; i < allCharacters.Count; i++) {
+                
                 allCharacters[i].ModifyHealth(healing);
             }
             currentHealer++;
 
-            if (currentHealer == healers.Count)
+            if (currentHealer == healers.Count-1)
             {
                 currentHealer = 0;
-                for (int i = 0; i < allCharacters.Count; i++)
-                {
-                    allCharacters[i].ModifyHealth(-50);
-                }
             }
+
+           
+
+            healProgress = 0.0f;
+        }
+
+        if (damageProgress > damageInterval)
+        {
+            for (int i = 0; i < allCharacters.Count; i++)
+            {
+                allCharacters[i].ModifyHealth(-25);
+            }
+            damageProgress = 0.0f;
+        }
+
+        text.text = "Party:\n";
+        for (int i = 0; i < allCharacters.Count; i++)
+        {
+            text.text += allCharacters[i].name + ": " + allCharacters[i].GetHealth() + "/" + allCharacters[i].GetMaxHealth() + "\n";
         }
     }
 }

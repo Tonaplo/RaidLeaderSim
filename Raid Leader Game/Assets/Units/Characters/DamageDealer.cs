@@ -14,7 +14,6 @@ public class DamageDealer : BaseCharacter
 	// Use this for initialization
 	void Start () {
         role = Enums.CharacterRole.DamageDealer;
-        text = gameObject.GetComponent<Text>();
 	}
 	
 	// Update is called once per frame

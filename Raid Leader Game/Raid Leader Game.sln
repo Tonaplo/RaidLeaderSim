@@ -1,7 +1,7 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2008
-
-Project("{B29A722D-D9CF-5E0F-6228-161799F68ABB}") = "Raid Leader Game", "Assembly-CSharp.csproj", "{9B08352F-3344-1BE5-1254-CC9FD13BB509}"
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raid Leader Game", "Assembly-CSharp.csproj", "{9B08352F-3344-1BE5-1254-CC9FD13BB509}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

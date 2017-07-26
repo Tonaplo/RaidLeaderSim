@@ -8,6 +8,7 @@ public class RaiderStats {
     int skillLevel = 0;
     int variation = 0;
     int skillThisAttempt = 0;
+    int throughput = 0;
     Enums.CharacterRole charRole;
     Enums.CharacterClass charClass;
     Enums.CharacterSpec charSpec;
@@ -18,6 +19,7 @@ public class RaiderStats {
     public int GetSkillLevel() { return skillLevel; }
     public int GetSkillThisAttempt() { return skillThisAttempt; }
     public int GetVariance() { return variation; }
+    public int GetThroughput() { return throughput; }
     public Enums.CharacterRole GetRole() { return charRole; }
     public Enums.CharacterClass GetClass() { return charClass; }
     public BaseAbility GetAbility() { return ability; }
@@ -52,21 +54,19 @@ public class RaiderStats {
         gearLevel = gearLevel < 0 ? 0 : gearLevel;
     }
 
-    public int ComputeThroughput(Enums.ThroughputTypes type)
+    public int ComputeThroughput()
     {
         //Cast to float for precision
-        float floatAmount = skillThisAttempt;// (float)type;
+        float floatAmount = skillThisAttempt;
 
         //Multiply with Gearlevel - increases the base by a percentage
-        floatAmount *= (1.0f + ((float)GetGearLevel() / 100.0f));
-
-        //Multiply with SkillLevel, WITHOUT the 1 +
-        //floatAmount *= (float)(50.0f + skillThisAttempt) / 100.0f;
+        floatAmount *= (1.0f + ((float)GetGearLevel() / 20.0f));
 
         //Adjust so we always contribute 'something'
         floatAmount = (float)Enums.StaticValues.minimumThroughput > floatAmount ? (float)Enums.StaticValues.minimumThroughput : floatAmount;
 
-        return (int)floatAmount;
+        throughput = (int)floatAmount;
+        return throughput;
     }
 
     public void ComputeSkillThisAttempt()
@@ -75,6 +75,30 @@ public class RaiderStats {
         //Note that this enables characters to go over the 100 skill cap
         if (skillThisAttempt <= 0)
             skillThisAttempt = 1;
+
+        ComputeThroughput();
+    }
+
+    public Enums.CharacterAttack GetBaseAttack()
+    {
+        switch (GetRole())
+        {
+            case Enums.CharacterRole.Tank:
+                return Enums.CharacterAttack.TankStrike;
+            case Enums.CharacterRole.Healer:
+                return Enums.CharacterAttack.HealerSmite;
+            case Enums.CharacterRole.RangedDPS:
+                return Enums.CharacterAttack.RangedFireball;
+            case Enums.CharacterRole.MeleeDPS:
+                return Enums.CharacterAttack.MeleeStab;
+            default:
+                return Enums.CharacterAttack.TankStrike;
+        }
+    }
+
+    public int GetSpellAmount(float multiplier) {
+        float value = multiplier * (GetThroughput() + Random.Range(-GetVariance(), GetVariance()));
+        return (int)(value > 1.0f ? value : 1);
     }
 
     public void GenerateRandomStats(Enums.CharacterRole role, int baseLevel)
@@ -145,6 +169,75 @@ public class RaiderStats {
                 gearLevel = randomValue;
         }
 
+    }
+
+    public IEnumerator DoAttack(float castTime, int attackDamage, int index, Raider attacker,  RaidSceneController rsc, RaiderScript rs)
+    {
+        yield return new WaitForSeconds(castTime);
+        if (!rsc.IsBossDead() && !rs.IsDead())
+        {
+            rsc.DealDamage(attackDamage, attacker.GetName(), Utility.GetAttackName(GetBaseAttack()), index);
+            rsc.StartCoroutine(DoAttack(castTime + Random.Range(0, castTime / 10.0f), GetSpellAmount(Utility.GetAttackBaseValue(GetBaseAttack(), Enums.AttackValueTypes.BaseDamageMultiplier)), index, attacker, rsc, rs));
+        }
+    }
+
+    public IEnumerator DoHeal(float castTime, RaiderScript caster, int index, RaidSceneController rsc, List<RaiderScript> raid)
+    {
+        yield return new WaitForSeconds(castTime);
+        
+        if (!rsc.IsBossDead() && !caster.IsDead())
+        {
+            int type = Random.Range(0, 2);
+            switch (type)
+            {
+                case 0:
+                    {
+                        RaiderScript lowest = null;
+                        int lowestDiff = 0;
+                        for (int i = 0; i < raid.Count; i++)
+                        {
+                           int thisDiff = raid[i].GetMaxHealth() - raid[i].GetHealth();
+                            if (thisDiff > lowestDiff) {
+                                lowest = raid[i];
+                                lowestDiff = raid[i].GetMaxHealth() - raid[i].GetHealth();
+                            }
+                        }
+
+                        if (lowest)
+                        {
+                            lowest.TakeDamage(-GetSpellAmount(1.0f));
+                        }
+                    }
+                    break;
+                case 1:
+                    {
+                        int healAmount = GetSpellAmount(1.0f) / 3;
+                        int randomIndex = 0;
+                        for (int i = 0; i < 3; i++)
+                        {
+                            randomIndex = Random.Range(0, raid.Count - 1);
+                            if(!raid[randomIndex].IsDead())
+                                raid[randomIndex].TakeDamage(-healAmount);
+                        }
+                    }
+                    break;
+                case 2:
+                    {
+                        int healAmount = GetSpellAmount(1.0f) / (raid.Count/2);
+                        int randomIndex = 0;
+                        for (int i = 0; i < raid.Count; i++)
+                        {
+                            randomIndex = Random.Range(0, raid.Count - 1);
+                            if (!raid[randomIndex].IsDead())
+                                raid[randomIndex].TakeDamage(-healAmount);
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            rsc.StartCoroutine(DoHeal(castTime + Random.Range(0, castTime / 10.0f), caster, index, rsc, raid));
+        }
     }
 
     //Internal Functions
@@ -225,6 +318,47 @@ public class RaiderStats {
                 break;
             case Enums.CharacterSpec.Elementalist:
                 ability = new BaseAbility("ElementalistSlow", "Provides the ability to slow", Enums.Ability.Slow);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void SetCooldownFromSpec()
+    {
+        //Code to give them correct abilities
+        cooldown = new BaseCooldown();
+        switch (charSpec)
+        {
+            case Enums.CharacterSpec.Guardian:
+                cooldown.Initialize("Immunity", "Provides the ability to immune", Enums.Cooldowns.Immunity);
+                break;
+            case Enums.CharacterSpec.Knight:
+                cooldown.Initialize("TankCD", "Provides the ability to immune", Enums.Cooldowns.Immunity);
+                break;
+            case Enums.CharacterSpec.Cleric:
+                cooldown.Initialize("HealingCooldown", "Provides the ability to immune", Enums.Cooldowns.HealingCooldown);
+                break;
+            case Enums.CharacterSpec.WitchDoctor:
+                cooldown.Initialize("HealingCooldown", "Provides the ability to immune", Enums.Cooldowns.Immunity);
+                break;
+            case Enums.CharacterSpec.Naturalist:
+                cooldown.Initialize("TankCooldown", "Provides the ability to immune", Enums.Cooldowns.TankCooldown);
+                break;
+            case Enums.CharacterSpec.Berserker:
+                cooldown.Initialize("AoECooldown", "Provides the ability to immune", Enums.Cooldowns.AoECooldown);
+                break;
+            case Enums.CharacterSpec.Assassin:
+                cooldown.Initialize("SingleTargetCooldown", "Provides the ability to immune", Enums.Cooldowns.SingleTargetCooldown);
+                break;
+            case Enums.CharacterSpec.Ranger:
+                cooldown.Initialize("AoECooldown", "Provides the ability to immune", Enums.Cooldowns.AoECooldown);
+                break;
+            case Enums.CharacterSpec.Wizard:
+                cooldown.Initialize("SingleTargetCooldown", "Provides the ability to immune", Enums.Cooldowns.SingleTargetCooldown);
+                break;
+            case Enums.CharacterSpec.Elementalist:
+                cooldown.Initialize("Immunity", "Provides the ability to immune", Enums.Cooldowns.Immunity);
                 break;
             default:
                 break;

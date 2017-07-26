@@ -18,13 +18,6 @@ public static class Enums{
         baseRaiderHealth        = 100,
     }
 
-    public enum ThroughputTypes {
-        SingleTargetHealing,
-        SingleTargetDPS,
-        AoEHealing,
-        AoEDPS,
-    }
-
     public enum CharacterRole {
         Tank,
         Healer,
@@ -56,6 +49,20 @@ public static class Enums{
         Wizard,         //Ranged DPS - Sorcerous
         Elementalist,   //Ranged DPS - Totemic
         Necromancer,    //Ranged DPS - Occultist
+    }
+
+    public enum CharacterAttack
+    {
+        TankStrike,
+        RangedFireball,
+        MeleeStab,
+        HealerSmite,
+    }
+
+    public enum AttackValueTypes
+    {
+        CastTime,
+        BaseDamageMultiplier,
     }
 
     public enum Ability
@@ -91,7 +98,10 @@ public static class Enums{
         AssignCounterToEncounterCooldowns = 3,
         ResolveAbilitiesCounters = 4,
         ResolveCooldownCounters = 5,
-        EvaluateFight = 6,
+        FightStart = 6,
+        FightInProgress = 7,
+        FightWon = 8,
+        FightLost = 9,
 
     }
 

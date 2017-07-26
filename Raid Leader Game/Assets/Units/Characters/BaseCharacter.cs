@@ -7,10 +7,8 @@ public class BaseCharacter {
     string name;
     int baseHealth;
     int maxHealth;
-    int currentHealth;
 
     public string GetName() { return name; }
-    public int GetCurrentHealth() { return currentHealth; }
     public int GetMaxHealth() { return maxHealth; }
     protected void SetMaxHealth(int newMax) { maxHealth = newMax; }
     protected void SetBaseHealth(int newBase) { baseHealth = newBase; }

@@ -5,163 +5,126 @@ using System.Collections.Generic;
 
 public class RaidSceneController : MonoBehaviour {
 
-    /*public Image singleTargetHealingNeededBar;
-    Image singleTargetHealingProvidedBar;
-    Text singleTargetHealingText;
-    public Image AoEHealingNeededBar;
-    Image AoEHealingProvidedBar;
-    Text AoEHealingText;
-    public Image singleTargetDamageNeededBar;
-    Image singleTargetDamageProvidedBar;
-    Text singleTargetDamageText;
-    public Image AoEDamageNeededBar;
-    Image AoEDamageProvidedBar;
-    Text AoEDamageText;*/
-
+    public GameObject HealthBarPrefab;
     public Text raidText;
     public Text encounterText;
-
-    int maxEncounterBarWidth = 800;
-    int staticBarHeight = 50;
-    int currentMaxEncounterBarNumber = 0;
-
-    int STHealingNeeded = 300;
-    int AoEHealingNeeded = 300;
-    int STDamageNeeded = 300;
-    int AoEDamageNeeded = 300;
-
-    int STHealingProvided = 300;
-    int AoEHealingProvided = 300;
-    int STDamageProvided = 300;
-    int AoEDamageProvided = 300;
+    public Canvas canvas;
 
     Enums.EncounterSteps currentStep = Enums.EncounterSteps.EncounterStart;
     int currentSubStep = -1;
     BaseEncounter encounter;
-
     List<Raider> all = new List<Raider>();
+    int[] totalDamage = new int[10];
+    HealthBarScript m_bossHealthScript;
+    List<RaiderScript> m_raiderScripts;
 
-	// Use this for initialization
-	void Start () {
+    public List<RaiderScript> GetRaid() { return m_raiderScripts; }
+
+    // Use this for initialization
+    void Start () {
         CreateTestRaid();
+        CreateRaidHealthBars();
         CreateTestEncounter();
-        raidText.text = "Raid:\n";
-        //Get the SingleTargetHealing components
+        raidText.text = "";
+        encounterText.text = "Current step is " + (int)currentStep;
 
-       /* singleTargetHealingProvidedBar = singleTargetHealingNeededBar.GetComponentInChildren<Image>();
-        singleTargetHealingText = singleTargetHealingProvidedBar.GetComponentInChildren<Text>();
+        GameObject temp = GameObject.Instantiate(HealthBarPrefab);
+        temp.transform.SetParent(canvas.transform);
+        m_bossHealthScript = temp.GetComponent<HealthBarScript>();
+        m_bossHealthScript.SetupHealthBar(350, 375, 100, 600, encounter.BossHealth);
 
-        //Get the AoEHealing components
-        AoEHealingProvidedBar = AoEHealingNeededBar.GetComponentInChildren<Image>();
-        AoEHealingText = AoEHealingProvidedBar.GetComponentInChildren<Text>();
-
-        //Get the SingleTargetDamage components
-        singleTargetDamageProvidedBar = singleTargetDamageNeededBar.GetComponentInChildren<Image>();
-        singleTargetDamageText = singleTargetDamageProvidedBar.GetComponentInChildren<Text>();
-
-        //Get the AoEDamage components
-        AoEDamageProvidedBar = AoEDamageNeededBar.GetComponentInChildren<Image>();
-        AoEDamageText = AoEDamageProvidedBar.GetComponentInChildren<Text>();
-
-        currentMaxEncounterBarNumber = 300;
-        //Rrefactor
-        CalculateBar(singleTargetHealingNeededBar, singleTargetHealingProvidedBar, singleTargetHealingText, Enums.ThroughputTypes.SingleTargetHealing);
-        CalculateBar(singleTargetHealingNeededBar, singleTargetHealingProvidedBar, singleTargetHealingText, Enums.ThroughputTypes.SingleTargetHealing);
-        CalculateBar(singleTargetHealingNeededBar, singleTargetHealingProvidedBar, singleTargetHealingText, Enums.ThroughputTypes.SingleTargetHealing);
-        CalculateBar(singleTargetHealingNeededBar, singleTargetHealingProvidedBar, singleTargetHealingText, Enums.ThroughputTypes.SingleTargetHealing);*/
-	}
+        totalDamage = new int[all.Count];
+        for (int i = 0; i < all.Count; i++)
+        {
+            totalDamage[i] = 0;
+        }
+    }
 
 	
 	// Update is called once per frame
 	void Update () {
-    }
-
-   void CalculateBar(Image neededBar, Image providedBar, Text text, Enums.ThroughputTypes type)
-    {
-        /*
-        int width = (int)((float)value / (float)currentMaxEncounterBarNumber * maxEncounterBarWidth);
-        bar.rectTransform.sizeDelta = new Vector2(width, staticBarHeight);
-        text.text = value.ToString();*/
-    }
-
-    void GetValuesForThroughputType(ref int needed, ref int provided, Enums.ThroughputTypes type) {
-        switch (type)
-        {
-            case Enums.ThroughputTypes.SingleTargetHealing:
-                needed = STHealingNeeded;
-                provided = STHealingProvided;
-                break;
-            case Enums.ThroughputTypes.SingleTargetDPS:
-                needed = STDamageNeeded;
-                provided = STDamageProvided;
-                break;
-            case Enums.ThroughputTypes.AoEHealing:
-                needed = AoEHealingNeeded;
-                provided = AoEHealingProvided;
-                break;
-            case Enums.ThroughputTypes.AoEDPS:
-                needed = AoEDamageNeeded;
-                provided = AoEDamageProvided;
-                break;
-            default:
-                break;
+        if (currentStep == Enums.EncounterSteps.FightInProgress && IsBossDead()) {
+            currentStep++;
+            AdvanceNextStep();
         }
     }
 
     public void AdvanceNextStep() {
 
+        encounterText.text = "Current step is " + (int)currentStep;
         switch (currentStep)
         {
             case Enums.EncounterSteps.EncounterStart:
                 currentStep = Enums.EncounterSteps.CalculateRaiderPerformanceForAttempt;
-                AdvanceNextStep();
+                currentSubStep = all.Count - 1;
+                while (currentSubStep >= 0)
+                {
+                    AdvanceNextStep();
+                }
                 break;
             case Enums.EncounterSteps.CalculateRaiderPerformanceForAttempt:
                 CalculateEncounterSkill();
                 break;
             case Enums.EncounterSteps.AssignCountersToEncounterAbilities:
+                currentSubStep = encounter.EncounterAbilities.Count-1;
+                AssignCountersToEncounterAbilities();
                 break;
             case Enums.EncounterSteps.AssignCounterToEncounterCooldowns:
+                currentStep++;
                 break;
             case Enums.EncounterSteps.ResolveAbilitiesCounters:
+                currentStep++;
                 break;
             case Enums.EncounterSteps.ResolveCooldownCounters:
+                currentStep++;
                 break;
-            case Enums.EncounterSteps.EvaluateFight:
+            case Enums.EncounterSteps.FightStart:
+                for (int i = 0; i < all.Count; i++)
+                {
+                    Enums.CharacterAttack attack = all[i].RaiderStats().GetBaseAttack();
+                    m_raiderScripts[i].StartFight(i, all[i], this);
+                }
+                encounter.BeginEncounter();
+
+                currentStep++;
+                encounterText.text = "Current step is " + (int)currentStep;
+                break;
+            case Enums.EncounterSteps.FightInProgress:
+                break;
+            case Enums.EncounterSteps.FightWon:
+            case Enums.EncounterSteps.FightLost:
+                raidText.text = "Total Damage Done:\n\n";
+                for (int i = 0; i < all.Count; i++)
+                {
+                    raidText.text += all[i].GetName() + "(" + all[i].RaiderStats().GetRole()  + ", " + all[i].RaiderStats().GetThroughput() + " throughput) : " + totalDamage[i] + " damage.\n";
+                }
                 break;
             default:
                 break;
         }
+    }
+
+    public bool IsBossDead()
+    {
+        return !(m_bossHealthScript.HealthBarSlider.value > 0);
+    }
+
+    public void DealDamage(int damage, string attacker, string attack, int index) {
+        string newText = attacker + " deals " + damage + " damage with " + attack + "!\n";
+        raidText.text = newText + raidText.text;
+        raidText.text.Trim();
+        totalDamage[index] += damage;
+        m_bossHealthScript.ModifyHealth(-damage);
     }
 
     void CalculateEncounterSkill() {
         if (currentSubStep >= 0 || currentSubStep <= (all.Count - 1))
         {
             all[currentSubStep].RaiderStats().ComputeSkillThisAttempt();
-            raidText.text += all[currentSubStep].GetName() + ": " + all[currentSubStep].RaiderStats().GetSkillThisAttempt().ToString() + " skill this attempt (" +
+            string newText = all[currentSubStep].GetName() + ": " + all[currentSubStep].RaiderStats().GetSkillThisAttempt().ToString() + " skill this attempt (" +
                 GetDifferenceFromSkillLevel(all[currentSubStep].RaiderStats().GetSkillLevel(), all[currentSubStep].RaiderStats().GetSkillThisAttempt()) + ")\n";
 
-            if (all[currentSubStep].RaiderStats().GetRole() == Enums.CharacterRole.Healer)
-            {
-                int AoEHPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.AoEHealing);
-                int SingleHPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.SingleTargetHealing);
-                print(all[currentSubStep].GetName() + " will do: " + SingleHPS + "/" + AoEHPS + " (SingleHPS/AoEHPS)");
-            }
-            else if (all[currentSubStep].RaiderStats().GetRole() == Enums.CharacterRole.Tank)
-            {
-                int AoEHPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.AoEHealing);
-                int SingleHPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.SingleTargetHealing);
-                int AoEDPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.AoEDPS);
-                int SingleDPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.SingleTargetDPS);
-                print(all[currentSubStep].GetName() + " will do: " + SingleDPS + "/" + AoEDPS + " (SingleDPS/AoEDPS) and " + SingleDPS + "/" + AoEDPS + " (SingleDPS/AoEDPS)");
-            }
-            else
-            {
-                int AoEDPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.AoEDPS);
-                int SingleDPS = all[currentSubStep].RaiderStats().ComputeThroughput(Enums.ThroughputTypes.SingleTargetDPS);
-                print(all[currentSubStep].GetName() + " will do: " + SingleDPS + "/" + AoEDPS + " (SingleDPS/AoEDPS)");
-                
-            }
+            raidText.text = newText + raidText.text;
 
             currentSubStep--;
             if (currentSubStep < 0)
@@ -171,6 +134,18 @@ public class RaidSceneController : MonoBehaviour {
         {
             print("Error! Incorrect amount of substeps for characters!");
             return;
+        }
+    }
+
+    void AssignCountersToEncounterAbilities() {
+        if (currentSubStep >= 0)
+        {
+            //Need to figure out some UI elements here
+            //I think using props and instantiating them correctly would be the best here.
+
+            //Skipping this step for now
+            currentSubStep = 0;
+            currentStep++;
         }
     }
 
@@ -185,24 +160,47 @@ public class RaidSceneController : MonoBehaviour {
         return "normal level";
     }
 
+    void CreateRaidHealthBars()
+    {
+        m_raiderScripts = new List<RaiderScript>();
+        for (int i = 0; i < all.Count; i++)
+        {
+            GameObject tempTwo = GameObject.Instantiate(HealthBarPrefab);
+            tempTwo.transform.SetParent(canvas.transform);
+            tempTwo.AddComponent<RaiderScript>();
+            m_raiderScripts.Add(tempTwo.AddComponent<RaiderScript>());
+            m_raiderScripts[i].Initialize(all[i], tempTwo.GetComponent<HealthBarScript>(), canvas, i);
+        }
+    }
+    
     //DEBUG FUNCTIONS
     void CreateTestRaid()
     {
-        all.Add(new Raider("Everett", new RaiderStats( 10, 30, 5, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
-        all.Add(new Raider("Greybone", new RaiderStats(10, 30, 2, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
+        all.Add(new Raider("Everett", new RaiderStats(10, 30, 5, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
+        all.Add(new Raider("Greybone", new RaiderStats(14, 30, 2, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
 
-        all.Add(new Raider("Mallusof", new RaiderStats(10, 30, 3, Enums.CharacterRole.Healer, Enums.CharacterClass.Paladin)));
-        all.Add(new Raider("Amranar", new RaiderStats(20, 20, 6, Enums.CharacterRole.Healer, Enums.CharacterClass.Totemic)));
-        all.Add(new Raider("Granjior", new RaiderStats(5, 40, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
+        all.Add(new Raider("Mallusof", new RaiderStats(10, 10, 3, Enums.CharacterRole.Healer, Enums.CharacterClass.Paladin)));
+        all.Add(new Raider("Amranar", new RaiderStats(12, 20, 6, Enums.CharacterRole.Healer, Enums.CharacterClass.Totemic)));
+        all.Add(new Raider("Granjior", new RaiderStats(14, 30, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
+        all.Add(new Raider("Farahn", new RaiderStats(19, 40, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
 
 
-        all.Add(new Raider("Morifa", new RaiderStats(35, 15, 6, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerous)));
-        all.Add(new Raider("Faerand", new RaiderStats(25, 25, 1, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Shadow)));
-        all.Add(new Raider("Farahn", new RaiderStats(20, 30, 8, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
-        all.Add(new Raider("Kaldorath", new RaiderStats(5, 45, 10, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Fighter)));
-        all.Add(new Raider("Rahran", new RaiderStats(40, 5, 8, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
+        all.Add(new Raider("Morifa", new RaiderStats(10, 25, 1, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerous)));
+        all.Add(new Raider("Kaldorath", new RaiderStats(10, 25, 1, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Fighter)));
 
-        currentSubStep = all.Count - 1;
+        all.Add(new Raider("Faerand", new RaiderStats(15, 25, 1, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Shadow)));
+        all.Add(new Raider("Rahran", new RaiderStats(15, 25, 1, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
+
+        all.Add(new Raider("Fimwack", new RaiderStats(20, 25, 1, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
+        all.Add(new Raider("Miriyal", new RaiderStats(20, 25, 1, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
+
+        //all.Add(new Raider("Fimwack", new RaiderStats(40, 45, 1, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerous)));
+        //all.Add(new Raider("Earendil", new RaiderStats(40, 45, 1, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
+
+        for (int i = 0; i < all.Count; i++)
+        {
+            all[i].CalculateMaxHealth();
+        }
     }
 
     void CreateTestEncounter() {
@@ -212,13 +210,6 @@ public class RaidSceneController : MonoBehaviour {
         abilities.Add(new EncounterAbility("Second Ability", "Generic ability that should be dispelled", Enums.Ability.Dispel, new EncounterAbilityEffect(10, 10)));
 
         List<BaseCooldown> cooldowns = new List<BaseCooldown>();
-
-        //"this needs to Be completely refactored. The encounters should have health instead of HPS and DPS Requirements"
-        encounter = new BaseEncounter(2, 300, 1000, 800, 300, Enums.Difficulties.Easy, abilities, cooldowns);
-        encounterText.text = "This encounter needs " + encounter.ActualSingleTargetDPSNeeded.ToString() + " Single Target DPS, "  +
-            encounter.ActualAoEDPSNeeded.ToString() + " AoE DPS, "  +
-            encounter.ActualSingleTargetHealingNeeded.ToString() + " Single Target HPS, "  +
-            encounter.ActualAoEHealingNeeded.ToString() + " AoE HPS, and this is not how it should work.";
-
+        encounter = new BaseEncounter(10000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this);
     }
 }

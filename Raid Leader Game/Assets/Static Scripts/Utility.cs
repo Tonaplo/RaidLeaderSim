@@ -7,18 +7,89 @@ public static class Utility
     static List<string> names;
 
     public static void Initialize() {
-        names = new List<string>();
-    
-        names.Add("Andoe");	names.Add("Niry");	names.Add("Gethi");	names.Add("Ene");	names.Add("Assol");	names.Add("Onun");	names.Add("Gamec");	names.Add("Nossu");
-        names.Add("Volni");	names.Add("Esu");	names.Add("Uliok");	names.Add("Rhilnush");	names.Add("Kiozon");	names.Add("Linnas");	names.Add("Uthmid");	names.Add("Weldy");
-        names.Add("Zezob");	names.Add("Ilgral");	names.Add("Phiathon");	names.Add("Phimnar");	names.Add("Muroes");	names.Add("Selar");	names.Add("Tumu");	names.Add("Walel");
-        names.Add("Gelnis");	names.Add("Shidru");	names.Add("Diassi");	names.Add("Murshal");	names.Add("Kulnun");	names.Add("Lasal");	names.Add("Nulnu");	names.Add("Phamru");
-        names.Add("Daldu");	names.Add("Renmu");	names.Add("Phiagrolm");	names.Add("Jella");	names.Add("Zulab");	names.Add("Lullosh");	names.Add("Wardi");	names.Add("Shynmo");
-        names.Add("Vordoecy");	names.Add("Shynronna");	names.Add("Nigresseb");	names.Add("Omulgra");	names.Add("Vososseln");	names.Add("Shernylni");	names.Add("Wiolmoesa");	names.Add("Phymrilma");
-        names.Add("Phathmendolm");	names.Add("Renamron");	names.Add("Muthmime");	names.Add("Hanunras");	names.Add("Larialnu");	names.Add("Rhorlano");	names.Add("Vamodra");	names.Add("Resissys");
-        names.Add("Zosilneb");	names.Add("Rillosse");	names.Add("Arana");	names.Add("Onnutha");	names.Add("Memnerdulm");	names.Add("Orune");	names.Add("Kondessub");	names.Add("Oshasa");
-        names.Add("Ocilmir");	names.Add("Zidrurshe");	names.Add("Werdossik");	names.Add("Shanralla");	names.Add("Phothimdaln");	names.Add("Unarnel");	names.Add("Worusos"); names.Add("Sonmarnu");
-        names.Add("Gylese"); names.Add("Zyrliro"); names.Add("Kedriathmac"); names.Add("Chalnony"); names.Add("Jirlutholm"); names.Add("Phamnullo"); names.Add("Tardino"); names.Add("Rimenil");
+        names = new List<string>
+        {
+            "Andoe",
+            "Niry",
+            "Gethi",
+            "Ene",
+            "Assol",
+            "Onun",
+            "Gamec",
+            "Nossu",
+            "Volni",
+            "Esu",
+            "Uliok",
+            "Rhilnush",
+            "Kiozon",
+            "Linnas",
+            "Uthmid",
+            "Weldy",
+            "Zezob",
+            "Ilgral",
+            "Phiathon",
+            "Phimnar",
+            "Muroes",
+            "Selar",
+            "Tumu",
+            "Walel",
+            "Gelnis",
+            "Shidru",
+            "Diassi",
+            "Murshal",
+            "Kulnun",
+            "Lasal",
+            "Nulnu",
+            "Phamru",
+            "Daldu",
+            "Renmu",
+            "Phiagrolm",
+            "Jella",
+            "Zulab",
+            "Lullosh",
+            "Wardi",
+            "Shynmo",
+            "Vordoecy",
+            "Shynronna",
+            "Nigresseb",
+            "Omulgra",
+            "Vososseln",
+            "Shernylni",
+            "Wiolmoesa",
+            "Phymrilma",
+            "Phathmendolm",
+            "Renamron",
+            "Muthmime",
+            "Hanunras",
+            "Larialnu",
+            "Rhorlano",
+            "Vamodra",
+            "Resissys",
+            "Zosilneb",
+            "Rillosse",
+            "Arana",
+            "Onnutha",
+            "Memnerdulm",
+            "Orune",
+            "Kondessub",
+            "Oshasa",
+            "Ocilmir",
+            "Zidrurshe",
+            "Werdossik",
+            "Shanralla",
+            "Phothimdaln",
+            "Unarnel",
+            "Worusos",
+            "Sonmarnu",
+            "Gylese",
+            "Zyrliro",
+            "Kedriathmac",
+            "Chalnony",
+            "Jirlutholm",
+            "Phamnullo",
+            "Tardino",
+            "Rimenil"
+        };
     }
 
     public static string GetRandomCharacterName() {
@@ -26,4 +97,55 @@ public static class Utility
         return names[index];
     }
 
+    public static float GetAttackBaseValue(Enums.CharacterAttack attack, Enums.AttackValueTypes type)
+    {
+        switch (attack)
+        {
+            case Enums.CharacterAttack.TankStrike:
+                if (type == Enums.AttackValueTypes.CastTime)
+                    return 1.0f;
+                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
+                    return 0.5f;
+                break;
+            case Enums.CharacterAttack.RangedFireball:
+                if (type == Enums.AttackValueTypes.CastTime)
+                    return 2.2f;
+                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
+                    return 2.0f;
+                break;
+            case Enums.CharacterAttack.MeleeStab:
+                if (type == Enums.AttackValueTypes.CastTime)
+                    return 0.5f;
+                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
+                    return 1.0f;
+                break;
+            case Enums.CharacterAttack.HealerSmite:
+                if (type == Enums.AttackValueTypes.CastTime)
+                    return 1.5f;
+                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
+                    return 0.3f;
+                break;
+            default:
+                break;
+        }
+
+        Debug.LogError("No attack of type " + attack + " or base type " + type + " found!");
+        return 1.0f;
+    }
+
+    public static string GetAttackName(Enums.CharacterAttack attack) {
+        switch (attack)
+        {
+            case Enums.CharacterAttack.TankStrike:
+                return "Strike";
+            case Enums.CharacterAttack.RangedFireball:
+                return "Fireball";
+            case Enums.CharacterAttack.MeleeStab:
+                return "Stab";
+            case Enums.CharacterAttack.HealerSmite:
+                return "Smite";
+            default:
+                return "Undefined!";
+        }
+    }
 }

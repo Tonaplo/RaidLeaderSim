@@ -13,25 +13,30 @@ public class Raider : BaseCharacter {
     }
 
     //Calculate Max Health based on Class
+    //this should be based on gear and the like later
     public override void CalculateMaxHealth()
     {
-        SetBaseHealth((int)Enums.StaticValues.baseRaiderHealth);
+        float value = (int)Enums.StaticValues.baseRaiderHealth;
+        SetBaseHealth((int)value);
+
         switch (stats.GetRole())
         {
             case Enums.CharacterRole.Tank:
-                SetMaxHealth((int)Enums.StaticValues.baseRaiderHealth * 2);
+                value *= 2.0f;
                 break;
             case Enums.CharacterRole.Healer:
-                SetMaxHealth((int)((int)Enums.StaticValues.baseRaiderHealth * 0.8));
+                value *= 0.8f;
                 break;
             case Enums.CharacterRole.RangedDPS:
-                SetMaxHealth((int)((int)Enums.StaticValues.baseRaiderHealth * 0.9));
+                value *= 0.9f;
                 break;
             case Enums.CharacterRole.MeleeDPS:
-                SetMaxHealth((int)((int)Enums.StaticValues.baseRaiderHealth * 1.1));
+                value *= 1.1f;
                 break;
             default:
                 break;
         }
+        value += RaiderStats().GetGearLevel();
+        SetMaxHealth((int)value);
     }
 }

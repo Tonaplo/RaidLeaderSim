@@ -4,26 +4,42 @@ using UnityEngine;
 
 public class RaiderStats {
 
+    //base stats
     int gearLevel = 0;
     int skillLevel = 0;
     int variation = 0;
-    int skillThisAttempt = 0;
-    int throughput = 0;
+    int averageThroughput = 0;
     Enums.CharacterRole charRole;
     Enums.CharacterClass charClass;
     Enums.CharacterSpec charSpec;
     BaseAbility ability;
     BaseCooldown cooldown;
 
+    //per fight stats
+    int skillThisAttempt = 0;
+    int throughput = 0;
+
     public int GetGearLevel() { return gearLevel; }
     public int GetSkillLevel() { return skillLevel; }
     public int GetSkillThisAttempt() { return skillThisAttempt; }
     public int GetVariance() { return variation; }
+    public int GetAverageThroughput() { return averageThroughput; }
     public int GetThroughput() { return throughput; }
     public Enums.CharacterRole GetRole() { return charRole; }
     public Enums.CharacterClass GetClass() { return charClass; }
     public BaseAbility GetAbility() { return ability; }
     public BaseCooldown GetCooldown() { return cooldown; }
+
+    RaiderStats(int baseLevel)
+    {
+        //Generate skill and gear level
+        skillLevel = GenerateRandomLevelFromBase(baseLevel);
+        gearLevel = GenerateRandomLevelFromBase(baseLevel);
+
+        //Compute the variation based on the skill level
+        variation = GenerateVariationFromSkillLevel(skillLevel);
+        ComputeAverageThroughput();
+    }
 
     public RaiderStats(int _gearLevel, int _skillLevel, int _variation, Enums.CharacterRole _charRole, Enums.CharacterClass _charClass)
     {
@@ -32,7 +48,8 @@ public class RaiderStats {
         variation = _variation;
         charRole = _charRole;
         charClass = _charClass;
-        SetSpecFromRoleAndClass();
+        FinishRaiderStatGeneration();
+        ComputeAverageThroughput();
     }
 
     public void ModifySkillLevel(int amount)
@@ -44,6 +61,8 @@ public class RaiderStats {
             skillLevel = (int)Enums.StaticValues.maxSkill;
         else if (skillLevel < 1)
             skillLevel = 1;
+
+        ComputeAverageThroughput();
     }
 
     public void ModifyGearLevel(int amount)
@@ -52,21 +71,34 @@ public class RaiderStats {
 
         //GearLevel can never be below 0
         gearLevel = gearLevel < 0 ? 0 : gearLevel;
+
+        ComputeAverageThroughput();
     }
 
     public int ComputeThroughput()
     {
+        throughput = averageThroughput = ComputeThroughputInternal(GetSkillThisAttempt());
+        return throughput;
+    }
+
+    public int ComputeAverageThroughput()
+    {
+        averageThroughput = ComputeThroughputInternal(GetSkillLevel());
+        return averageThroughput;
+    }
+
+    int ComputeThroughputInternal(int basevalue)
+    {
         //Cast to float for precision
-        float floatAmount = skillThisAttempt;
+        float floatAmount = basevalue;
 
         //Multiply with Gearlevel - increases the base by a percentage
-        floatAmount *= (1.0f + ((float)GetGearLevel() / 20.0f));
+        floatAmount *= (1.0f + ((float)GetGearLevel() / 30.0f));
 
         //Adjust so we always contribute 'something'
         floatAmount = (float)Enums.StaticValues.minimumThroughput > floatAmount ? (float)Enums.StaticValues.minimumThroughput : floatAmount;
 
-        throughput = (int)floatAmount;
-        return throughput;
+        return (int)floatAmount;
     }
 
     public void ComputeSkillThisAttempt()
@@ -101,74 +133,26 @@ public class RaiderStats {
         return (int)(value > 1.0f ? value : 1);
     }
 
-    public void GenerateRandomStats(Enums.CharacterRole role, int baseLevel)
+    public static RaiderStats GenerateRaiderStatsFromClass(Enums.CharacterClass Class, int baseLevel)
     {
-        //Find the Class
-        int randomValue = 0;
-        switch (role)
-        {
-            case Enums.CharacterRole.Tank:
-                randomValue = Random.Range(0, 2);
-                if (randomValue == 0)
-                    charClass = Enums.CharacterClass.Fighter;
-                else
-                    charClass = Enums.CharacterClass.Paladin;
-                break;
-            case Enums.CharacterRole.MeleeDPS:
-                randomValue = Random.Range(0, 2);
-                if (randomValue == 0)
-                    charClass = Enums.CharacterClass.Fighter;
-                else
-                    charClass = Enums.CharacterClass.Shadow;
-                break;
-            case Enums.CharacterRole.Healer:
+        RaiderStats returnValue = new RaiderStats(baseLevel);
 
-                randomValue = Random.Range(0, 3);
-                if (randomValue == 0)
-                    charClass = Enums.CharacterClass.Totemic;
-                else if (randomValue == 1)
-                    charClass = Enums.CharacterClass.Sorcerous;
-                else
-                    charClass = Enums.CharacterClass.Paladin;
+        returnValue.charRole = GenerateRoleFromClass(Class);
+        returnValue.charClass = Class;
 
-                break;
-            case Enums.CharacterRole.RangedDPS:
+        FinishRaiderStatGeneration(ref returnValue);
+        return returnValue;
+    }
 
-                randomValue = Random.Range(0, 3);
-                if (randomValue == 0)
-                    charClass = Enums.CharacterClass.Totemic;
-                else if (randomValue == 1)
-                    charClass = Enums.CharacterClass.Sorcerous;
-                else
-                    charClass = Enums.CharacterClass.Shadow;
+    public static RaiderStats GenerateRaiderStatsFromRole(Enums.CharacterRole role, int baseLevel)
+    {
+        RaiderStats returnValue = new RaiderStats(baseLevel);
+        returnValue.charClass = GenerateClassFromRole(role);
+        returnValue.charRole = role;
 
-                break;
-            default:
-                break;
-        }
-
-        //Compute the variation
-        variation = baseLevel;
-        for (int i = 0; i < 3; i++)
-        {
-            variation = Random.Range(1, variation);
-        }
-
-        //Compute the gearlevel and skill from the baselevel
-        //Two passes - first is skill, second is gearlevel
-        for (int i = 0; i < 2; i++)
-        {
-            int first = (int)Random.Range(baseLevel / 2, baseLevel * 1.5f);
-            int second = (int)Random.Range(baseLevel / 2, baseLevel * 1.5f);
-            int third = (int)Random.Range(baseLevel / 2, baseLevel * 1.5f);
-
-            randomValue = (int)((first + second + third) / 3);
-            if (i == 0)
-                skillLevel = randomValue;
-            else
-                gearLevel = randomValue;
-        }
-
+        FinishRaiderStatGeneration(ref returnValue);
+        
+        return returnValue;
     }
 
     public IEnumerator DoAttack(float castTime, int attackDamage, int index, Raider attacker, Enums.CharacterAttack attack, RaidSceneController rsc, RaiderScript rs)
@@ -207,7 +191,9 @@ public class RaiderStats {
 
                         if (lowest)
                         {
-                            lowest.TakeHealing(GetSpellAmount(1.0f));
+                            int healamount = GetSpellAmount(1.0f);
+                            lowest.TakeHealing(healamount);
+                            rsc.DoHeal(healamount, caster.Raider.GetName(), "Big Heal", index);
                         }
                     }
                     break;
@@ -218,8 +204,11 @@ public class RaiderStats {
                         for (int i = 0; i < 3; i++)
                         {
                             randomIndex = Random.Range(0, raid.Count - 1);
-                            if(!raid[randomIndex].IsDead())
+                            if (!raid[randomIndex].IsDead())
+                            {
                                 raid[randomIndex].TakeHealing(healAmount);
+                                rsc.DoHeal(healAmount, caster.Raider.GetName(), "Medium Heal", index);
+                            }
                         }
                     }
                     break;
@@ -231,7 +220,10 @@ public class RaiderStats {
                         {
                             randomIndex = Random.Range(0, raid.Count - 1);
                             if (!raid[randomIndex].IsDead())
+                            {
                                 raid[randomIndex].TakeHealing(healAmount);
+                                rsc.DoHeal(healAmount, caster.Raider.GetName(), "Small Heal", index);
+                            }
                         }
                     }
                     break;
@@ -244,6 +236,127 @@ public class RaiderStats {
     }
 
     //Internal Functions
+
+    static Enums.CharacterClass GenerateClassFromRole(Enums.CharacterRole role)
+    {
+        int randomValue = 0;
+        switch (role)
+        {
+            case Enums.CharacterRole.Tank:
+                randomValue = Random.Range(0, 2);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Fighter;
+                else
+                    return Enums.CharacterClass.Paladin;
+            case Enums.CharacterRole.MeleeDPS:
+                randomValue = Random.Range(0, 2);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Fighter;
+                else
+                    return Enums.CharacterClass.Shadow;
+            case Enums.CharacterRole.Healer:
+
+                randomValue = Random.Range(0, 3);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Totemic;
+                else if (randomValue == 1)
+                    return Enums.CharacterClass.Sorcerous;
+                else
+                    return Enums.CharacterClass.Paladin;
+
+            default:
+            case Enums.CharacterRole.RangedDPS:
+
+                randomValue = Random.Range(0, 3);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Totemic;
+                else if (randomValue == 1)
+                    return Enums.CharacterClass.Sorcerous;
+                else
+                    return Enums.CharacterClass.Shadow;
+        }
+    }
+
+    static Enums.CharacterRole GenerateRoleFromClass(Enums.CharacterClass Class)
+    {
+        //implement this correctly later
+        int randomValue = Random.Range(0, 2);
+        switch (Class)
+        {
+            case Enums.CharacterClass.Fighter:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Tank;
+                else
+                    return Enums.CharacterRole.MeleeDPS;
+
+            case Enums.CharacterClass.Shadow:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.RangedDPS;
+                else
+                    return Enums.CharacterRole.MeleeDPS;
+            case Enums.CharacterClass.Totemic:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Healer;
+                else
+                    return Enums.CharacterRole.RangedDPS;
+            case Enums.CharacterClass.Sorcerous:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Healer;
+                else
+                    return Enums.CharacterRole.RangedDPS;
+            case Enums.CharacterClass.Paladin:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Healer;
+                else
+                    return Enums.CharacterRole.Tank;
+            default:
+            case Enums.CharacterClass.Occultist:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.RangedDPS;
+                else
+                    return Enums.CharacterRole.MeleeDPS;
+        }
+    }
+    
+    static int GenerateRandomLevelFromBase(int baseValue)
+    {
+        int first = (int)Random.Range(baseValue / 2, baseValue * 1.5f);
+        int second = (int)Random.Range(baseValue / 2, baseValue * 1.5f);
+        int third = (int)Random.Range(baseValue / 2, baseValue * 1.5f);
+
+        return (int)((first + second + third) / 3);
+    }
+
+    static int GenerateVariationFromSkillLevel(int skillLevel)
+    {
+        //We dont want to vary more than 20% up AND down
+        //except when we're at really low skillslevels
+        int variation = (int)(skillLevel * 0.2f);
+        variation = variation < 4 ? 3 : variation;
+
+        return variation = Random.Range(1, variation);
+        /*for (int i = 0; i < 3; i++)
+        {
+            variation = Random.Range(1, variation);
+        }
+        return variation;*/
+    }
+
+    static void FinishRaiderStatGeneration(ref RaiderStats rs)
+    {
+        rs.SetSpecFromRoleAndClass();
+        rs.SetAbilityFromSpec();
+        rs.SetCooldownFromSpec();
+        rs.SetBaseAbility();
+    }
+
+    void FinishRaiderStatGeneration()
+    {
+        SetSpecFromRoleAndClass();
+        SetAbilityFromSpec();
+        SetCooldownFromSpec();
+        SetBaseAbility();
+    }
 
     void SetSpecFromRoleAndClass()
     {

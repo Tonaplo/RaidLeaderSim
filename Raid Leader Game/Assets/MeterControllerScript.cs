@@ -12,18 +12,21 @@ public class MeterControllerScript : MonoBehaviour {
 
     public class Entry {
 
-        public Entry(string n, int i)
+        public Entry(string n, int i, Enums.CharacterRole r)
         {
             m_name = n;
             m_index = i;
+            m_role = r;
         }
 
         string m_name;
         int m_index;
         public int Amount;
+        Enums.CharacterRole m_role;
 
         public string Name { get { return m_name; } }
         public int Index { get { return m_index; } }
+        public Enums.CharacterRole Role { get { return m_role; } }
     }
 
     public class Bar
@@ -51,7 +54,7 @@ public class MeterControllerScript : MonoBehaviour {
             temp.transform.SetPositionAndRotation(new Vector3(xPos, yPos - (height*i)/2, 0), Quaternion.identity);
             temp.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
             m_bars.Add(new Bar(temp.GetComponent <MeterBarScript>(), i));
-            m_bars[i].BarScript.UpdateEntry(new Entry("None", 0));
+            m_bars[i].BarScript.UpdateEntry(new Entry("None", 0, Enums.CharacterRole.RangedDPS));
             m_bars[i].BarScript.NameText.resizeTextForBestFit = true;
             m_bars[i].BarScript.AmountText.resizeTextForBestFit = true;
         }
@@ -64,7 +67,7 @@ public class MeterControllerScript : MonoBehaviour {
         m_entries = new List<Entry>();
         for (int i = 0; i < raid.Count; i++)
         {
-            m_entries.Add(new Entry(raid[i].GetName(), i));
+            m_entries.Add(new Entry(raid[i].GetName(), i, raid[i].RaiderStats().GetRole()));
         }
 
         if (raid.Count < m_bars.Count)
@@ -82,20 +85,6 @@ public class MeterControllerScript : MonoBehaviour {
             entry.Amount += Mathf.Abs(amount);
             CheckForBarUpdate(entry);
         }
-
-        return;
-        Debug.Log("1: " + m_entries[0].Name + ": " + m_entries[0].Amount + "\n" +
-            "2: " + m_entries[1].Name + ": " + m_entries[1].Amount + "\n" +
-            "3: " + m_entries[2].Name + ": " + m_entries[2].Amount + "\n" +
-            "4: " + m_entries[3].Name + ": " + m_entries[3].Amount + "\n" +
-            "5: " + m_entries[4].Name + ": " + m_entries[4].Amount + "\n" +
-            "6: " + m_entries[5].Name + ": " + m_entries[5].Amount + "\n" +
-            "7: " + m_entries[6].Name + ": " + m_entries[6].Amount + "\n" +
-            "8: " + m_entries[7].Name + ": " + m_entries[7].Amount + "\n" +
-            "9: " + m_entries[8].Name + ": " + m_entries[8].Amount + "\n" +
-            "10: " + m_entries[9].Name + ": " + m_entries[9].Amount + "\n" +
-            "11: " + m_entries[10].Name + ": " + m_entries[10].Amount + "\n" +
-            "12: " + m_entries[11].Name + ": " + m_entries[11].Amount + "\n");
     }
     
 

@@ -7,6 +7,8 @@ public class RaiderScript : MonoBehaviour {
     Raider m_raider;
     public HealthBarScript HealthBar;
 
+    public Raider Raider { get { return m_raider; } }
+
     // Use this for initialization
     void Start() {
 
@@ -30,23 +32,7 @@ public class RaiderScript : MonoBehaviour {
         HealthBar = hbs;
         HealthBar.SetupHealthBar((index % 3) * 80 + 465, 310 - (index / 3) * 60, 100, 70, m_raider.GetMaxHealth());
         HealthBar.SetUseName(m_raider.GetName(), true);
-        switch (m_raider.RaiderStats().GetRole())
-        {
-            case Enums.CharacterRole.Tank:
-                HealthBar.Fill.color = Color.grey;
-                break;
-            case Enums.CharacterRole.Healer:
-                HealthBar.Fill.color = Color.green;
-                break;
-            case Enums.CharacterRole.RangedDPS:
-                HealthBar.Fill.color = Color.cyan;
-                break;
-            case Enums.CharacterRole.MeleeDPS:
-                HealthBar.Fill.color = Color.red;
-                break;
-            default:
-                break;
-        }
+        HealthBar.Fill.color = Utility.GetColorFromRole(m_raider.RaiderStats().GetRole());
     }
 
     public void StartFight(int index, Raider attacker, RaidSceneController rsc)

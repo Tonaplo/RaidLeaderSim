@@ -92,9 +92,18 @@ public static class Utility
         };
     }
 
-    public static string GetRandomCharacterName() {
-        int index = Random.Range(0, names.Count - 1);
-        return names[index];
+    public static void GetRandomCharacterName(ref List<string> outNames, int numNamesNeeded) {
+        List<string> namePool = new List<string>(names);
+        outNames = new List<string>();
+
+        Debug.Assert(namePool.Count >= numNamesNeeded);
+
+        for (int i = 0; i < numNamesNeeded; i++)
+        {
+            int index = Random.Range(0, namePool.Count - 1);
+            outNames.Add(namePool[index]);
+            namePool.RemoveAt(index);
+        }
     }
 
     public static float GetAttackBaseValue(Enums.CharacterAttack attack, Enums.AttackValueTypes type)
@@ -131,6 +140,22 @@ public static class Utility
 
         Debug.LogError("No attack of type " + attack + " or base type " + type + " found!");
         return 1.0f;
+    }
+
+    public static Color GetColorFromRole(Enums.CharacterRole role)
+    {
+        switch (role)
+        {
+            case Enums.CharacterRole.Tank:
+                return Color.grey;
+            case Enums.CharacterRole.Healer:
+                return Color.green;
+            case Enums.CharacterRole.RangedDPS:
+                return Color.cyan;
+            case Enums.CharacterRole.MeleeDPS:
+            default:
+                return Color.red;
+        }
     }
 
     public static string GetAttackName(Enums.CharacterAttack attack) {

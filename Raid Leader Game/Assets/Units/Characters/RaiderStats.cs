@@ -148,7 +148,7 @@ public class RaiderStats {
         }
 
         //Compute the variation
-        variation = 100 - baseLevel;
+        variation = baseLevel;
         for (int i = 0; i < 3; i++)
         {
             variation = Random.Range(1, variation);
@@ -171,13 +171,15 @@ public class RaiderStats {
 
     }
 
-    public IEnumerator DoAttack(float castTime, int attackDamage, int index, Raider attacker,  RaidSceneController rsc, RaiderScript rs)
+    public IEnumerator DoAttack(float castTime, int attackDamage, int index, Raider attacker, Enums.CharacterAttack attack, RaidSceneController rsc, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             rsc.DealDamage(attackDamage, attacker.GetName(), Utility.GetAttackName(GetBaseAttack()), index);
-            rsc.StartCoroutine(DoAttack(castTime + Random.Range(0, castTime / 10.0f), GetSpellAmount(Utility.GetAttackBaseValue(GetBaseAttack(), Enums.AttackValueTypes.BaseDamageMultiplier)), index, attacker, rsc, rs));
+            float baseCastTime = Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.CastTime);
+            int newDamage = GetSpellAmount(Utility.GetAttackBaseValue(GetBaseAttack(), Enums.AttackValueTypes.BaseDamageMultiplier));
+            rs.StartCoroutine(DoAttack(baseCastTime + Random.Range(0, baseCastTime / 10.0f), newDamage, index, attacker, attack, rsc, rs));
         }
     }
 
@@ -205,7 +207,7 @@ public class RaiderStats {
 
                         if (lowest)
                         {
-                            lowest.TakeDamage(-GetSpellAmount(1.0f));
+                            lowest.TakeHealing(GetSpellAmount(1.0f));
                         }
                     }
                     break;
@@ -217,7 +219,7 @@ public class RaiderStats {
                         {
                             randomIndex = Random.Range(0, raid.Count - 1);
                             if(!raid[randomIndex].IsDead())
-                                raid[randomIndex].TakeDamage(-healAmount);
+                                raid[randomIndex].TakeHealing(healAmount);
                         }
                     }
                     break;
@@ -229,14 +231,15 @@ public class RaiderStats {
                         {
                             randomIndex = Random.Range(0, raid.Count - 1);
                             if (!raid[randomIndex].IsDead())
-                                raid[randomIndex].TakeDamage(-healAmount);
+                                raid[randomIndex].TakeHealing(healAmount);
                         }
                     }
                     break;
                 default:
                     break;
             }
-            rsc.StartCoroutine(DoHeal(castTime + Random.Range(0, castTime / 10.0f), caster, index, rsc, raid));
+            float baseCastTime = 2.5f;
+            caster.StartCoroutine(DoHeal(baseCastTime + Random.Range(0, baseCastTime / 10.0f), caster, index, rsc, raid));
         }
     }
 

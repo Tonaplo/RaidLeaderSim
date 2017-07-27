@@ -37,6 +37,11 @@ public class HealthBarScript : MonoBehaviour {
             HealthBarText.text = HealthBarSlider.value + "/" + HealthBarSlider.maxValue;
     }
 
+    public bool IsDead()
+    {
+        return HealthBarSlider.value <= 0;
+    }
+
     public void ModifyHealth(int amount) {
         ModifyHealth((float)amount);
     }
@@ -53,20 +58,19 @@ public class HealthBarScript : MonoBehaviour {
         else if (newAmount < 0)
         {
             HealthBarSlider.value = 0;
-            Death();
         }
         else
             HealthBarSlider.value = newAmount;
 
+        string healthString = HealthBarSlider.value + "/" + HealthBarSlider.maxValue;
+        if (HealthBarSlider.value == 0)
+            healthString = "DEAD";
+
         if (!m_useName)
-            HealthBarText.text = HealthBarSlider.value + "/" + HealthBarSlider.maxValue;
+            HealthBarText.text = healthString;
         else
         {
-            HealthBarText.text = m_name + "\n" +HealthBarSlider.value + "/" + HealthBarSlider.maxValue;
+            HealthBarText.text = m_name + "\n" + healthString;
         }
-    }
-
-    void Death() {
-        HealthBarText.text = "DEAD";
     }
 }

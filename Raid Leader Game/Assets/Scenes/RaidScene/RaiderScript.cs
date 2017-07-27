@@ -19,7 +19,7 @@ public class RaiderScript : MonoBehaviour {
 
     public bool IsDead()
     {
-        return HealthBar.HealthBarSlider.value <= 0;
+        return HealthBar.IsDead();
     }
 
     public int GetHealth() { return (int)HealthBar.HealthBarSlider.value; }
@@ -54,7 +54,7 @@ public class RaiderScript : MonoBehaviour {
         Enums.CharacterAttack attack = attacker.RaiderStats().GetBaseAttack();
         float castTime = Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.CastTime);
         int damage = attacker.RaiderStats().GetSpellAmount(Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.BaseDamageMultiplier));
-        rsc.StartCoroutine(attacker.RaiderStats().DoAttack(castTime, damage, index, attacker, rsc, this));
+        rsc.StartCoroutine(attacker.RaiderStats().DoAttack(castTime, damage, index, attacker, attack, rsc, this));
 
         if(attacker.RaiderStats().GetRole() == Enums.CharacterRole.Healer)
             rsc.StartCoroutine(attacker.RaiderStats().DoHeal(2.5f, this, index, rsc, rsc.GetRaid()));
@@ -62,5 +62,16 @@ public class RaiderScript : MonoBehaviour {
 
     public void TakeDamage(int damage) {
         HealthBar.ModifyHealth(-damage);
+        if (IsDead())
+            Die();
+    }
+
+    public void TakeHealing(int healing) {
+        HealthBar.ModifyHealth(healing);
+    }
+
+    void Die()
+    {
+        enabled = false;
     }
 }

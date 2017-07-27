@@ -9,12 +9,11 @@ public class BaseEncounter
 
     private RaidSceneController m_rsc;
     private List<RaiderScript> m_raid;
-    private int m_bossHealth;
+    private HealthBarScript m_healthBar;
 
-    public int BossHealth
+    public HealthBarScript HealthBar
     {
-        get { return m_bossHealth; }
-        set { m_bossHealth = value; }
+        get { return m_healthBar; }
     }
 
     Enums.Difficulties m_difficulty = Enums.Difficulties.Normal;
@@ -45,14 +44,16 @@ public class BaseEncounter
                             List<EncounterAbility> encounterAbilities, 
                             List<BaseCooldown> encounterCooldowns,
                             List<RaiderScript> raiders,
-                            RaidSceneController rsc)
+                            RaidSceneController rsc,
+                            HealthBarScript healthBar)
     {
-        m_bossHealth = health;
         m_difficulty = difficulty;
         m_encounterAbilities = encounterAbilities;
         m_encounterCooldowns = encounterCooldowns;
         m_raid = raiders;
         m_rsc = rsc;
+        m_healthBar = healthBar;
+        m_healthBar.SetupHealthBar(350, 375, 100, 600, health);
     }
 
 	// Use this for initialization
@@ -65,6 +66,11 @@ public class BaseEncounter
 	
 	}
 
+    public bool IsDead()
+    {
+        return HealthBar.IsDead();
+    }
+
     public virtual void BeginEncounter() {
         for (int i = 0; i < m_raid.Count; i++)
         {
@@ -76,7 +82,7 @@ public class BaseEncounter
     public virtual IEnumerator DoBasicAttack(float castTime, int damage, RaiderScript target) {
         yield return new WaitForSeconds(castTime);
 
-        if (!target.IsDead())
+        if (!target.IsDead() && !IsDead())
         {
             target.TakeDamage(damage);
             m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int)(25 * Random.value), target));

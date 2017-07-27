@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class RaidSceneController : MonoBehaviour {
 
     public GameObject HealthBarPrefab;
+    public GameObject MeterPrefab;
     public Text raidText;
     public Text encounterText;
     public Canvas canvas;
@@ -15,8 +16,8 @@ public class RaidSceneController : MonoBehaviour {
     BaseEncounter encounter;
     List<Raider> all = new List<Raider>();
     int[] totalDamage = new int[10];
-    HealthBarScript m_bossHealthScript;
     List<RaiderScript> m_raiderScripts;
+    MeterControllerScript m_mcs;
 
     public List<RaiderScript> GetRaid() { return m_raiderScripts; }
 
@@ -25,19 +26,25 @@ public class RaidSceneController : MonoBehaviour {
         CreateTestRaid();
         CreateRaidHealthBars();
         CreateTestEncounter();
-        raidText.text = "";
-        encounterText.text = "Current step is " + (int)currentStep;
-
-        GameObject temp = GameObject.Instantiate(HealthBarPrefab);
-        temp.transform.SetParent(canvas.transform);
-        m_bossHealthScript = temp.GetComponent<HealthBarScript>();
-        m_bossHealthScript.SetupHealthBar(350, 375, 100, 600, encounter.BossHealth);
+        SetupUI();
+        
 
         totalDamage = new int[all.Count];
         for (int i = 0; i < all.Count; i++)
         {
             totalDamage[i] = 0;
         }
+    }
+
+    void SetupUI()
+    {
+        raidText.text = "";
+        encounterText.text = "Current step is " + (int)currentStep;
+        GameObject temp = GameObject.Instantiate(MeterPrefab);
+        temp.transform.SetParent(canvas.transform);
+        m_mcs = temp.GetComponent<MeterControllerScript>();
+        m_mcs.Initialize(150, 240, 40, 200, 12);
+        m_mcs.CreateEntriesFromRaid(all);
     }
 
 	
@@ -106,7 +113,7 @@ public class RaidSceneController : MonoBehaviour {
 
     public bool IsBossDead()
     {
-        return !(m_bossHealthScript.HealthBarSlider.value > 0);
+        return encounter.IsDead();
     }
 
     public void DealDamage(int damage, string attacker, string attack, int index) {
@@ -114,7 +121,8 @@ public class RaidSceneController : MonoBehaviour {
         raidText.text = newText + raidText.text;
         raidText.text.Trim();
         totalDamage[index] += damage;
-        m_bossHealthScript.ModifyHealth(-damage);
+        encounter.HealthBar.ModifyHealth(-damage);
+        m_mcs.AddAmountToEntry(attacker, index, damage);
     }
 
     void CalculateEncounterSkill() {
@@ -210,6 +218,10 @@ public class RaidSceneController : MonoBehaviour {
         abilities.Add(new EncounterAbility("Second Ability", "Generic ability that should be dispelled", Enums.Ability.Dispel, new EncounterAbilityEffect(10, 10)));
 
         List<BaseCooldown> cooldowns = new List<BaseCooldown>();
-        encounter = new BaseEncounter(10000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this);
+
+        GameObject temp = GameObject.Instantiate(HealthBarPrefab);
+        temp.transform.SetParent(canvas.transform);
+
+        encounter = new BaseEncounter(10000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
     }
 }

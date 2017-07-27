@@ -109,15 +109,15 @@ public static class Utility
                 break;
             case Enums.CharacterAttack.RangedFireball:
                 if (type == Enums.AttackValueTypes.CastTime)
-                    return 2.2f;
-                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
                     return 2.0f;
+                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
+                    return 2.9f;
                 break;
             case Enums.CharacterAttack.MeleeStab:
                 if (type == Enums.AttackValueTypes.CastTime)
                     return 0.5f;
                 else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
-                    return 1.0f;
+                    return 0.7f;
                 break;
             case Enums.CharacterAttack.HealerSmite:
                 if (type == Enums.AttackValueTypes.CastTime)

@@ -90,12 +90,14 @@
     <Compile Include="Assets\Encounters\EncounterAbility.cs" />
     <Compile Include="Assets\Encounters\EncounterAbilityEffect.cs" />
     <Compile Include="Assets\Encounters\Phase.cs" />
+    <Compile Include="Assets\MainSceneMainController.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />
+    <Compile Include="Assets\RosterButtonScript.cs" />
+    <Compile Include="Assets\RosterControllerScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
-    <Compile Include="Assets\Scenes\RecruitingScene\RecruitmentScript.cs" />
     <Compile Include="Assets\Static Scripts\Enums.cs" />
     <Compile Include="Assets\Static Scripts\PlayerData.cs" />
     <Compile Include="Assets\Static Scripts\Utility.cs" />

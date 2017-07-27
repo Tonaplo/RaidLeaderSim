@@ -7,9 +7,15 @@ public class BaseEncounter
 
     #region variables and getters and setters
 
+    private string m_name;
     private RaidSceneController m_rsc;
     private List<RaiderScript> m_raid;
     private HealthBarScript m_healthBar;
+
+    public string Name
+    {
+        get { return m_name; }
+    }
 
     public HealthBarScript HealthBar
     {
@@ -39,7 +45,8 @@ public class BaseEncounter
     }
     #endregion
 
-    public BaseEncounter(   int health,
+    public BaseEncounter(   string name,
+                            int health,
                             Enums.Difficulties difficulty, 
                             List<EncounterAbility> encounterAbilities, 
                             List<BaseCooldown> encounterCooldowns,
@@ -47,6 +54,7 @@ public class BaseEncounter
                             RaidSceneController rsc,
                             HealthBarScript healthBar)
     {
+        m_name = name;
         m_difficulty = difficulty;
         m_encounterAbilities = encounterAbilities;
         m_encounterCooldowns = encounterCooldowns;
@@ -54,6 +62,7 @@ public class BaseEncounter
         m_rsc = rsc;
         m_healthBar = healthBar;
         m_healthBar.SetupHealthBar(350, 375, 100, 600, health);
+        m_healthBar.SetUseName(name, true);
     }
 
 	// Use this for initialization

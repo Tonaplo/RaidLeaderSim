@@ -90,6 +90,9 @@ public static class Utility
             "Tardino",
             "Rimenil"
         };
+
+        PlayerData.Initialize();
+
     }
 
     public static void GetRandomCharacterName(ref List<string> outNames, int numNamesNeeded) {

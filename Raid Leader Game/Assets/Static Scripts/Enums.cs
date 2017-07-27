@@ -102,6 +102,7 @@ public static class Enums{
         FightInProgress = 7,
         FightWon = 8,
         FightLost = 9,
+        GoToMainScreen = 10,
 
     }
 

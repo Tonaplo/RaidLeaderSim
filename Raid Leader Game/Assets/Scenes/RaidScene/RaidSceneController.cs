@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -115,6 +116,10 @@ public class RaidSceneController : MonoBehaviour {
                 {
                     raidText.text += all[i].GetName() + "(ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + "\n";
                 }
+                currentStep++;
+                break;
+            case Enums.EncounterSteps.GoToMainScreen:
+                SceneManager.LoadScene("MainGameScene");
                 break;
             default:
                 break;
@@ -186,25 +191,26 @@ public class RaidSceneController : MonoBehaviour {
     //DEBUG FUNCTIONS
     void CreateTestRaid()
     {
+        all = PlayerData.GetRoster();
+        return;
+
+        all.Add(new Raider("Praerend", new RaiderStats(15, 15, 5, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
+        all.Add(new Raider("Greybone", new RaiderStats(15, 15, 2, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
+
+        all.Add(new Raider("Mallusof", new RaiderStats(15, 15, 2, Enums.CharacterRole.Healer, Enums.CharacterClass.Paladin)));
+        all.Add(new Raider("Amranar", new RaiderStats(15, 15, 5, Enums.CharacterRole.Healer, Enums.CharacterClass.Totemic)));
+        all.Add(new Raider("Granjior", new RaiderStats(15, 15, 7, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
+        all.Add(new Raider("Farahn", new RaiderStats(15, 15, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
+
+        all.Add(new Raider("Morifa", new RaiderStats(15, 15, 2, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerous)));
+        all.Add(new Raider("Kaldorath", new RaiderStats(15, 15, 2, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Fighter)));
+
+        all.Add(new Raider("Faerand", new RaiderStats(15, 15, 5, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Shadow)));
+        all.Add(new Raider("Rahran", new RaiderStats(15, 15, 5, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
+
+        all.Add(new Raider("Fimwack", new RaiderStats(15, 15, 7, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
+        all.Add(new Raider("Miriyal", new RaiderStats(15, 15, 7, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
         /*
-        all.Add(new Raider("Praerend", new RaiderStats(10, 30, 5, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
-        all.Add(new Raider("Greybone", new RaiderStats(14, 30, 2, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
-
-        all.Add(new Raider("Mallusof", new RaiderStats(10, 10, 3, Enums.CharacterRole.Healer, Enums.CharacterClass.Paladin)));
-        all.Add(new Raider("Amranar", new RaiderStats(12, 20, 6, Enums.CharacterRole.Healer, Enums.CharacterClass.Totemic)));
-        all.Add(new Raider("Granjior", new RaiderStats(14, 30, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
-        all.Add(new Raider("Farahn", new RaiderStats(19, 40, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
-
-
-        all.Add(new Raider("Morifa", new RaiderStats(15, 25, 1, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerous)));
-        all.Add(new Raider("Kaldorath", new RaiderStats(15, 25, 1, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Fighter)));
-
-        all.Add(new Raider("Faerand", new RaiderStats(15, 25, 10, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Shadow)));
-        all.Add(new Raider("Rahran", new RaiderStats(15, 25, 10, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
-
-        all.Add(new Raider("Fimwack", new RaiderStats(15, 25, 20, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
-        all.Add(new Raider("Miriyal", new RaiderStats(15, 25, 20, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
-        */
         int baseLevel = 15;
 
         all.Add(new Raider("Praerend", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Tank, baseLevel)));
@@ -222,7 +228,7 @@ public class RaidSceneController : MonoBehaviour {
         all.Add(new Raider("Rahran", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
         all.Add(new Raider("Miriyal", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
         all.Add(new Raider("Kaldorath", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
-
+        */
 
         for (int i = 0; i < all.Count; i++)
         {
@@ -241,6 +247,6 @@ public class RaidSceneController : MonoBehaviour {
         GameObject temp = GameObject.Instantiate(HealthBarPrefab);
         temp.transform.SetParent(canvas.transform);
 
-        encounter = new BaseEncounter(10000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
+        encounter = new BaseEncounter("Basic Encounter", 10000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
     }
 }

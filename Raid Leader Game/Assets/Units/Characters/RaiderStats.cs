@@ -77,7 +77,7 @@ public class RaiderStats {
 
     public int ComputeThroughput()
     {
-        throughput = averageThroughput = ComputeThroughputInternal(GetSkillThisAttempt());
+        throughput = ComputeThroughputInternal(GetSkillThisAttempt());
         return throughput;
     }
 

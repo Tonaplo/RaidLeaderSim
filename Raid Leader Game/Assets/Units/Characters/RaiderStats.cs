@@ -350,6 +350,58 @@ public class RaiderStats {
         rs.SetBaseAbility();
     }
 
+    void ChangeSpec()
+    {
+        Enums.CharacterRole role = GetRole();
+        switch (GetClass())
+        {
+            case Enums.CharacterClass.Fighter:
+                if (role == Enums.CharacterRole.Tank)
+                    role = Enums.CharacterRole.MeleeDPS;
+                else
+                    role = Enums.CharacterRole.Tank;
+                break;
+
+            case Enums.CharacterClass.Shadow:
+                if (role == Enums.CharacterRole.RangedDPS)
+                    role = Enums.CharacterRole.MeleeDPS;
+                else
+                    role = Enums.CharacterRole.RangedDPS;
+                break;
+
+            case Enums.CharacterClass.Totemic:
+                if (role == Enums.CharacterRole.Healer)
+                    role = Enums.CharacterRole.RangedDPS;
+                else
+                    role = Enums.CharacterRole.Healer;
+                break;
+
+            case Enums.CharacterClass.Sorcerous:
+                if (role == Enums.CharacterRole.Healer)
+                    role = Enums.CharacterRole.RangedDPS;
+                else
+                    role = Enums.CharacterRole.Healer;
+                break;
+
+            case Enums.CharacterClass.Paladin:
+                if (role == Enums.CharacterRole.Tank)
+                    role = Enums.CharacterRole.Healer;
+                else
+                    role = Enums.CharacterRole.Tank;
+                break;
+            case Enums.CharacterClass.Occultist:
+                if (role == Enums.CharacterRole.MeleeDPS)
+                    role = Enums.CharacterRole.RangedDPS;
+                else
+                    role = Enums.CharacterRole.MeleeDPS;
+                break;
+
+            default:
+                break;
+        }
+        SetSpecFromRoleAndClass();
+    }
+
     void FinishRaiderStatGeneration()
     {
         SetSpecFromRoleAndClass();
@@ -386,12 +438,23 @@ public class RaiderStats {
 
             case Enums.CharacterClass.Sorcerous:
                 if (role == Enums.CharacterRole.Healer)
+                    charSpec = Enums.CharacterSpec.WitchDoctor;
+                else
+                    charSpec = Enums.CharacterSpec.Wizard;
+                break;
+
+            case Enums.CharacterClass.Paladin:
+                if (role == Enums.CharacterRole.Healer)
                     charSpec = Enums.CharacterSpec.Cleric;
                 else
                     charSpec = Enums.CharacterSpec.Knight;
                 break;
 
-            case Enums.CharacterClass.Paladin:
+            case Enums.CharacterClass.Occultist:
+                if (role == Enums.CharacterRole.MeleeDPS)
+                    charSpec = Enums.CharacterSpec.Scourge;
+                else
+                    charSpec = Enums.CharacterSpec.Necromancer;
                 break;
 
             default:

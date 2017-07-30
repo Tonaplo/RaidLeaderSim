@@ -27,6 +27,9 @@ public class RaiderStats {
     public int GetThroughput() { return throughput; }
     public Enums.CharacterRole GetRole() { return charRole; }
     public Enums.CharacterClass GetClass() { return charClass; }
+    public Enums.CharacterSpec GetCurrentSpec() { return charSpec; }
+    public Enums.CharacterSpec GetOffSpec() { return Utility.GetOtherSpec(GetCurrentSpec()); }
+    public Enums.CharacterRole GetOffSpecRole() { return Utility.GetRoleFromSpec(GetOffSpec()); }
     public BaseAbility GetAbility() { return ability; }
     public BaseCooldown GetCooldown() { return cooldown; }
 
@@ -249,11 +252,13 @@ public class RaiderStats {
                 else
                     return Enums.CharacterClass.Paladin;
             case Enums.CharacterRole.MeleeDPS:
-                randomValue = Random.Range(0, 2);
+                randomValue = Random.Range(0, 3);
                 if (randomValue == 0)
                     return Enums.CharacterClass.Fighter;
-                else
+                else if(randomValue == 1)
                     return Enums.CharacterClass.Shadow;
+                else
+                    return Enums.CharacterClass.Occultist;
             case Enums.CharacterRole.Healer:
 
                 randomValue = Random.Range(0, 3);
@@ -267,13 +272,15 @@ public class RaiderStats {
             default:
             case Enums.CharacterRole.RangedDPS:
 
-                randomValue = Random.Range(0, 3);
+                randomValue = Random.Range(0, 4);
                 if (randomValue == 0)
                     return Enums.CharacterClass.Totemic;
                 else if (randomValue == 1)
                     return Enums.CharacterClass.Sorcerous;
-                else
+                else if(randomValue == 2)
                     return Enums.CharacterClass.Shadow;
+                else
+                    return Enums.CharacterClass.Occultist;
         }
     }
 

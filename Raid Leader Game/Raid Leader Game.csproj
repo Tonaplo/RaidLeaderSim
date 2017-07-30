@@ -16,7 +16,7 @@
     <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
-    <UnityVersion>2017.1.0f3</UnityVersion>
+    <UnityVersion>2017.1.0p2</UnityVersion>
     <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
@@ -98,6 +98,7 @@
     <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
+    <Compile Include="Assets\StartSceneController.cs" />
     <Compile Include="Assets\Static Scripts\Enums.cs" />
     <Compile Include="Assets\Static Scripts\PlayerData.cs" />
     <Compile Include="Assets\Static Scripts\Utility.cs" />

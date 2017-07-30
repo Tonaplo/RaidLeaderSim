@@ -9,6 +9,7 @@ public static class PlayerData
 
     public static void Initialize()
     {
+        Debug.Log("Generating new raiders");
         int baseLevel = 15;
         roster = new List<Raider> {
 

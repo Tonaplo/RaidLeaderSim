@@ -25,7 +25,6 @@ public class RaidSceneController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        Utility.Initialize();
         all = PlayerData.GetRoster();
         CreateRaidHealthBars();
         CreateTestEncounter();

@@ -145,17 +145,22 @@ public static class Utility
         return 1.0f;
     }
 
-    public static Color GetColorFromRole(Enums.CharacterRole role)
+    public static Color GetColorFromClass(Enums.CharacterClass Class)
     {
-        switch (role)
+        switch (Class)
         {
-            case Enums.CharacterRole.Tank:
+            case Enums.CharacterClass.Fighter:
                 return Color.grey;
-            case Enums.CharacterRole.Healer:
+            case Enums.CharacterClass.Shadow:
+                return Color.yellow;
+            case Enums.CharacterClass.Totemic:
                 return Color.green;
-            case Enums.CharacterRole.RangedDPS:
+            case Enums.CharacterClass.Sorcerous:
                 return Color.cyan;
-            case Enums.CharacterRole.MeleeDPS:
+            case Enums.CharacterClass.Paladin:
+                return Color.magenta;
+            case Enums.CharacterClass.Occultist:
+                return Color.red;
             default:
                 return Color.red;
         }
@@ -174,6 +179,70 @@ public static class Utility
                 return "Smite";
             default:
                 return "Undefined!";
+        }
+    }
+
+    public static Enums.CharacterSpec GetOtherSpec(Enums.CharacterSpec spec)
+    {
+        switch (spec)
+        {
+            case Enums.CharacterSpec.Guardian:
+                return Enums.CharacterSpec.Berserker;
+            case Enums.CharacterSpec.Knight:
+                return Enums.CharacterSpec.Cleric;
+            case Enums.CharacterSpec.Cleric:
+                return Enums.CharacterSpec.Knight;
+            case Enums.CharacterSpec.WitchDoctor:
+                return Enums.CharacterSpec.Wizard;
+            case Enums.CharacterSpec.Naturalist:
+                return Enums.CharacterSpec.Elementalist;
+            case Enums.CharacterSpec.Berserker:
+                return Enums.CharacterSpec.Guardian;
+            case Enums.CharacterSpec.Assassin:
+                return Enums.CharacterSpec.Ranger;
+            case Enums.CharacterSpec.Scourge:
+                return Enums.CharacterSpec.Necromancer;
+            case Enums.CharacterSpec.Ranger:
+                return Enums.CharacterSpec.Assassin;
+            case Enums.CharacterSpec.Wizard:
+                return Enums.CharacterSpec.WitchDoctor;
+            case Enums.CharacterSpec.Elementalist:
+                return Enums.CharacterSpec.Naturalist;
+            case Enums.CharacterSpec.Necromancer:
+            default:
+                return Enums.CharacterSpec.Scourge;
+        }
+    }
+
+    public static Enums.CharacterRole GetRoleFromSpec(Enums.CharacterSpec spec)
+    {
+        switch (spec)
+        {
+            case Enums.CharacterSpec.Guardian:
+                return Enums.CharacterRole.Tank;
+            case Enums.CharacterSpec.Knight:
+                return Enums.CharacterRole.Tank;
+            case Enums.CharacterSpec.Cleric:
+                return Enums.CharacterRole.Healer;
+            case Enums.CharacterSpec.WitchDoctor:
+                return Enums.CharacterRole.Healer;
+            case Enums.CharacterSpec.Naturalist:
+                return Enums.CharacterRole.Healer;
+            case Enums.CharacterSpec.Berserker:
+                return Enums.CharacterRole.MeleeDPS;
+            case Enums.CharacterSpec.Assassin:
+                return Enums.CharacterRole.MeleeDPS;
+            case Enums.CharacterSpec.Scourge:
+                return Enums.CharacterRole.MeleeDPS;
+            case Enums.CharacterSpec.Ranger:
+                return Enums.CharacterRole.RangedDPS;
+            case Enums.CharacterSpec.Wizard:
+                return Enums.CharacterRole.RangedDPS;
+            case Enums.CharacterSpec.Elementalist:
+                return Enums.CharacterRole.RangedDPS;
+            default:
+            case Enums.CharacterSpec.Necromancer:
+                return Enums.CharacterRole.RangedDPS;
         }
     }
 }

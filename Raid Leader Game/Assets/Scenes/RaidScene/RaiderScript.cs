@@ -32,7 +32,7 @@ public class RaiderScript : MonoBehaviour {
         HealthBar = hbs;
         HealthBar.SetupHealthBar((index % 3) * 80 + 465, 310 - (index / 3) * 60, 100, 70, m_raider.GetMaxHealth());
         HealthBar.SetUseName(m_raider.GetName(), true);
-        HealthBar.Fill.color = Utility.GetColorFromRole(m_raider.RaiderStats().GetRole());
+        HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats().GetClass());
     }
 
     public void StartFight(int index, Raider attacker, RaidSceneController rsc)

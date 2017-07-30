@@ -26,7 +26,7 @@ public class RaidSceneController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Utility.Initialize();
-        CreateTestRaid();
+        all = PlayerData.GetRoster();
         CreateRaidHealthBars();
         CreateTestEncounter();
         SetupUI();
@@ -99,7 +99,6 @@ public class RaidSceneController : MonoBehaviour {
             case Enums.EncounterSteps.FightStart:
                 for (int i = 0; i < all.Count; i++)
                 {
-                    Enums.CharacterAttack attack = all[i].RaiderStats().GetBaseAttack();
                     m_raiderScripts[i].StartFight(i, all[i], this);
                 }
                 encounter.BeginEncounter();
@@ -189,52 +188,6 @@ public class RaidSceneController : MonoBehaviour {
     }
     
     //DEBUG FUNCTIONS
-    void CreateTestRaid()
-    {
-        all = PlayerData.GetRoster();
-        return;
-
-        all.Add(new Raider("Praerend", new RaiderStats(15, 15, 5, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
-        all.Add(new Raider("Greybone", new RaiderStats(15, 15, 2, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
-
-        all.Add(new Raider("Mallusof", new RaiderStats(15, 15, 2, Enums.CharacterRole.Healer, Enums.CharacterClass.Paladin)));
-        all.Add(new Raider("Amranar", new RaiderStats(15, 15, 5, Enums.CharacterRole.Healer, Enums.CharacterClass.Totemic)));
-        all.Add(new Raider("Granjior", new RaiderStats(15, 15, 7, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
-        all.Add(new Raider("Farahn", new RaiderStats(15, 15, 9, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerous)));
-
-        all.Add(new Raider("Morifa", new RaiderStats(15, 15, 2, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerous)));
-        all.Add(new Raider("Kaldorath", new RaiderStats(15, 15, 2, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Fighter)));
-
-        all.Add(new Raider("Faerand", new RaiderStats(15, 15, 5, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Shadow)));
-        all.Add(new Raider("Rahran", new RaiderStats(15, 15, 5, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
-
-        all.Add(new Raider("Fimwack", new RaiderStats(15, 15, 7, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
-        all.Add(new Raider("Miriyal", new RaiderStats(15, 15, 7, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
-        /*
-        int baseLevel = 15;
-
-        all.Add(new Raider("Praerend", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Tank, baseLevel)));
-        all.Add(new Raider("Greybone", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Tank, baseLevel)));
-
-        all.Add(new Raider("Mallusof", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)));
-        all.Add(new Raider("Granjior", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)));
-        all.Add(new Raider("Farahn", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)));
-        all.Add(new Raider("Amranar", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)));
-
-        all.Add(new Raider("Morifa", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)));
-        all.Add(new Raider("Fimwack", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)));
-        all.Add(new Raider("Faerand", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)));
-
-        all.Add(new Raider("Rahran", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
-        all.Add(new Raider("Miriyal", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
-        all.Add(new Raider("Kaldorath", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
-        */
-
-        for (int i = 0; i < all.Count; i++)
-        {
-            all[i].CalculateMaxHealth();
-        }
-    }
 
     void CreateTestEncounter() {
         List<EncounterAbility> abilities = new List<EncounterAbility>();

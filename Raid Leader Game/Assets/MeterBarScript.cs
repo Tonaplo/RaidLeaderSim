@@ -24,7 +24,7 @@ public class MeterBarScript : MonoBehaviour {
         BarSlider.value = entry.Amount;
         NameText.text = entry.Name;
         AmountText.text = entry.Amount.ToString();
-        Fill.color = Utility.GetColorFromRole(entry.Role);
+        Fill.color = Utility.GetColorFromClass(entry.Class);
     }
 
     public void UpdateMax(int newMax)

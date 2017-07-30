@@ -12,21 +12,21 @@ public class MeterControllerScript : MonoBehaviour {
 
     public class Entry {
 
-        public Entry(string n, int i, Enums.CharacterRole r)
+        public Entry(string n, int i, Enums.CharacterClass c)
         {
             m_name = n;
             m_index = i;
-            m_role = r;
+            m_class = c;
         }
 
         string m_name;
         int m_index;
         public int Amount;
-        Enums.CharacterRole m_role;
+        Enums.CharacterClass m_class;
 
         public string Name { get { return m_name; } }
         public int Index { get { return m_index; } }
-        public Enums.CharacterRole Role { get { return m_role; } }
+        public Enums.CharacterClass Class { get { return m_class; } }
     }
 
     public class Bar
@@ -54,7 +54,7 @@ public class MeterControllerScript : MonoBehaviour {
             temp.transform.SetPositionAndRotation(new Vector3(xPos, yPos - (height*i)/2, 0), Quaternion.identity);
             temp.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
             m_bars.Add(new Bar(temp.GetComponent <MeterBarScript>(), i));
-            m_bars[i].BarScript.UpdateEntry(new Entry("None", 0, Enums.CharacterRole.RangedDPS));
+            m_bars[i].BarScript.UpdateEntry(new Entry("None", 0, Enums.CharacterClass.Fighter));
             m_bars[i].BarScript.NameText.resizeTextForBestFit = true;
             m_bars[i].BarScript.AmountText.resizeTextForBestFit = true;
         }
@@ -67,7 +67,7 @@ public class MeterControllerScript : MonoBehaviour {
         m_entries = new List<Entry>();
         for (int i = 0; i < raid.Count; i++)
         {
-            m_entries.Add(new Entry(raid[i].GetName(), i, raid[i].RaiderStats().GetRole()));
+            m_entries.Add(new Entry(raid[i].GetName(), i, raid[i].RaiderStats().GetClass()));
         }
 
         if (raid.Count < m_bars.Count)

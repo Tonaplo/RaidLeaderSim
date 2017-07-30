@@ -9,7 +9,27 @@ public static class PlayerData
 
     public static void Initialize()
     {
-        roster = new List<Raider>();
+        int baseLevel = 15;
+        roster = new List<Raider> {
+
+        new Raider("Praerend", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Tank, baseLevel)),
+        new Raider("Greybone", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Tank, baseLevel)),
+
+        new Raider("Mallusof", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)),
+        new Raider("Granjior", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)),
+        new Raider("Farahn", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)),
+        new Raider("Amranar", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)),
+
+        new Raider("Morifa", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)),
+        new Raider("Fimwack", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)),
+        new Raider("Faerand", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)),
+
+        new Raider("Rahran", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)),
+        new Raider("Miriyal", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)),
+        new Raider("Kaldorath", RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel))
+
+         };
+        /*
         roster.Add(new Raider("Praerend", new RaiderStats(15, 15, 5, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
         roster.Add(new Raider("Greybone", new RaiderStats(15, 15, 2, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
 
@@ -26,7 +46,7 @@ public static class PlayerData
 
         roster.Add(new Raider("Fimwack", new RaiderStats(15, 15, 7, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
         roster.Add(new Raider("Miriyal", new RaiderStats(15, 15, 7, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
-
+        */
         for (int i = 0; i < roster.Count; i++)
         {
             roster[i].CalculateMaxHealth();

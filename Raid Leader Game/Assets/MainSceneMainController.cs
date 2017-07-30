@@ -5,8 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class MainSceneMainController : MonoBehaviour {
 
-    public GameObject RosterControllerPrefab;
     public Canvas canvas;
+    public GameObject RosterControllerPrefab;
+    public GameObject ProgressControllerPrefab;
+    public GameObject RecruitmentControllerPrefab;
+    public GameObject BankControllerPrefab;
+
 
     RosterControllerScript m_rosterScript;
 

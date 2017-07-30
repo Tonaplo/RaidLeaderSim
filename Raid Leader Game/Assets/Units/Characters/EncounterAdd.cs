@@ -11,4 +11,6 @@ public class EncounterAdd : BaseCharacter {
     {
         addType = _type;
     }
+
+    public Enums.EncounterAdds GetAddType() { return addType; }
 }

@@ -84,6 +84,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\CreateNewGameController.cs" />
     <Compile Include="Assets\Encounters\BaseAbility.cs" />
     <Compile Include="Assets\Encounters\BaseCooldown.cs" />
     <Compile Include="Assets\Encounters\BaseEncounter.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
     <Compile Include="Assets\StartSceneController.cs" />
+    <Compile Include="Assets\Static Scripts\DataController.cs" />
     <Compile Include="Assets\Static Scripts\Enums.cs" />
     <Compile Include="Assets\Static Scripts\PlayerData.cs" />
     <Compile Include="Assets\Static Scripts\Utility.cs" />

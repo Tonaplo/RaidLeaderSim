@@ -83,7 +83,7 @@ public class BaseEncounter
     public virtual void BeginEncounter() {
         for (int i = 0; i < m_raid.Count; i++)
         {
-            m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int) (25 * Random.value), m_raid[i]));
+            m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int) (20 * Random.value), m_raid[i]));
         }
         
     }
@@ -94,7 +94,7 @@ public class BaseEncounter
         if (!target.IsDead() && !IsDead())
         {
             target.TakeDamage(damage);
-            m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int)(25 * Random.value), target));
+            m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int)(20 * Random.value), target));
         }
     }
 }

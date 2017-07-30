@@ -30,7 +30,7 @@ public static class Enums{
         Fighter,    // Guardian / Berserker         -- Tank/MDPS
         Shadow,     // Assassin / Ranger            -- RDPS/MDPS
         Totemic,    // Naturalist / Elementalist    -- Heal/RDPS
-        Sorcerous,  // WitchDoctor / Wizard         -- Heal/RDPS
+        Sorcerer,  // Diviner / Wizard         -- Heal/RDPS
         Paladin,    // Knight / Cleric              -- Tank/Heal
         Occultist,  // Scourge, Necromancer         -- MDPS/RDPS
     }
@@ -40,13 +40,13 @@ public static class Enums{
         Guardian,       //Tank - Fighter
         Knight,         //Tank - Paladin
         Cleric,         //Healer - Paladin
-        WitchDoctor,    //Healer - Sorcerous
+        Diviner,        //Healer - Sorcerer
         Naturalist,     //Healer - Totemic
         Berserker,      //Melee DPS - Fighter
         Assassin,       //Melee DPS - Shadow
         Scourge,        //Melee DPS - Occulist
         Ranger,         //Ranged DPS - Shadow
-        Wizard,         //Ranged DPS - Sorcerous
+        Wizard,         //Ranged DPS - Sorcerer
         Elementalist,   //Ranged DPS - Totemic
         Necromancer,    //Ranged DPS - Occultist
     }

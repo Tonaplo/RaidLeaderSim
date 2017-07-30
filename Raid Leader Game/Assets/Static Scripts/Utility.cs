@@ -9,6 +9,23 @@ public static class Utility
     public static void Initialize() {
         names = new List<string>
         {
+            "Praerend",
+            "Everett",
+            "Morifa",
+            "Amranar",
+            "Farahn",
+            "Faerand",
+            "Fimwack",
+            "Miriyal",
+            "Greybone",
+            "Earendil",
+            "Kalithumos",
+            "Kaligon",
+            "Granjior",
+            "Rahran",
+            "Novgorod",
+            "Kaldorath",
+            "Arkator",
             "Andoe",
             "Niry",
             "Gethi",
@@ -43,21 +60,13 @@ public static class Utility
             "Phamru",
             "Daldu",
             "Renmu",
-            "Phiagrolm",
             "Jella",
             "Zulab",
             "Lullosh",
             "Wardi",
             "Shynmo",
             "Vordoecy",
-            "Shynronna",
-            "Nigresseb",
             "Omulgra",
-            "Vososseln",
-            "Shernylni",
-            "Wiolmoesa",
-            "Phymrilma",
-            "Phathmendolm",
             "Renamron",
             "Muthmime",
             "Hanunras",
@@ -69,23 +78,16 @@ public static class Utility
             "Rillosse",
             "Arana",
             "Onnutha",
-            "Memnerdulm",
             "Orune",
-            "Kondessub",
             "Oshasa",
             "Ocilmir",
-            "Zidrurshe",
-            "Werdossik",
             "Shanralla",
-            "Phothimdaln",
             "Unarnel",
             "Worusos",
             "Sonmarnu",
             "Gylese",
             "Zyrliro",
-            "Kedriathmac",
             "Chalnony",
-            "Jirlutholm",
             "Phamnullo",
             "Tardino",
             "Rimenil"
@@ -97,7 +99,12 @@ public static class Utility
 
     public static void GetRandomCharacterName(ref List<string> outNames, int numNamesNeeded) {
         List<string> namePool = new List<string>(names);
-        outNames = new List<string>();
+
+        if (outNames.Count > 0)
+        {
+            List<string> removables = new List<string>(outNames);
+            namePool.RemoveAll(x => removables.Contains(x));
+        }
 
         Debug.Assert(namePool.Count >= numNamesNeeded);
 
@@ -155,7 +162,7 @@ public static class Utility
                 return Color.yellow;
             case Enums.CharacterClass.Totemic:
                 return Color.green;
-            case Enums.CharacterClass.Sorcerous:
+            case Enums.CharacterClass.Sorcerer:
                 return Color.cyan;
             case Enums.CharacterClass.Paladin:
                 return Color.magenta;
@@ -163,6 +170,49 @@ public static class Utility
                 return Color.red;
             default:
                 return Color.red;
+        }
+    }
+
+    public static string GetDescriptionOfClass(Enums.CharacterClass Class)
+    {
+        switch (Class)
+        {
+            case Enums.CharacterClass.Fighter:
+                return "A fearsome tribe, the Warriors use aggression and rage in battle. They can either protect as a mighty Guardian or ravage their foes as the unstoppable Berserker.";
+            case Enums.CharacterClass.Shadow:
+                return "The Shadows operates in secret and shyes away from the spotlight. They inflict terrible agony as the stealthy Assassin, or pick off their foes from afar as Rangers.";
+            case Enums.CharacterClass.Totemic:
+                return "The Totemics live in harmony with Mother Nature draw their power from her. They can mend their allies as Naturalists or unleash the fury of their Mother as Elementalists.";
+            case Enums.CharacterClass.Sorcerer:
+                return "Schooled in the magical arts, the Sorcerers use the Arcane in combat. They can heal wounds as Diviners, or decimate their foes as fire-wielding Wizards.";
+            case Enums.CharacterClass.Paladin:
+                return "Believers in truth and the mercy of God, the Paladins are a noble class. They ask the help of their Savior to save their allies from death as Clerics, or protect them as Knights.";
+            case Enums.CharacterClass.Occultist:
+                return "The Occultists wield of dark and obscure magic and the only thing they desire is more power. They obliterate their enemies, either from afar as Necromancers or up close as Scourges.";
+            default:
+                return "Class not implemented!";
+        }
+    }
+
+    public static string GetDescriptionOfSpec(Enums.CharacterSpec spec)
+    {
+        switch (spec)
+        {
+            case Enums.CharacterSpec.Guardian:
+            case Enums.CharacterSpec.Knight:
+            case Enums.CharacterSpec.Cleric:
+            case Enums.CharacterSpec.Diviner:
+            case Enums.CharacterSpec.Naturalist:
+            case Enums.CharacterSpec.Berserker:
+            case Enums.CharacterSpec.Assassin:
+            case Enums.CharacterSpec.Scourge:
+            case Enums.CharacterSpec.Ranger:
+            case Enums.CharacterSpec.Wizard:
+            case Enums.CharacterSpec.Elementalist:
+            case Enums.CharacterSpec.Necromancer:
+                return "Cool description of the " + spec.ToString() + " is still being worked on";
+            default:
+                return "No spec found!";
         }
     }
 
@@ -192,7 +242,7 @@ public static class Utility
                 return Enums.CharacterSpec.Cleric;
             case Enums.CharacterSpec.Cleric:
                 return Enums.CharacterSpec.Knight;
-            case Enums.CharacterSpec.WitchDoctor:
+            case Enums.CharacterSpec.Diviner:
                 return Enums.CharacterSpec.Wizard;
             case Enums.CharacterSpec.Naturalist:
                 return Enums.CharacterSpec.Elementalist;
@@ -205,7 +255,7 @@ public static class Utility
             case Enums.CharacterSpec.Ranger:
                 return Enums.CharacterSpec.Assassin;
             case Enums.CharacterSpec.Wizard:
-                return Enums.CharacterSpec.WitchDoctor;
+                return Enums.CharacterSpec.Diviner;
             case Enums.CharacterSpec.Elementalist:
                 return Enums.CharacterSpec.Naturalist;
             case Enums.CharacterSpec.Necromancer:
@@ -224,7 +274,7 @@ public static class Utility
                 return Enums.CharacterRole.Tank;
             case Enums.CharacterSpec.Cleric:
                 return Enums.CharacterRole.Healer;
-            case Enums.CharacterSpec.WitchDoctor:
+            case Enums.CharacterSpec.Diviner:
                 return Enums.CharacterRole.Healer;
             case Enums.CharacterSpec.Naturalist:
                 return Enums.CharacterRole.Healer;
@@ -243,6 +293,33 @@ public static class Utility
             default:
             case Enums.CharacterSpec.Necromancer:
                 return Enums.CharacterRole.RangedDPS;
+        }
+    }
+
+    public static Enums.CharacterClass GetClassFromSpec(Enums.CharacterSpec spec)
+    {
+        switch (spec)
+        {
+            case Enums.CharacterSpec.Guardian:
+            case Enums.CharacterSpec.Berserker:
+                return Enums.CharacterClass.Fighter;
+            case Enums.CharacterSpec.Knight:
+            case Enums.CharacterSpec.Cleric:
+                return Enums.CharacterClass.Paladin;
+            case Enums.CharacterSpec.Diviner:
+            case Enums.CharacterSpec.Wizard:
+                return Enums.CharacterClass.Sorcerer;
+            case Enums.CharacterSpec.Naturalist:
+            case Enums.CharacterSpec.Elementalist:
+                return Enums.CharacterClass.Totemic;
+            case Enums.CharacterSpec.Assassin:
+            case Enums.CharacterSpec.Ranger:
+                return Enums.CharacterClass.Shadow;
+            case Enums.CharacterSpec.Scourge:
+            case Enums.CharacterSpec.Necromancer:
+                return Enums.CharacterClass.Occultist;
+            default:
+                return Enums.CharacterClass.Fighter;
         }
     }
 }

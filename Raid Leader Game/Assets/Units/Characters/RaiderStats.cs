@@ -158,6 +158,17 @@ public class RaiderStats {
         return returnValue;
     }
 
+    public static RaiderStats GenerateRaiderStatsFromSpec(Enums.CharacterSpec spec, int baseLevel)
+    {
+        RaiderStats returnValue = new RaiderStats(baseLevel);
+
+        returnValue.charRole = Utility.GetRoleFromSpec(spec);
+        returnValue.charClass = Utility.GetClassFromSpec(spec);
+
+        FinishRaiderStatGeneration(ref returnValue);
+        return returnValue;
+    }
+
     public IEnumerator DoAttack(float castTime, int attackDamage, int index, Raider attacker, Enums.CharacterAttack attack, RaidSceneController rsc, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
@@ -233,7 +244,7 @@ public class RaiderStats {
                 default:
                     break;
             }
-            float baseCastTime = 2.5f;
+            float baseCastTime = 1.5f;
             caster.StartCoroutine(DoHeal(baseCastTime + Random.Range(0, baseCastTime / 10.0f), caster, index, rsc, raid));
         }
     }
@@ -265,7 +276,7 @@ public class RaiderStats {
                 if (randomValue == 0)
                     return Enums.CharacterClass.Totemic;
                 else if (randomValue == 1)
-                    return Enums.CharacterClass.Sorcerous;
+                    return Enums.CharacterClass.Sorcerer;
                 else
                     return Enums.CharacterClass.Paladin;
 
@@ -276,7 +287,7 @@ public class RaiderStats {
                 if (randomValue == 0)
                     return Enums.CharacterClass.Totemic;
                 else if (randomValue == 1)
-                    return Enums.CharacterClass.Sorcerous;
+                    return Enums.CharacterClass.Sorcerer;
                 else if(randomValue == 2)
                     return Enums.CharacterClass.Shadow;
                 else
@@ -306,7 +317,7 @@ public class RaiderStats {
                     return Enums.CharacterRole.Healer;
                 else
                     return Enums.CharacterRole.RangedDPS;
-            case Enums.CharacterClass.Sorcerous:
+            case Enums.CharacterClass.Sorcerer:
                 if (randomValue == 0)
                     return Enums.CharacterRole.Healer;
                 else
@@ -340,6 +351,8 @@ public class RaiderStats {
         //except when we're at really low skillslevels
         int variation = (int)(skillLevel * 0.2f);
         variation = variation < 4 ? 3 : variation;
+
+        Actually, variation should be a percentage, rather than a set amount, so that it will grow with the raider.
 
         return variation = Random.Range(1, variation);
         /*for (int i = 0; i < 3; i++)
@@ -383,7 +396,7 @@ public class RaiderStats {
                     role = Enums.CharacterRole.Healer;
                 break;
 
-            case Enums.CharacterClass.Sorcerous:
+            case Enums.CharacterClass.Sorcerer:
                 if (role == Enums.CharacterRole.Healer)
                     role = Enums.CharacterRole.RangedDPS;
                 else
@@ -443,9 +456,9 @@ public class RaiderStats {
                     charSpec = Enums.CharacterSpec.Elementalist;
                 break;
 
-            case Enums.CharacterClass.Sorcerous:
+            case Enums.CharacterClass.Sorcerer:
                 if (role == Enums.CharacterRole.Healer)
-                    charSpec = Enums.CharacterSpec.WitchDoctor;
+                    charSpec = Enums.CharacterSpec.Diviner;
                 else
                     charSpec = Enums.CharacterSpec.Wizard;
                 break;
@@ -484,8 +497,8 @@ public class RaiderStats {
             case Enums.CharacterSpec.Cleric:
                 ability = new BaseAbility("ClericDispel", "Provides the ability to dispel", Enums.Ability.Dispel);
                 break;
-            case Enums.CharacterSpec.WitchDoctor:
-                ability = new BaseAbility("WitchDoctorDispel", "Provides the ability to dispel", Enums.Ability.Dispel);
+            case Enums.CharacterSpec.Diviner:
+                ability = new BaseAbility("DivinerDispel", "Provides the ability to dispel", Enums.Ability.Dispel);
                 break;
             case Enums.CharacterSpec.Naturalist:
                 ability = new BaseAbility("NaturalistDispel", "Provides the ability to dispel", Enums.Ability.Dispel);
@@ -525,7 +538,7 @@ public class RaiderStats {
             case Enums.CharacterSpec.Cleric:
                 cooldown.Initialize("HealingCooldown", "Provides the ability to immune", Enums.Cooldowns.HealingCooldown);
                 break;
-            case Enums.CharacterSpec.WitchDoctor:
+            case Enums.CharacterSpec.Diviner:
                 cooldown.Initialize("HealingCooldown", "Provides the ability to immune", Enums.Cooldowns.Immunity);
                 break;
             case Enums.CharacterSpec.Naturalist:

@@ -13,7 +13,6 @@ public class Raider : BaseCharacter {
     }
 
     //Calculate Max Health based on Class
-    //this should be based on gear and the like later
     public override void CalculateMaxHealth()
     {
         float value = (int)Enums.StaticValues.baseRaiderHealth;

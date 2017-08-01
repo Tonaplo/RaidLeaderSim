@@ -116,40 +116,9 @@ public static class Utility
         }
     }
 
-    public static float GetAttackBaseValue(Enums.CharacterAttack attack, Enums.AttackValueTypes type)
+    public static float GetFussyCastTime(float baseCastTime)
     {
-        switch (attack)
-        {
-            case Enums.CharacterAttack.TankStrike:
-                if (type == Enums.AttackValueTypes.CastTime)
-                    return 1.0f;
-                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
-                    return 0.5f;
-                break;
-            case Enums.CharacterAttack.RangedFireball:
-                if (type == Enums.AttackValueTypes.CastTime)
-                    return 2.0f;
-                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
-                    return 2.9f;
-                break;
-            case Enums.CharacterAttack.MeleeStab:
-                if (type == Enums.AttackValueTypes.CastTime)
-                    return 0.5f;
-                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
-                    return 0.7f;
-                break;
-            case Enums.CharacterAttack.HealerSmite:
-                if (type == Enums.AttackValueTypes.CastTime)
-                    return 1.5f;
-                else if (type == Enums.AttackValueTypes.BaseDamageMultiplier)
-                    return 0.3f;
-                break;
-            default:
-                break;
-        }
-
-        Debug.LogError("No attack of type " + attack + " or base type " + type + " found!");
-        return 1.0f;
+        return Random.Range(baseCastTime * 0.8f, 1.2f * baseCastTime);
     }
 
     public static Color GetColorFromClass(Enums.CharacterClass Class)

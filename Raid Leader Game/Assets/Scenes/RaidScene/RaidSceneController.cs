@@ -23,6 +23,10 @@ public class RaidSceneController : MonoBehaviour {
 
     public List<RaiderScript> GetRaid() { return m_raiderScripts; }
 
+    public int GetBossHealthPercent() {
+        return encounter.HealthBar.GetHealthPercent();
+    }
+
     // Use this for initialization
     void Start () {
         all = PlayerData.GetRoster();
@@ -46,7 +50,8 @@ public class RaidSceneController : MonoBehaviour {
         GameObject temp = GameObject.Instantiate(MeterPrefab);
         temp.transform.SetParent(canvas.transform);
         m_damageMcs = temp.GetComponent<MeterControllerScript>();
-        m_damageMcs.Initialize(150, 140, 40, 175, 6);
+        List<Raider> dps = all.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS || x.RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS);
+        m_damageMcs.Initialize(150, 140, 40, 175, dps.Count);
         m_damageMcs.CreateEntriesFromRaid(all);
 
         GameObject temptwo = GameObject.Instantiate(MeterPrefab);
@@ -98,7 +103,7 @@ public class RaidSceneController : MonoBehaviour {
             case Enums.EncounterSteps.FightStart:
                 for (int i = 0; i < all.Count; i++)
                 {
-                    m_raiderScripts[i].StartFight(i, i*0.1f, all[i], this);
+                    StartCoroutine(m_raiderScripts[i].StartFight(i*0.1f, i, all[i], this));
                 }
                 encounter.BeginEncounter();
 
@@ -112,7 +117,7 @@ public class RaidSceneController : MonoBehaviour {
                 raidText.text = "Total Stats:\n\n";
                 for (int i = 0; i < all.Count; i++)
                 {
-                    raidText.text += all[i].GetName() + "(ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + " %\n";
+                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats().GetCurrentSpec().ToString()  + " (ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + " %)\n";
                 }
                 currentStep++;
                 break;
@@ -192,8 +197,8 @@ public class RaidSceneController : MonoBehaviour {
     void CreateTestEncounter() {
         List<EncounterAbility> abilities = new List<EncounterAbility>();
 
-        abilities.Add(new EncounterAbility("First Ability", "Generic ability that should be interrupted", Enums.Ability.Interrupt, new EncounterAbilityEffect(10, 10)));
-        abilities.Add(new EncounterAbility("Second Ability", "Generic ability that should be dispelled", Enums.Ability.Dispel, new EncounterAbilityEffect(10, 10)));
+        abilities.Add(new EncounterAbility("First Ability", "Generic m_ability that should be interrupted", Enums.Ability.Interrupt, new EncounterAbilityEffect(10, 10)));
+        abilities.Add(new EncounterAbility("Second Ability", "Generic m_ability that should be dispelled", Enums.Ability.Dispel, new EncounterAbilityEffect(10, 10)));
 
         List<BaseCooldown> cooldowns = new List<BaseCooldown>();
 

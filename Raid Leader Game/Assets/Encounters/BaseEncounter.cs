@@ -63,6 +63,7 @@ public class BaseEncounter
         m_healthBar = healthBar;
         m_healthBar.SetupHealthBar(350, 375, 100, 600, health);
         m_healthBar.SetUseName(name, true);
+        m_healthBar.SetUsePercent(true);
     }
 
 	// Use this for initialization

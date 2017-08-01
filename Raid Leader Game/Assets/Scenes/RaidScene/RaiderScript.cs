@@ -26,6 +26,7 @@ public class RaiderScript : MonoBehaviour {
 
     public int GetHealth() { return (int)HealthBar.HealthBarSlider.value; }
     public int GetMaxHealth() { return m_raider.GetMaxHealth(); }
+    public float GetHealthPercent() { return (HealthBar.HealthBarSlider.value / m_raider.GetMaxHealth()) * 100.0f;  }
 
     public void Initialize(Raider raider, HealthBarScript hbs, Canvas parent, int index) {
         m_raider = raider;
@@ -35,12 +36,13 @@ public class RaiderScript : MonoBehaviour {
         HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats().GetClass());
     }
 
-    public void StartFight(int index, float offset, Raider attacker, RaidSceneController rsc)
+    public IEnumerator StartFight(float offset, int index, Raider attacker, RaidSceneController rsc)
     {
-        Enums.CharacterAttack attack = attacker.RaiderStats().GetBaseAttack();
-        float castTime = Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.CastTime) + offset;
-        int damage = attacker.RaiderStats().GetSpellAmount(Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.BaseDamageMultiplier));
-        rsc.StartCoroutine(attacker.RaiderStats().DoAttack(castTime, damage, index, attacker, attack, rsc, this));
+        yield return new WaitForSeconds(offset);
+
+        BaseAttackScript script;
+        attacker.RaiderStats().GetBaseAttackScript(out script);
+        script.StartFight(index, attacker, rsc, this);
 
         if(attacker.RaiderStats().GetRole() == Enums.CharacterRole.Healer)
             rsc.StartCoroutine(attacker.RaiderStats().DoHeal(2.5f, this, index, rsc, rsc.GetRaid()));

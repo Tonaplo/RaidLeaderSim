@@ -21,21 +21,27 @@ public static class PlayerData
     public static void GenerateNewGameRoster(Raider player, int baseLevel)
     {
         playerChar = player;
+        List<Enums.CharacterSpec> tankSpecs = new List<Enums.CharacterSpec> { Enums.CharacterSpec.Knight, Enums.CharacterSpec.Guardian };
+        List<Enums.CharacterSpec> healerSpecs = new List<Enums.CharacterSpec> { Enums.CharacterSpec.Cleric, Enums.CharacterSpec.Diviner, Enums.CharacterSpec.Naturalist };
+        List<Enums.CharacterSpec> DPSSpecs = new List<Enums.CharacterSpec> { Enums.CharacterSpec.Assassin, Enums.CharacterSpec.Berserker, Enums.CharacterSpec.Elementalist, Enums.CharacterSpec.Necromancer, Enums.CharacterSpec.Ranger, Enums.CharacterSpec.Scourge, Enums.CharacterSpec.Wizard };
         int numTanks = 2;
-        int numHealers = 4;
-        int numDPS = 6;
+        int numHealers = 3;
+        int numDPS = 7;
 
         switch (player.RaiderStats().GetRole())
         {
             case Enums.CharacterRole.Tank:
                 numTanks--;
+                tankSpecs.Remove(player.RaiderStats().GetCurrentSpec());
                 break;
             case Enums.CharacterRole.Healer:
                 numHealers--;
+                healerSpecs.Remove(player.RaiderStats().GetCurrentSpec());
                 break;
             case Enums.CharacterRole.RangedDPS:
             case Enums.CharacterRole.MeleeDPS:
                 numDPS--;
+                DPSSpecs.Remove(player.RaiderStats().GetCurrentSpec());
                 break;
             default:
                 break;
@@ -47,29 +53,24 @@ public static class PlayerData
         Utility.GetRandomCharacterName(ref names, numDPS+numHealers+numTanks);
         names.Remove(player.GetName());
 
-        roster = new List<Raider>();
-        roster.Add(player);
+        roster = new List<Raider> { player };
         int namecounter = 0;
         for (int i = 0; i < numTanks; i++)
         {
-            roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Tank, baseLevel)));
+            roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(tankSpecs[i % tankSpecs.Count], baseLevel)));
         }
         for (int i = 0; i < numHealers; i++)
         {
-            roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.Healer, baseLevel)));
+            roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(healerSpecs[i % healerSpecs.Count], baseLevel)));
         }
-        int randomValue = 0;
         for (int i = 0; i < numDPS; i++)
         {
-            randomValue = Random.Range(0, 2);
-            if(randomValue == 0)
-                roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
-            else
-                roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.RangedDPS, baseLevel)));
+            roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(DPSSpecs[i % DPSSpecs.Count], baseLevel)));
         }
 
         for (int i = 0; i < roster.Count; i++)
         {
+            roster[i].RaiderStats().SetTestValue();
             roster[i].CalculateMaxHealth();
         }
     }

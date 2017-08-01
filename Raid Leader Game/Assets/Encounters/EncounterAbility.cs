@@ -30,7 +30,7 @@ public class EncounterAbility : BaseAbility
         if (!CanCounterAbility(m_counter))
             return false;
         else { 
-            //Handle the persons skill to counter the ability
+            //Handle the persons skill to counter the m_ability
             //Before this logic is implemented assume he countered
             return true;
         }

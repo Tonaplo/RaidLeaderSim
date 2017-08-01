@@ -12,6 +12,8 @@ public class HealthBarScript : MonoBehaviour {
     bool m_useName = false;
     string m_name;
 
+    bool m_usePercent = false;
+
     // Use this for initialization
     void Start() {
 
@@ -28,13 +30,15 @@ public class HealthBarScript : MonoBehaviour {
         m_useName = on;
     }
 
+    public void SetUsePercent(bool on) { m_usePercent = on; }
+
     public void SetupHealthBar(int xPos, int yPos, int height, int width, int maxHealth) {
         HealthBarSlider.transform.SetPositionAndRotation(new Vector3(xPos, yPos, 0), Quaternion.identity);
         HealthBarSlider.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
         HealthBarSlider.maxValue = maxHealth;
         HealthBarSlider.value = maxHealth;
-        if(!m_useName)
-            HealthBarText.text = HealthBarSlider.value + "/" + HealthBarSlider.maxValue;
+
+        SetText();
     }
 
     public bool IsDead()
@@ -62,9 +66,21 @@ public class HealthBarScript : MonoBehaviour {
         else
             HealthBarSlider.value = newAmount;
 
+        SetText();
+    }
+
+    public int GetHealthPercent()
+    {
+        return (int)(HealthBarSlider.value / HealthBarSlider.maxValue * 100.0f);
+    }
+
+    void SetText()
+    {
         string healthString = HealthBarSlider.value + "/" + HealthBarSlider.maxValue;
         if (HealthBarSlider.value == 0)
             healthString = "DEAD";
+        else if (m_usePercent)
+            healthString += " (" + GetHealthPercent() + " %)";
 
         if (!m_useName)
             HealthBarText.text = healthString;

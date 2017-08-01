@@ -191,7 +191,8 @@ public class CreateNewGameController : MonoBehaviour {
     public void OnStartGameButtonClicked()
     {
         int baseLevel = 10;
-        Raider player = new Raider(namefield.text, new RaiderStats(baseLevel, baseLevel+5, 2, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
+        int playerAdvantage = 3;
+        Raider player = new Raider(namefield.text, new RaiderStats(baseLevel, baseLevel+ playerAdvantage, 10, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
         PlayerData.GenerateNewGameRoster(player, baseLevel);
         SceneManager.LoadScene("MainGameScene");
     }

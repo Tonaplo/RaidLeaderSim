@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class RaiderStats {
 
     //base stats
@@ -23,6 +25,7 @@ public class RaiderStats {
     public int GetSkillLevel() { return skillLevel; }
     public int GetSkillThisAttempt() { return skillThisAttempt; }
     public int GetVariance() { return variation; }
+    public float GetVarianceMultiplier() { return 1.0f + (UnityEngine.Random.Range(-GetVariance(), GetVariance()))/100.0f; }
     public int GetAverageThroughput() { return averageThroughput; }
     public int GetThroughput() { return throughput; }
     public Enums.CharacterRole GetRole() { return charRole; }
@@ -38,9 +41,8 @@ public class RaiderStats {
         //Generate skill and gear level
         skillLevel = GenerateRandomLevelFromBase(baseLevel);
         gearLevel = GenerateRandomLevelFromBase(baseLevel);
-
-        //Compute the variation based on the skill level
-        variation = GenerateVariationFromSkillLevel(skillLevel);
+        
+        variation = GenerateVariation();
         ComputeAverageThroughput();
     }
 
@@ -106,7 +108,7 @@ public class RaiderStats {
 
     public void ComputeSkillThisAttempt()
     {
-        skillThisAttempt = (int)(GetSkillLevel() + Random.Range(-GetVariance(), GetVariance()));
+        skillThisAttempt = (int)(GetSkillLevel() * GetVarianceMultiplier());
         //Note that this enables characters to go over the 100 skill cap
         if (skillThisAttempt <= 0)
             skillThisAttempt = 1;
@@ -132,7 +134,7 @@ public class RaiderStats {
     }
 
     public int GetSpellAmount(float multiplier) {
-        float value = multiplier * (GetThroughput() + Random.Range(-GetVariance(), GetVariance()));
+        float value = multiplier * (GetThroughput() * GetVarianceMultiplier());
         return (int)(value > 1.0f ? value : 1);
     }
 
@@ -177,7 +179,7 @@ public class RaiderStats {
             rsc.DealDamage(attackDamage, attacker.GetName(), Utility.GetAttackName(GetBaseAttack()), index);
             float baseCastTime = Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.CastTime);
             int newDamage = GetSpellAmount(Utility.GetAttackBaseValue(GetBaseAttack(), Enums.AttackValueTypes.BaseDamageMultiplier));
-            rs.StartCoroutine(DoAttack(baseCastTime + Random.Range(0, baseCastTime / 10.0f), newDamage, index, attacker, attack, rsc, rs));
+            rs.StartCoroutine(DoAttack(baseCastTime + UnityEngine.Random.Range(0, baseCastTime / 10.0f), newDamage, index, attacker, attack, rsc, rs));
         }
     }
 
@@ -187,7 +189,7 @@ public class RaiderStats {
         
         if (!rsc.IsBossDead() && !caster.IsDead())
         {
-            int type = Random.Range(0, 2);
+            int type = UnityEngine.Random.Range(0, 2);
             switch (type)
             {
                 case 0:
@@ -217,7 +219,7 @@ public class RaiderStats {
                         int randomIndex = 0;
                         for (int i = 0; i < 3; i++)
                         {
-                            randomIndex = Random.Range(0, raid.Count - 1);
+                            randomIndex = UnityEngine.Random.Range(0, raid.Count - 1);
                             if (!raid[randomIndex].IsDead())
                             {
                                 raid[randomIndex].TakeHealing(healAmount);
@@ -232,7 +234,7 @@ public class RaiderStats {
                         int randomIndex = 0;
                         for (int i = 0; i < raid.Count; i++)
                         {
-                            randomIndex = Random.Range(0, raid.Count - 1);
+                            randomIndex = UnityEngine.Random.Range(0, raid.Count - 1);
                             if (!raid[randomIndex].IsDead())
                             {
                                 raid[randomIndex].TakeHealing(healAmount);
@@ -245,7 +247,7 @@ public class RaiderStats {
                     break;
             }
             float baseCastTime = 1.5f;
-            caster.StartCoroutine(DoHeal(baseCastTime + Random.Range(0, baseCastTime / 10.0f), caster, index, rsc, raid));
+            caster.StartCoroutine(DoHeal(baseCastTime + UnityEngine.Random.Range(0, baseCastTime / 10.0f), caster, index, rsc, raid));
         }
     }
 
@@ -257,13 +259,13 @@ public class RaiderStats {
         switch (role)
         {
             case Enums.CharacterRole.Tank:
-                randomValue = Random.Range(0, 2);
+                randomValue = UnityEngine.Random.Range(0, 2);
                 if (randomValue == 0)
                     return Enums.CharacterClass.Fighter;
                 else
                     return Enums.CharacterClass.Paladin;
             case Enums.CharacterRole.MeleeDPS:
-                randomValue = Random.Range(0, 3);
+                randomValue = UnityEngine.Random.Range(0, 3);
                 if (randomValue == 0)
                     return Enums.CharacterClass.Fighter;
                 else if(randomValue == 1)
@@ -272,7 +274,7 @@ public class RaiderStats {
                     return Enums.CharacterClass.Occultist;
             case Enums.CharacterRole.Healer:
 
-                randomValue = Random.Range(0, 3);
+                randomValue = UnityEngine.Random.Range(0, 3);
                 if (randomValue == 0)
                     return Enums.CharacterClass.Totemic;
                 else if (randomValue == 1)
@@ -283,7 +285,7 @@ public class RaiderStats {
             default:
             case Enums.CharacterRole.RangedDPS:
 
-                randomValue = Random.Range(0, 4);
+                randomValue = UnityEngine.Random.Range(0, 4);
                 if (randomValue == 0)
                     return Enums.CharacterClass.Totemic;
                 else if (randomValue == 1)
@@ -298,7 +300,7 @@ public class RaiderStats {
     static Enums.CharacterRole GenerateRoleFromClass(Enums.CharacterClass Class)
     {
         //implement this correctly later
-        int randomValue = Random.Range(0, 2);
+        int randomValue = UnityEngine.Random.Range(0, 2);
         switch (Class)
         {
             case Enums.CharacterClass.Fighter:
@@ -338,28 +340,25 @@ public class RaiderStats {
     
     static int GenerateRandomLevelFromBase(int baseValue)
     {
-        int first = (int)Random.Range(baseValue / 2, baseValue * 1.5f);
-        int second = (int)Random.Range(baseValue / 2, baseValue * 1.5f);
-        int third = (int)Random.Range(baseValue / 2, baseValue * 1.5f);
+        int first = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
+        int second = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
+        int third = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
 
         return (int)((first + second + third) / 3);
     }
 
-    static int GenerateVariationFromSkillLevel(int skillLevel)
+    static int GenerateVariation()
     {
-        //We dont want to vary more than 20% up AND down
-        //except when we're at really low skillslevels
-        int variation = (int)(skillLevel * 0.2f);
-        variation = variation < 4 ? 3 : variation;
-
-        Actually, variation should be a percentage, rather than a set amount, so that it will grow with the raider.
-
-        return variation = Random.Range(1, variation);
-        /*for (int i = 0; i < 3; i++)
+        //We want to vary a maximum of 20% up AND down
+        int variation = 0;
+        int iterations = 5;
+        for (int i = 0; i < iterations; i++)
         {
-            variation = Random.Range(1, variation);
+            variation += UnityEngine.Random.Range(5, 20);
         }
-        return variation;*/
+
+        variation /= iterations;
+        return variation;
     }
 
     static void FinishRaiderStatGeneration(ref RaiderStats rs)

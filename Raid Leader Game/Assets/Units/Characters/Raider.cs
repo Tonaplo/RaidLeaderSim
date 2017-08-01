@@ -1,13 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
+[Serializable]
 public class Raider : BaseCharacter {
 
     
     RaiderStats stats;
     public RaiderStats RaiderStats() { return stats; }
 
+    
     public Raider(string _name, RaiderStats _stats) : base(_name) {
         stats = _stats;
     }

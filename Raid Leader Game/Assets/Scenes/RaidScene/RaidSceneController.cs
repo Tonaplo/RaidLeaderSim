@@ -98,7 +98,7 @@ public class RaidSceneController : MonoBehaviour {
             case Enums.EncounterSteps.FightStart:
                 for (int i = 0; i < all.Count; i++)
                 {
-                    m_raiderScripts[i].StartFight(i, all[i], this);
+                    m_raiderScripts[i].StartFight(i, i*0.1f, all[i], this);
                 }
                 encounter.BeginEncounter();
 
@@ -112,11 +112,12 @@ public class RaidSceneController : MonoBehaviour {
                 raidText.text = "Total Stats:\n\n";
                 for (int i = 0; i < all.Count; i++)
                 {
-                    raidText.text += all[i].GetName() + "(ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + "\n";
+                    raidText.text += all[i].GetName() + "(ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + " %\n";
                 }
                 currentStep++;
                 break;
             case Enums.EncounterSteps.GoToMainScreen:
+                DataController.controller.Save();
                 SceneManager.LoadScene("MainGameScene");
                 break;
             default:

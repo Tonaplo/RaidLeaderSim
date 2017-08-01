@@ -5,17 +5,18 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class StartSceneController : MonoBehaviour {
-
-    public Button StartGameButton;
+    
     public Button LoadDataButton;
     public Button NewGameButton;
     public InputField LoadDataInputField;
     public GameObject CreateNewPrefab;
+    public GameObject LoadGamePrefab;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
         Utility.Initialize();
         CreateNewPrefab.SetActive(false);
+        LoadGamePrefab.SetActive(false);
     }
 	
 	// Update is called once per frame
@@ -30,10 +31,18 @@ public class StartSceneController : MonoBehaviour {
         CreateNewPrefab.SetActive(true);
     }
 
-    public void BackFromCreateNewGameClicked()
+    public void OnLoadGameClick()
+    {
+        NewGameButton.gameObject.SetActive(false);
+        LoadDataButton.gameObject.SetActive(false);
+        LoadGamePrefab.SetActive(true);
+    }
+
+    public void BackButtonClicked()
     {
         NewGameButton.gameObject.SetActive(true);
         LoadDataButton.gameObject.SetActive(true);
         CreateNewPrefab.SetActive(false);
+        LoadGamePrefab.SetActive(false);
     }
 }

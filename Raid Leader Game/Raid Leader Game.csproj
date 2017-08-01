@@ -91,6 +91,7 @@
     <Compile Include="Assets\Encounters\EncounterAbility.cs" />
     <Compile Include="Assets\Encounters\EncounterAbilityEffect.cs" />
     <Compile Include="Assets\Encounters\Phase.cs" />
+    <Compile Include="Assets\LoadGameController.cs" />
     <Compile Include="Assets\MainSceneMainController.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />

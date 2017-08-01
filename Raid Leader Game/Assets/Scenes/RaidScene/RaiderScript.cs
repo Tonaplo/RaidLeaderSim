@@ -35,10 +35,10 @@ public class RaiderScript : MonoBehaviour {
         HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats().GetClass());
     }
 
-    public void StartFight(int index, Raider attacker, RaidSceneController rsc)
+    public void StartFight(int index, float offset, Raider attacker, RaidSceneController rsc)
     {
         Enums.CharacterAttack attack = attacker.RaiderStats().GetBaseAttack();
-        float castTime = Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.CastTime);
+        float castTime = Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.CastTime) + offset;
         int damage = attacker.RaiderStats().GetSpellAmount(Utility.GetAttackBaseValue(attack, Enums.AttackValueTypes.BaseDamageMultiplier));
         rsc.StartCoroutine(attacker.RaiderStats().DoAttack(castTime, damage, index, attacker, attack, rsc, this));
 

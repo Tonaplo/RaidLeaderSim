@@ -61,7 +61,7 @@ public static class PlayerData
         int randomValue = 0;
         for (int i = 0; i < numDPS; i++)
         {
-            randomValue = Random.Range(0, 1);
+            randomValue = Random.Range(0, 2);
             if(randomValue == 0)
                 roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromRole(Enums.CharacterRole.MeleeDPS, baseLevel)));
             else

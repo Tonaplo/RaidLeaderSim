@@ -42,7 +42,7 @@ public class RosterButtonScript : MonoBehaviour {
         m_bodyText.text += "Off Spec: " + m_raider.RaiderStats().GetOffSpec() + " (" + m_raider.RaiderStats().GetOffSpecRole() + ")\n";
         m_bodyText.text += "Skill: " + m_raider.RaiderStats().GetSkillLevel() + "\n";
         m_bodyText.text += "Gear Level: " + m_raider.RaiderStats().GetGearLevel() + "\n";
-        m_bodyText.text += "Performance Variance: " + m_raider.RaiderStats().GetVariance() + "\n";
+        m_bodyText.text += "Performance Variance: " + m_raider.RaiderStats().GetVariance() + " %\n";
         m_bodyText.text += "Average Throughput: " + m_raider.RaiderStats().GetAverageThroughput() + "\n";
     }
 }

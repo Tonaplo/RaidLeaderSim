@@ -40,12 +40,16 @@ public class RaiderScript : MonoBehaviour {
     {
         yield return new WaitForSeconds(offset);
 
-        BaseAttackScript script;
+        BaseHealOrAttackScript script;
         attacker.RaiderStats().GetBaseAttackScript(out script);
         script.StartFight(index, attacker, rsc, this);
 
-        if(attacker.RaiderStats().GetRole() == Enums.CharacterRole.Healer)
-            rsc.StartCoroutine(attacker.RaiderStats().DoHeal(2.5f, this, index, rsc, rsc.GetRaid()));
+        if (attacker.RaiderStats().GetRole() == Enums.CharacterRole.Healer)
+        {
+            BaseHealScript healScript;
+            attacker.RaiderStats().GetBaseHealingScript(out healScript);
+            healScript.StartFight(index, attacker, rsc, this);
+        }
     }
 
     public void TakeDamage(int damage) {
@@ -54,8 +58,11 @@ public class RaiderScript : MonoBehaviour {
             Die();
     }
 
-    public void TakeHealing(int healing) {
+    public int TakeHealing(int healing) {
+        float priorValue = HealthBar.HealthBarSlider.value;
         HealthBar.ModifyHealth(healing);
+
+        return Mathf.RoundToInt(HealthBar.HealthBarSlider.value - priorValue);
     }
 
     void Die()

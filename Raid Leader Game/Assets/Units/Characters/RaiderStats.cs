@@ -154,7 +154,7 @@ public class RaiderStats {
         return returnValue;
     }
 
-    public void GetBaseAttackScript(out BaseAttackScript script)
+    public void GetBaseAttackScript(out BaseHealOrAttackScript script)
     {
         switch (GetCurrentSpec())
         {
@@ -196,75 +196,39 @@ public class RaiderStats {
                 script = new NecromancerAttack();
                 break;
         }
-        script.SetupAttack();
+        script.Setup();
     }
 
-    public IEnumerator DoHeal(float castTime, RaiderScript caster, int index, RaidSceneController rsc, List<RaiderScript> raid)
+    public void GetBaseHealingScript(out BaseHealScript script)
     {
-        yield return new WaitForSeconds(castTime);
-        
-        if (!rsc.IsBossDead() && !caster.IsDead())
+        switch (GetCurrentSpec())
         {
-            int type = UnityEngine.Random.Range(0, 2);
-            switch (type)
-            {
-                case 0:
-                    {
-                        RaiderScript lowest = null;
-                        int lowestDiff = 0;
-                        for (int i = 0; i < raid.Count; i++)
-                        {
-                           int thisDiff = raid[i].GetMaxHealth() - raid[i].GetHealth();
-                            if (thisDiff > lowestDiff) {
-                                lowest = raid[i];
-                                lowestDiff = raid[i].GetMaxHealth() - raid[i].GetHealth();
-                            }
-                        }
-
-                        if (lowest)
-                        {
-                            int healamount = GetSpellAmount(1.0f);
-                            lowest.TakeHealing(healamount);
-                            rsc.DoHeal(healamount, caster.Raider.GetName(), "Big Heal", index);
-                        }
-                    }
-                    break;
-                case 1:
-                    {
-                        int healAmount = GetSpellAmount(1.0f) / 3;
-                        int randomIndex = 0;
-                        for (int i = 0; i < 3; i++)
-                        {
-                            randomIndex = UnityEngine.Random.Range(0, raid.Count - 1);
-                            if (!raid[randomIndex].IsDead())
-                            {
-                                raid[randomIndex].TakeHealing(healAmount);
-                                rsc.DoHeal(healAmount, caster.Raider.GetName(), "Medium Heal", index);
-                            }
-                        }
-                    }
-                    break;
-                case 2:
-                    {
-                        int healAmount = GetSpellAmount(1.0f) / (raid.Count/2);
-                        int randomIndex = 0;
-                        for (int i = 0; i < raid.Count; i++)
-                        {
-                            randomIndex = UnityEngine.Random.Range(0, raid.Count - 1);
-                            if (!raid[randomIndex].IsDead())
-                            {
-                                raid[randomIndex].TakeHealing(healAmount);
-                                rsc.DoHeal(healAmount, caster.Raider.GetName(), "Small Heal", index);
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-            float baseCastTime = 1.5f;
-            caster.StartCoroutine(DoHeal(baseCastTime + UnityEngine.Random.Range(0, baseCastTime / 10.0f), caster, index, rsc, raid));
+            
+            case Enums.CharacterSpec.Cleric:
+                script = new ClericHealScript();
+                break;
+            case Enums.CharacterSpec.Diviner:
+                script = new DivinerHealScript();
+                break;
+            case Enums.CharacterSpec.Naturalist:
+                script = new NaturalistHealScript();
+                break;
+            case Enums.CharacterSpec.Berserker:
+            case Enums.CharacterSpec.Guardian:
+            case Enums.CharacterSpec.Knight:
+            case Enums.CharacterSpec.Assassin:
+            case Enums.CharacterSpec.Scourge:
+            case Enums.CharacterSpec.Ranger:
+            case Enums.CharacterSpec.Wizard:
+            case Enums.CharacterSpec.Elementalist:
+            case Enums.CharacterSpec.Necromancer:
+            default:
+                Debug.Assert(false);
+                script = new NaturalistHealScript();
+                break;
         }
+
+        script.Setup();
     }
 
     //Internal Functions

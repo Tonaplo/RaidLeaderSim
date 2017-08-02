@@ -14,11 +14,6 @@ public class RosterControllerScript : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-
-        TextBackGround.transform.SetPositionAndRotation(new Vector3(500, 265, 0), Quaternion.identity);
-        HeaderText.transform.SetPositionAndRotation(new Vector3(500, 340, 0), Quaternion.identity);
-        BodyText.transform.SetPositionAndRotation(new Vector3(500, 225, 0), Quaternion.identity);
-
         buttons = new List<GameObject>();
         int height = 40;
         int width = 150;
@@ -34,6 +29,7 @@ public class RosterControllerScript : MonoBehaviour {
             temp.GetComponent<RosterButtonScript>().SetupButton(PlayerData.GetRoster()[i], ref HeaderText, ref BodyText);
             buttons.Add(temp);
         }
+        buttons[0].GetComponent<RosterButtonScript>().OnClick();
         gameObject.SetActive(false);
     }
 	

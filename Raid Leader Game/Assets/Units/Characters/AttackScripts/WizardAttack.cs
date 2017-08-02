@@ -1,21 +1,18 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class WizardAttack : BaseAttackScript
+public class WizardAttack : BaseHealOrAttackScript
 {
+    float m_minMultiplier = 0.80f;
+    float m_maxMultiplier = 1.80f;
 
-    /*
-     * Has a 15% chance to deal sextuple damage			
-     * */
+    public override string GetDescription() { return "Deals between " + GetPercentIncreaseString(m_minMultiplier+1.0f) + " and " + GetPercentIncreaseString(m_maxMultiplier + 1.0f) + " damage on every attack"; }
 
-    float m_multiplier = 6.0f;
-    int m_chance = 15;
-
-    public override void SetupAttack()
+    public override void Setup()
     {
         m_castTime = 2.0f;
-        m_baseMultiplier = 2.9f;
-        m_attackName = "Arcane Blast";
+        m_baseMultiplier = 2.8f;
+        m_name = "Arcane Blast";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -30,13 +27,9 @@ public class WizardAttack : BaseAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
-            int roll = Random.Range(0, 100);
-            if (m_chance >= roll)
-            {
-                damage *= m_multiplier;
-            }
+            damage *= Random.Range(m_minMultiplier, m_maxMultiplier);
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

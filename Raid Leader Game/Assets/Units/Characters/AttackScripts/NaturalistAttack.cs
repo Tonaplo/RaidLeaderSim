@@ -1,18 +1,15 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class NaturalistAttack : BaseAttackScript
+public class NaturalistAttack : BaseHealOrAttackScript
 {
+    public override string GetDescription() { return "Attempts to drown the target by splashing water on it."; }
 
-    /*
-     * Just Deals Damage
-     * */
-
-    public override void SetupAttack()
+    public override void Setup()
     {
         m_castTime = 1.5f;
         m_baseMultiplier = 0.3f;
-        m_attackName = "Splash";
+        m_name = "Splash";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -27,7 +24,7 @@ public class NaturalistAttack : BaseAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

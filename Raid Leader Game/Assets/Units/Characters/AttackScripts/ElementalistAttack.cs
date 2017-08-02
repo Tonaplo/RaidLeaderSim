@@ -1,22 +1,19 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class ElementalistAttack : BaseAttackScript
+public class ElementalistAttack : BaseHealOrAttackScript
 {
-
-    /*
-     * Deals 25% less damage, but has a 50% chance to deal double damage
-     * */
-
     float m_multiplier = 2.0f;
-    float m_percentReduction = 0.75f;
+    float m_percentReduction = 0.85f;
     int m_chance = 50;
 
-    public override void SetupAttack()
+    public override string GetDescription() { return "Deals " + GetPercentIncreaseString((1.0f-m_percentReduction)+ 1.0f) + " less damage, but has a " + m_chance + "% chance to deal " + GetPercentIncreaseString(m_multiplier + 1.0f) + " damage"; }
+
+    public override void Setup()
     {
-        m_castTime = 2.0f;
-        m_baseMultiplier = 2.9f;
-        m_attackName = "Fireball";
+        m_castTime = 1.9f;
+        m_baseMultiplier = 2.7f;
+        m_name = "Fireball";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -37,7 +34,7 @@ public class ElementalistAttack : BaseAttackScript
                 damage *= m_multiplier;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

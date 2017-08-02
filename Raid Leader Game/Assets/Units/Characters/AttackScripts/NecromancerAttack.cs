@@ -1,26 +1,22 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class NecromancerAttack : BaseAttackScript
+public class NecromancerAttack : BaseHealOrAttackScript
 {
+    float m_multiplier = 4.0f;
+    int m_chance = 10;
 
-    /*
-     * Leaves a plague on targets, causing 100% of throughput after 10 secs.			
-     * */
+    public override string GetDescription() { return "Has a " + m_chance + "% chance to deal " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage"; }
 
-    bool m_isDoTRolling;
-    float m_DoTCastTime = 10.0f;
-
-    public override void SetupAttack()
+    public override void Setup()
     {
         m_castTime = 2.0f;
-        m_baseMultiplier = 2.9f;
-        m_attackName = "Death Missile";
+        m_baseMultiplier = 2.8f;
+        m_name = "Spear of Death";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
     {
-        m_isDoTRolling = false;
         rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
     }
 
@@ -31,24 +27,14 @@ public class NecromancerAttack : BaseAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
-            if (!m_isDoTRolling) {
-                rs.StartCoroutine(DealDelayedDamage(m_DoTCastTime, (int)damage, index, attacker, rsc, rs));
-                m_isDoTRolling = true;
+            int roll = Random.Range(0, 100);
+            if (m_chance >= roll)
+            {
+                damage *= m_multiplier;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
-        }
-    }
-
-    IEnumerator DealDelayedDamage(float castTime, int damageAmount, int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
-    {
-        yield return new WaitForSeconds(castTime);
-
-        if (!rsc.IsBossDead() && !rs.IsDead())
-        {
-            rsc.DealDamage((int)damageAmount, attacker.GetName(), m_attackName, index);
-            m_isDoTRolling = false;
         }
     }
 }

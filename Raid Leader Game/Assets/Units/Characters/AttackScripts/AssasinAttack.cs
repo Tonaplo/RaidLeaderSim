@@ -1,21 +1,19 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class AssasinAttack : BaseAttackScript
+public class AssasinAttack : BaseHealOrAttackScript
 {
-
-    /*
-     * Deals  double damage to enemies above 75% health
-     * */
-
+    
     float m_multiplier = 2.0f;
     int m_bossHealthPercent = 75;
 
-    public override void SetupAttack()
+    public override string GetDescription() { return "Deals " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage to enemies above " + m_bossHealthPercent + "% health"; }
+
+    public override void Setup()
     {
         m_castTime = 0.5f;
         m_baseMultiplier = 0.7f;
-        m_attackName = "Vein Slit";
+        m_name = "Vein Slit";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -35,7 +33,7 @@ public class AssasinAttack : BaseAttackScript
                 damage *= m_multiplier;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

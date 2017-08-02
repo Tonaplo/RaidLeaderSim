@@ -1,21 +1,18 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class ScourgeAttack : BaseAttackScript
+public class ScourgeAttack : BaseHealOrAttackScript
 {
-
-    /*
-     * Scent of Death: Deals triple damage to enemies below 20% health			
-     * */
-
-    float m_multiplier = 3.0f;
+    float m_multiplier = 3.5f;
     int m_bossHealthPercent = 20;
 
-    public override void SetupAttack()
+    public override string GetDescription() { return "Deals " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage to enemies below " + m_bossHealthPercent + "% health."; }
+
+    public override void Setup()
     {
         m_castTime = 0.5f;
-        m_baseMultiplier = 0.7f;
-        m_attackName = "Scent of Death";
+        m_baseMultiplier = 0.68f;
+        m_name = "Scent of Death";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -35,7 +32,7 @@ public class ScourgeAttack : BaseAttackScript
                 damage *= m_multiplier;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

@@ -1,22 +1,21 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class BerserkerAttack : BaseAttackScript
+public class BerserkerAttack : BaseHealOrAttackScript
 {
-
-    /*
-     * Sacrifices 2% health for 35% more damage done while above 50% health.
-     * */
-
-    int m_healthPercent = 50;
+    int m_healthPercent = 20;
     float m_damageTakenPercent = 0.02f;
-    float m_multiplier = 1.35f;
-     
-    public override void SetupAttack()
+    float m_multiplier = 1.45f;
+
+
+    public override string GetDescription() { return "While above " + m_healthPercent + " % health, " + GetPercentIncreaseString(m_damageTakenPercent + 1.0f) + " health is sacrificed to deal " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage."; }
+
+
+    public override void Setup()
     {
-        m_castTime = 1.0f;
-        m_baseMultiplier = 1.6f;
-        m_attackName = "Raging Blow";
+        m_castTime = 1.5f;
+        m_baseMultiplier = 2.6f;
+        m_name = "Raging Blow";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -36,7 +35,7 @@ public class BerserkerAttack : BaseAttackScript
                 m_multiplier *= 1.25f;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

@@ -1,24 +1,24 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class RangerAttack : BaseAttackScript
+public class RangerAttack : BaseHealOrAttackScript
 {
+    int m_counter;
+    int m_maxCount = 4;
+    float m_multiplier = 3.1f;
 
-    /*
-     * Every 4th attack will deal quadruple damage			
-     * */
-    int counter;
+    public override string GetDescription() { return "Every " + m_maxCount + "th attack will deal " + GetPercentIncreaseString(m_multiplier) + " damage."; }
 
-    public override void SetupAttack()
+    public override void Setup()
     {
-        m_castTime = 1.8f;
-        m_baseMultiplier = 2.1f;
-        m_attackName = "Aimed Shot";
+        m_castTime = 1.9f;
+        m_baseMultiplier = 2.2f;
+        m_name = "Aimed Shot";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
     {
-        counter = 0;
+        m_counter = 0;
         rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
     }
 
@@ -29,15 +29,15 @@ public class RangerAttack : BaseAttackScript
         {
             float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
 
-            counter++;
+            m_counter++;
 
-            if (counter == 4)
+            if (m_counter == m_maxCount)
             {
-                damage *= 4.0f;
-                counter = 0;
+                damage *= m_multiplier;
+                m_counter = 0;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

@@ -1,20 +1,17 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class KnightAttack : BaseAttackScript
+public class KnightAttack : BaseHealOrAttackScript
 {
-
-    /*
-     * Heals self for 15% of damage dealt			
-     * */
-
     float healPercent = 0.15f;
 
-    public override void SetupAttack()
+    public override string GetDescription() { return "Heals self for " + GetPercentIncreaseString(1.0f + healPercent) + " of damage dealt	"; }
+
+    public override void Setup()
     {
         m_castTime = 1.0f;
         m_baseMultiplier = 0.5f;
-        m_attackName = "Shield Bash";
+        m_name = "Shield Bash";
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -29,8 +26,9 @@ public class KnightAttack : BaseAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             int damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
-            rs.TakeHealing((int)(damage * healPercent));
-            rsc.DealDamage(damage, attacker.GetName(), m_attackName, index);
+            int actualHealing = rs.TakeHealing((int)(damage * healPercent));
+            rsc.DoHeal(actualHealing, attacker.GetName(), GetName(), index);
+            rsc.DealDamage(damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

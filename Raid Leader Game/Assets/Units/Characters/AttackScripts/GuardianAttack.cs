@@ -1,18 +1,14 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class GuardianAttack : BaseAttackScript
+public class GuardianAttack : BaseHealOrAttackScript
 {
+    public override string GetDescription() { return "Counterattacks the enemy that hits him"; }
 
-    /*
-     * The attack of the Guardian is quite boring.
-     * It just deals damage on a cast time, no modifiers
-     * */
-     
-    public override void SetupAttack() {
+    public override void Setup() {
         m_castTime = 1.0f;
         m_baseMultiplier = 0.5f;
-        m_attackName = "Counterattack";
+        m_name = "Counterattack";
     }
     
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs) {
@@ -26,7 +22,7 @@ public class GuardianAttack : BaseAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             int damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
-            rsc.DealDamage(damage, attacker.GetName(), m_attackName, index);
+            rsc.DealDamage(damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

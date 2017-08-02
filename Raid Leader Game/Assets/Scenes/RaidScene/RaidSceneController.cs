@@ -205,6 +205,6 @@ public class RaidSceneController : MonoBehaviour {
         GameObject temp = GameObject.Instantiate(HealthBarPrefab);
         temp.transform.SetParent(canvas.transform);
 
-        encounter = new BaseEncounter("Basic Encounter", 10000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
+        encounter = new BaseEncounter("Basic Encounter", 20000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
     }
 }

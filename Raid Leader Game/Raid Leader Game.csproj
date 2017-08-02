@@ -106,7 +106,6 @@
     <Compile Include="Assets\Static Scripts\PlayerData.cs" />
     <Compile Include="Assets\Static Scripts\Utility.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\AssasinAttack.cs" />
-    <Compile Include="Assets\Units\Characters\AttackScripts\BaseAttackScript.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\BerserkerAttack.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\ClericAttack.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\DivinerAttack.cs" />
@@ -119,7 +118,12 @@
     <Compile Include="Assets\Units\Characters\AttackScripts\ScourgeAttack.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\WizardAttack.cs" />
     <Compile Include="Assets\Units\Characters\BaseCharacter.cs" />
+    <Compile Include="Assets\Units\Characters\BaseHealOrAttackScript.cs" />
     <Compile Include="Assets\Units\Characters\EncounterAdd.cs" />
+    <Compile Include="Assets\Units\Characters\HealScripts\BaseHealScript.cs" />
+    <Compile Include="Assets\Units\Characters\HealScripts\ClericHealScript.cs" />
+    <Compile Include="Assets\Units\Characters\HealScripts\DivinerHealScript.cs" />
+    <Compile Include="Assets\Units\Characters\HealScripts\NaturalistHealScript.cs" />
     <Compile Include="Assets\Units\Characters\Raider.cs" />
     <Compile Include="Assets\Units\Characters\RaiderStats.cs" />
   </ItemGroup>

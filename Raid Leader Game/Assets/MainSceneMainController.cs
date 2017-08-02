@@ -16,8 +16,6 @@ public class MainSceneMainController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        RosterControllerPrefab = GameObject.Instantiate(RosterControllerPrefab);
-        RosterControllerPrefab.transform.SetParent(canvas.transform);
         m_rosterScript = RosterControllerPrefab.GetComponent<RosterControllerScript>();
         m_rosterScript.SetActive(false);
     }

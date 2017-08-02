@@ -7,7 +7,7 @@ public class NaturalistHealScript : BaseHealScript
 
 
     float m_HoTMultiplier = 0.05f;
-    int m_maxSeconds = 3;
+    int m_maxSeconds = 4;
     float healInterval = 1.0f;
 
     public override string GetDescription() { return "Healed targets are healed again for " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " throughput every second for " + m_maxSeconds + " seconds"; }

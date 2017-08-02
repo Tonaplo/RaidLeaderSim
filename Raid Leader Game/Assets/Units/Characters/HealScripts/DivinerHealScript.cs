@@ -6,14 +6,14 @@ public class DivinerHealScript : BaseHealScript
 {
 
 
-    float m_TankAndSelfMultiplier = 0.3f;
+    float m_LowestMultiplier = 0.6f;
 
-    public override string GetDescription() { return "Heals self and the lowest health target for " + GetPercentIncreaseString(m_TankAndSelfMultiplier + 1.0f) + " of healing done"; }
+    public override string GetDescription() { return "Also heals the lowest health target for " + GetPercentIncreaseString(m_LowestMultiplier + 1.0f) + " of throughput"; }
 
     public override void Setup()
     {
         m_castTime = 1.5f;
-        m_baseMultiplier = 1.5f;
+        m_baseMultiplier = 2.0f;
         m_name = "Arcane Mending";
     }
 
@@ -38,16 +38,14 @@ public class DivinerHealScript : BaseHealScript
                 int actualHealing = targets[i].TakeHealing(heal);
                 rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
             }
+            
+            int abilityHealAmount = Mathf.RoundToInt(caster.RaiderStats().GetSpellAmount(m_baseMultiplier) * m_LowestMultiplier);
+            List<RaiderScript> lowest = new List<RaiderScript>(Raid);
+            TrimToLowestXFromList(ref lowest, 1);
 
-            int totalHealingDone = heal * numTargets;
-            int abilityHealAmount = Mathf.RoundToInt(totalHealingDone * m_TankAndSelfMultiplier);
-            List<RaiderScript> lowestAndSelf = new List<RaiderScript>(Raid);
-            TrimToLowestXFromList(ref lowestAndSelf, 1);
-            lowestAndSelf.Add(rs);
-
-            for (int i = 0; i < lowestAndSelf.Count; i++)
+            for (int i = 0; i < lowest.Count; i++)
             {
-                int actualHealing = lowestAndSelf[i].TakeHealing(abilityHealAmount);
+                int actualHealing = lowest[i].TakeHealing(abilityHealAmount);
                 rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
             }
 

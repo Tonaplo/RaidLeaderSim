@@ -27,6 +27,14 @@ public class MeterBarScript : MonoBehaviour {
         Fill.color = Utility.GetColorFromClass(entry.Class);
     }
 
+    public void FinalizeEntry(MeterControllerScript.Entry entry, float time)
+    {
+        BarSlider.value = entry.Amount;
+        NameText.text = entry.Name;
+        AmountText.text = System.Math.Round((entry.Amount / time), 1).ToString() + "/sec";
+        Fill.color = Utility.GetColorFromClass(entry.Class);
+    }
+
     public void UpdateMax(int newMax)
     {
         BarSlider.maxValue = newMax;

@@ -20,6 +20,7 @@ public class RaidSceneController : MonoBehaviour {
     List<RaiderScript> m_raiderScripts;
     MeterControllerScript m_damageMcs;
     MeterControllerScript m_healingMcs;
+    float m_fightStartTime;
 
     public List<RaiderScript> GetRaid() { return m_raiderScripts; }
 
@@ -106,19 +107,23 @@ public class RaidSceneController : MonoBehaviour {
                     StartCoroutine(m_raiderScripts[i].StartFight(i*0.1f, i, all[i], this));
                 }
                 encounter.BeginEncounter();
-
+                m_fightStartTime = Time.time;
                 currentStep++;
                 encounterText.text = "Current step is " + (int)currentStep;
                 break;
             case Enums.EncounterSteps.FightInProgress:
                 break;
             case Enums.EncounterSteps.FightWon:
-            case Enums.EncounterSteps.FightLost:
                 raidText.text = "Total Stats:\n\n";
                 for (int i = 0; i < all.Count; i++)
                 {
-                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats().GetCurrentSpec().ToString()  + " (ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + " %)\n";
+                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats().GetCurrentSpec().ToString() + " (ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + " %)\n";
                 }
+                m_damageMcs.FightEnded(Time.time - m_fightStartTime);
+                m_healingMcs.FightEnded(Time.time - m_fightStartTime);
+                currentStep++;
+                break;
+            case Enums.EncounterSteps.FightLost:
                 currentStep++;
                 break;
             case Enums.EncounterSteps.GoToMainScreen:

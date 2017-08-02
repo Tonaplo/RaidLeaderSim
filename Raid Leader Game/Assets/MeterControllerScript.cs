@@ -86,7 +86,17 @@ public class MeterControllerScript : MonoBehaviour {
             CheckForBarUpdate(entry);
         }
     }
-    
+
+    public void FightEnded(float fightTime)
+    {
+        SortEntries();
+        for (int i = 0; i < m_bars.Count; i++)
+        {
+            m_bars[i].CurrentEntry = m_entries[i];
+            m_bars[i].BarScript.FinalizeEntry(m_entries[i], fightTime);
+        }
+        
+    }
 
     void CheckForBarUpdate(Entry updatedEntry) {
 
@@ -101,13 +111,7 @@ public class MeterControllerScript : MonoBehaviour {
         }
 
         UpdateNewMax(max);
-
-        m_entries.Sort(delegate (Entry x, Entry y)
-        {
-            if (x.Amount > y.Amount)
-                return -1;
-            else return 1;
-        });
+        SortEntries();
 
         for (int i = 0; i < m_bars.Count; i++)
         {
@@ -160,6 +164,16 @@ public class MeterControllerScript : MonoBehaviour {
         #endregion
     }
 
+    void SortEntries()
+    {
+        m_entries.Sort(delegate (Entry x, Entry y)
+        {
+            if (x.Amount > y.Amount)
+                return -1;
+            else return 1;
+        });
+    }
+
     void UpdateNewMax(int newMax)
     {
         for (int i = 0; i < m_bars.Count; i++)
@@ -167,6 +181,7 @@ public class MeterControllerScript : MonoBehaviour {
             m_bars[i].BarScript.UpdateMax(newMax);
         }
     }
+
 
 	// Use this for initialization
 	void Start () {

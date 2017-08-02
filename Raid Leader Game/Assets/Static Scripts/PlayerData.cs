@@ -70,7 +70,7 @@ public static class PlayerData
 
         for (int i = 0; i < roster.Count; i++)
         {
-            roster[i].RaiderStats().SetTestValue();
+            //roster[i].RaiderStats().SetTestValue();
             roster[i].CalculateMaxHealth();
         }
     }

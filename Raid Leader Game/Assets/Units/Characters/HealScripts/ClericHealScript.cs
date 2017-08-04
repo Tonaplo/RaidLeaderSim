@@ -21,15 +21,24 @@ public class ClericHealScript : BaseHealScript
     {
         Raid = rsc.GetRaid();
         rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));
+
+        PriorityList = new List<Priority> { new Priority(1, Enums.RaidHealingState.RaidMultiHeavyDamage),
+                                            new Priority(2, Enums.RaidHealingState.RaidSingleHeavyDamage),
+                                            new Priority(3, Enums.RaidHealingState.TankHeavyDamage),
+                                            new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
+                                            new Priority(5, Enums.RaidHealingState.RaidSingleMediumDamage),
+                                            new Priority(6, Enums.RaidHealingState.TankMediumDamage),
+                                            new Priority(7, Enums.RaidHealingState.RandomTargets), };
     }
 
     IEnumerator DoHeal(float castTime, int index, Raider caster, RaidSceneController rsc, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
-
+        
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            List<RaiderScript> targets = GetRandomTargets(); // This asshole needs to be rewritten.
+            List<RaiderScript> targets = new List<RaiderScript>();
+            GetBestTargets(ref targets);
             int numTargets = targets.Count;
             int heal = Mathf.RoundToInt(caster.RaiderStats().GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
 

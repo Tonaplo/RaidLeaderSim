@@ -5,7 +5,7 @@ public class BerserkerAttack : BaseHealOrAttackScript
 {
     int m_healthPercent = 20;
     float m_damageTakenPercent = 0.02f;
-    float m_multiplier = 1.45f;
+    float m_multiplier = 1.50f;
 
 
     public override string GetDescription() { return "While above " + m_healthPercent + " % health, " + GetPercentIncreaseString(m_damageTakenPercent + 1.0f) + " health is sacrificed to deal " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage."; }
@@ -13,7 +13,7 @@ public class BerserkerAttack : BaseHealOrAttackScript
 
     public override void Setup()
     {
-        m_castTime = 1.5f;
+        m_castTime = 1.4f;
         m_baseMultiplier = 2.6f;
         m_name = "Raging Blow";
     }

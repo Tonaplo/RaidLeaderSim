@@ -82,9 +82,16 @@ public class BaseEncounter
     }
 
     public virtual void BeginEncounter() {
+        bool hasHitTank = false;
         for (int i = 0; i < m_raid.Count; i++)
         {
             m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int) (20 * Random.value), m_raid[i]));
+
+            if (m_raid[i].Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank && !hasHitTank)
+            {
+                hasHitTank = true;
+                m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), 40, 6, m_raid[i]));
+            }
         }
         
     }
@@ -96,6 +103,30 @@ public class BaseEncounter
         {
             target.TakeDamage(damage);
             m_rsc.StartCoroutine(DoBasicAttack(2.5f + Random.Range(0, 2.5f), (int)(20 * Random.value), target));
+        }
+    }
+
+    public virtual IEnumerator DoTankAttack(float castTime, int damage, int counter, RaiderScript target)
+    {
+        yield return new WaitForSeconds(castTime);
+
+        if (!target.IsDead() && !IsDead())
+        {
+            target.TakeDamage(damage);
+            if (counter > 0)
+            {
+                counter--;
+                m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(damage*1.1f), counter, target));
+            }
+            else
+            {
+                RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
+                Debug.Log("target: " + target.Raider.GetName() + ", othertank: " + (otherTank ? otherTank.Raider.GetName() : "null"));
+                if (otherTank && !otherTank.IsDead())
+                    m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(40), 6, otherTank));
+                else
+                    m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(damage * 1.1f), 6, target));
+            }
         }
     }
 }

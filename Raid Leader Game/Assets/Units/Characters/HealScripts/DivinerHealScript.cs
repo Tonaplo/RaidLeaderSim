@@ -12,9 +12,17 @@ public class DivinerHealScript : BaseHealScript
 
     public override void Setup()
     {
-        m_castTime = 1.5f;
-        m_baseMultiplier = 2.0f;
+        m_castTime = 2.0f;
+        m_baseMultiplier = 2.5f;
         m_name = "Arcane Mending";
+
+        PriorityList = new List<Priority> { new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
+                                            new Priority(2, Enums.RaidHealingState.TankMediumDamage),
+                                            new Priority(3, Enums.RaidHealingState.RaidMultiHeavyDamage),
+                                            new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
+                                            new Priority(5, Enums.RaidHealingState.RaidSingleHeavyDamage),
+                                            new Priority(6, Enums.RaidHealingState.RaidSingleMediumDamage),
+                                            new Priority(7, Enums.RaidHealingState.RandomTargets), };
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -29,7 +37,8 @@ public class DivinerHealScript : BaseHealScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            List<RaiderScript> targets = GetRandomTargets(); // This asshole needs to be rewritten.
+            List<RaiderScript> targets = new List<RaiderScript>();
+            GetBestTargets(ref targets);
             int numTargets = targets.Count;
             int heal = Mathf.RoundToInt(caster.RaiderStats().GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
             

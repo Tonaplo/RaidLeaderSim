@@ -121,4 +121,15 @@ public static class Enums{
         TimeBased,
         DPSBased,
     }
+
+    public enum RaidHealingState
+    {
+        TankMediumDamage    = 1 << 1,
+        TankHeavyDamage     = 1 << 2,
+        RaidSingleMediumDamage = 1 << 4,
+        RaidSingleHeavyDamage  = 1 << 5,
+        RaidMultiMediumDamage = 1 << 7,
+        RaidMultiHeavyDamage = 1 << 8,
+        RandomTargets       = 1 << 9,
+    }
 }

@@ -39,6 +39,8 @@ public class CreateNewGameController : MonoBehaviour {
 
     public Text TeamMemberHeader;
     public Text TeamMemberAbilityDescription;
+    public Button AddMember;
+    public Button RejectMember;
 
     Enums.CharacterClass m_playerClass = Enums.CharacterClass.Fighter;
     Enums.CharacterSpec m_playerMainSpec = Enums.CharacterSpec.Berserker;
@@ -240,16 +242,16 @@ public class CreateNewGameController : MonoBehaviour {
             default:
                 break;
         }
+        
+        UpdateRaidRosterText();
 
         if (m_dpsNeeded != 0)
             GenerateNewRecruit();
         else
         {
-            OnStartGameButtonClicked();
+            TeamCreationFinished();
         }
 
-
-        UpdateRaidRosterText();
     }
 
     public void OnRejectRecruitClicked()
@@ -264,7 +266,7 @@ public class CreateNewGameController : MonoBehaviour {
         else if (m_healersNeeded != 0)
             RaidRoster.text = "Recruiting Healers - 3 total:\n\n";
         else
-            RaidRoster.text = "Recruiting Tanks - 7 total:\n\n";
+            RaidRoster.text = "Recruiting DPS - 7 total:\n\n";
         
         PlayerData.SortRoster();
         for (int i = 0; i < PlayerData.Roster.Count; i++)
@@ -282,47 +284,34 @@ public class CreateNewGameController : MonoBehaviour {
                 RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
             }
         }
+    }
 
-        /*
-        RaidRosterLeft.text = "";
-        RaidRosterRight.text = "";
-        bool hasFirstTankBeenAdded = false;
-        bool hasFirstHealerBeenAdded = false;
-        bool hasFirstDPSBeenAdded = false;
+    void UpdateRosterTextWithFullTeam()
+    {
+        RaidRoster.text = "DPS:\n";
+        TeamMemberHeader.text = "Tanks:\n";
         PlayerData.SortRoster();
-        Debug.Log("Roster Count : " + PlayerData.Roster.Count);
+        bool firstHealer = true;
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
             if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Tank)
             {
-                if (!hasFirstTankBeenAdded)
-                {
-                    hasFirstTankBeenAdded = true;
-                    RaidRosterLeft.text = "Tanks:\n";
-                }
-                RaidRosterLeft.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                TeamMemberHeader.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
             }
             else if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Healer)
             {
-                if (!hasFirstHealerBeenAdded)
+                if (firstHealer)
                 {
-                    RaidRosterLeft.text += "\nHealers:\n";
-                    hasFirstHealerBeenAdded = true;
+                    firstHealer = false;
+                    TeamMemberHeader.text += "\nHealers:\n";
                 }
-                RaidRosterLeft.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                TeamMemberHeader.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
             }
             else
             {
-                if (!hasFirstDPSBeenAdded)
-                {
-                    hasFirstDPSBeenAdded = true;
-                    RaidRosterRight.text = "DPS:\n";
-                }
-                RaidRosterRight.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
             }
-            Debug.Log("Added " + PlayerData.Roster[i].GetName() + " to the roster text");
         }
-        */
     }
 
     void GenerateNewRecruit()
@@ -369,6 +358,20 @@ public class CreateNewGameController : MonoBehaviour {
     {
         DescriptionText.text = "Welcome to the world of raid team leadership, " + m_playerName + 
             ". You've made it clear who you are - now let's define your raid team.\n\nFirst off - What is your raid team called?                                     ";
+    }
+
+    void TeamCreationFinished()
+    {
+        PlayerData.SetRaidTeamName(RaidTeamNameField.text);
+        RaidTeamNameField.gameObject.SetActive(false);
+        UpdateRosterTextWithFullTeam();
+        ClassText.text = "A great collection of talent, ready for raiding!\n\nYou're ready and you've got yourself a team. Good luck!";
+        DescriptionText.fontSize = 20;
+        DescriptionText.text = PlayerData.RaidTeamName + "\nManaged by " + m_playerName + ", the " + PlayerData.PlayerCharacter.RaiderStats().GetCurrentSpec() +".";
+        StartGameButton.interactable = true;
+        AddMember.gameObject.SetActive(false);
+        RejectMember.gameObject.SetActive(false);
+        TeamMemberAbilityDescription.gameObject.SetActive(false);
     }
 
     public void OnNextButtonClicked()

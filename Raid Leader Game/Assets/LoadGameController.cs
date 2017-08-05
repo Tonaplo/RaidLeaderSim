@@ -82,7 +82,7 @@ public class LoadGameController : MonoBehaviour {
         averageGearLevel /= 100.0f;
         averageSkillLevel /= 100.0f;
 
-        RaidText.text = "Raid team Name functionality pending" +
+        RaidText.text =  PlayerData.RaidTeamName +
                         "\nTeam Size: " + numMembers +
                         "\nAverage Skill Level: " + averageSkillLevel +
                         "\nAverage Gear Level: " + averageGearLevel +

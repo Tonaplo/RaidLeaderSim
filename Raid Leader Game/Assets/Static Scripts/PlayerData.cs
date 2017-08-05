@@ -7,10 +7,12 @@ public static class PlayerData
     static List<Raider> m_roster;
     static List<Raider> m_raidTeam;
     static Raider m_playerChar;
+    static string m_raidTeamName;
     
     public static List<Raider> Roster { get { return m_roster; } }
     public static List<Raider> RaidTeam { get { return m_roster; } }
     public static Raider PlayerCharacter { get { return m_playerChar; } }
+    public static string RaidTeamName { get { return m_raidTeamName; } }
 
 
     public static void Initialize()
@@ -19,10 +21,11 @@ public static class PlayerData
         m_raidTeam = new List<Raider>();
     }
 
-    public static void InitializeDataFromSaveData(Raider player, List<Raider> r)
+    public static void InitializeDataFromSaveData(Raider player, List<Raider> r, string n)
     {
         m_roster = r;
         m_playerChar = player;
+        SetRaidTeamName(n);
     }
 
     public static void GenerateNewGameRoster(Raider player, int baseLevel)
@@ -136,6 +139,11 @@ public static class PlayerData
     {
         m_playerChar = player;
         AddRecruitToRoster(player);
+    }
+
+    public static void SetRaidTeamName(string newTeamName)
+    {
+        m_raidTeamName = newTeamName;
     }
 
     public static bool IsNameDuplicateOfRosterNames(string name)

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class GuardianAttack : BaseHealOrAttackScript
 {
-    public override string GetDescription() { return "Counterattacks the enemy that hits him"; }
+    public override string GetDescription() { return "Counterattacks the enemy that hits him. Guardians also have 15% increased health and take 15% reduced damage."; }
 
     public override void Setup() {
         m_castTime = 1.0f;

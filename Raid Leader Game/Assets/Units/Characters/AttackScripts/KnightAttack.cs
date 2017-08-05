@@ -5,7 +5,7 @@ public class KnightAttack : BaseHealOrAttackScript
 {
     float healPercent = 0.15f;
 
-    public override string GetDescription() { return "Heals self for " + GetPercentIncreaseString(1.0f + healPercent) + " of damage dealt	"; }
+    public override string GetDescription() { return "Heals self for " + GetPercentIncreaseString(1.0f + healPercent) + " of damage dealt."; }
 
     public override void Setup()
     {

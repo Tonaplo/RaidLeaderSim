@@ -125,7 +125,7 @@ public class RaiderStats {
     {
         RaiderStats returnValue = new RaiderStats(baseLevel);
 
-        returnValue.m_charRole = GenerateRoleFromClass(Class);
+        returnValue.m_charRole = Utility.GenerateRoleFromClass(Class);
         returnValue.m_charClass = Class;
 
         FinishRaiderStatGeneration(ref returnValue);
@@ -135,7 +135,7 @@ public class RaiderStats {
     public static RaiderStats GenerateRaiderStatsFromRole(Enums.CharacterRole role, int baseLevel)
     {
         RaiderStats returnValue = new RaiderStats(baseLevel);
-        returnValue.m_charClass = GenerateClassFromRole(role);
+        returnValue.m_charClass = Utility.GenerateClassFromRole(role);
         returnValue.m_charRole = role;
 
         FinishRaiderStatGeneration(ref returnValue);
@@ -232,91 +232,6 @@ public class RaiderStats {
     }
 
     //Internal Functions
-
-    static Enums.CharacterClass GenerateClassFromRole(Enums.CharacterRole role)
-    {
-        int randomValue = 0;
-        switch (role)
-        {
-            case Enums.CharacterRole.Tank:
-                randomValue = UnityEngine.Random.Range(0, 2);
-                if (randomValue == 0)
-                    return Enums.CharacterClass.Fighter;
-                else
-                    return Enums.CharacterClass.Paladin;
-            case Enums.CharacterRole.MeleeDPS:
-                randomValue = UnityEngine.Random.Range(0, 3);
-                if (randomValue == 0)
-                    return Enums.CharacterClass.Fighter;
-                else if(randomValue == 1)
-                    return Enums.CharacterClass.Shadow;
-                else
-                    return Enums.CharacterClass.Occultist;
-            case Enums.CharacterRole.Healer:
-
-                randomValue = UnityEngine.Random.Range(0, 3);
-                if (randomValue == 0)
-                    return Enums.CharacterClass.Totemic;
-                else if (randomValue == 1)
-                    return Enums.CharacterClass.Sorcerer;
-                else
-                    return Enums.CharacterClass.Paladin;
-
-            default:
-            case Enums.CharacterRole.RangedDPS:
-
-                randomValue = UnityEngine.Random.Range(0, 4);
-                if (randomValue == 0)
-                    return Enums.CharacterClass.Totemic;
-                else if (randomValue == 1)
-                    return Enums.CharacterClass.Sorcerer;
-                else if(randomValue == 2)
-                    return Enums.CharacterClass.Shadow;
-                else
-                    return Enums.CharacterClass.Occultist;
-        }
-    }
-
-    static Enums.CharacterRole GenerateRoleFromClass(Enums.CharacterClass Class)
-    {
-        //implement this correctly later
-        int randomValue = UnityEngine.Random.Range(0, 2);
-        switch (Class)
-        {
-            case Enums.CharacterClass.Fighter:
-                if (randomValue == 0)
-                    return Enums.CharacterRole.Tank;
-                else
-                    return Enums.CharacterRole.MeleeDPS;
-
-            case Enums.CharacterClass.Shadow:
-                if (randomValue == 0)
-                    return Enums.CharacterRole.RangedDPS;
-                else
-                    return Enums.CharacterRole.MeleeDPS;
-            case Enums.CharacterClass.Totemic:
-                if (randomValue == 0)
-                    return Enums.CharacterRole.Healer;
-                else
-                    return Enums.CharacterRole.RangedDPS;
-            case Enums.CharacterClass.Sorcerer:
-                if (randomValue == 0)
-                    return Enums.CharacterRole.Healer;
-                else
-                    return Enums.CharacterRole.RangedDPS;
-            case Enums.CharacterClass.Paladin:
-                if (randomValue == 0)
-                    return Enums.CharacterRole.Healer;
-                else
-                    return Enums.CharacterRole.Tank;
-            default:
-            case Enums.CharacterClass.Occultist:
-                if (randomValue == 0)
-                    return Enums.CharacterRole.RangedDPS;
-                else
-                    return Enums.CharacterRole.MeleeDPS;
-        }
-    }
     
     static int GenerateRandomLevelFromBase(int baseValue)
     {
@@ -343,7 +258,7 @@ public class RaiderStats {
 
     static void FinishRaiderStatGeneration(ref RaiderStats rs)
     {
-        rs.SetSpecFromRoleAndClass();
+        rs.m_charSpec = Utility.GetSpecFromRoleAndClass(rs.m_charClass, rs.m_charRole);
         rs.SetAbilityFromSpec();
         rs.SetCooldownFromSpec();
         rs.SetBaseAbility();
@@ -358,54 +273,54 @@ public class RaiderStats {
         {
             case Enums.CharacterClass.Fighter:
                 if (role == Enums.CharacterRole.Tank)
-                    role = Enums.CharacterRole.MeleeDPS;
+                    m_charRole = Enums.CharacterRole.MeleeDPS;
                 else
-                    role = Enums.CharacterRole.Tank;
+                    m_charRole = Enums.CharacterRole.Tank;
                 break;
 
             case Enums.CharacterClass.Shadow:
                 if (role == Enums.CharacterRole.RangedDPS)
-                    role = Enums.CharacterRole.MeleeDPS;
+                    m_charRole = Enums.CharacterRole.MeleeDPS;
                 else
-                    role = Enums.CharacterRole.RangedDPS;
+                    m_charRole = Enums.CharacterRole.RangedDPS;
                 break;
 
             case Enums.CharacterClass.Totemic:
                 if (role == Enums.CharacterRole.Healer)
-                    role = Enums.CharacterRole.RangedDPS;
+                    m_charRole = Enums.CharacterRole.RangedDPS;
                 else
-                    role = Enums.CharacterRole.Healer;
+                    m_charRole = Enums.CharacterRole.Healer;
                 break;
 
             case Enums.CharacterClass.Sorcerer:
                 if (role == Enums.CharacterRole.Healer)
-                    role = Enums.CharacterRole.RangedDPS;
+                    m_charRole = Enums.CharacterRole.RangedDPS;
                 else
-                    role = Enums.CharacterRole.Healer;
+                    m_charRole = Enums.CharacterRole.Healer;
                 break;
 
             case Enums.CharacterClass.Paladin:
                 if (role == Enums.CharacterRole.Tank)
-                    role = Enums.CharacterRole.Healer;
+                    m_charRole = Enums.CharacterRole.Healer;
                 else
-                    role = Enums.CharacterRole.Tank;
+                    m_charRole = Enums.CharacterRole.Tank;
                 break;
             case Enums.CharacterClass.Occultist:
                 if (role == Enums.CharacterRole.MeleeDPS)
-                    role = Enums.CharacterRole.RangedDPS;
+                    m_charRole = Enums.CharacterRole.RangedDPS;
                 else
-                    role = Enums.CharacterRole.MeleeDPS;
+                    m_charRole = Enums.CharacterRole.MeleeDPS;
                 break;
 
             default:
                 break;
         }
-        SetSpecFromRoleAndClass();
+        m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);
     }
 
     void FinishRaiderStatGeneration()
     {
-        SetSpecFromRoleAndClass();
+        m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);
         SetAbilityFromSpec();
         SetCooldownFromSpec();
         SetBaseAbility();
@@ -413,57 +328,7 @@ public class RaiderStats {
         ComputeThroughput();
     }
 
-    void SetSpecFromRoleAndClass()
-    {
-        Enums.CharacterRole role = GetRole();
-        switch (GetClass())
-        {
-            case Enums.CharacterClass.Fighter:
-                if (role == Enums.CharacterRole.Tank)
-                    m_charSpec = Enums.CharacterSpec.Guardian;
-                else
-                    m_charSpec = Enums.CharacterSpec.Berserker;
-                break;
-
-            case Enums.CharacterClass.Shadow:
-                if (role == Enums.CharacterRole.RangedDPS)
-                    m_charSpec = Enums.CharacterSpec.Ranger;
-                else
-                    m_charSpec = Enums.CharacterSpec.Assassin;
-                break;
-
-            case Enums.CharacterClass.Totemic:
-                if (role == Enums.CharacterRole.Healer)
-                    m_charSpec = Enums.CharacterSpec.Naturalist;
-                else
-                    m_charSpec = Enums.CharacterSpec.Elementalist;
-                break;
-
-            case Enums.CharacterClass.Sorcerer:
-                if (role == Enums.CharacterRole.Healer)
-                    m_charSpec = Enums.CharacterSpec.Diviner;
-                else
-                    m_charSpec = Enums.CharacterSpec.Wizard;
-                break;
-
-            case Enums.CharacterClass.Paladin:
-                if (role == Enums.CharacterRole.Healer)
-                    m_charSpec = Enums.CharacterSpec.Cleric;
-                else
-                    m_charSpec = Enums.CharacterSpec.Knight;
-                break;
-
-            case Enums.CharacterClass.Occultist:
-                if (role == Enums.CharacterRole.MeleeDPS)
-                    m_charSpec = Enums.CharacterSpec.Scourge;
-                else
-                    m_charSpec = Enums.CharacterSpec.Necromancer;
-                break;
-
-            default:
-                break;
-        }
-    }
+    
 
     void SetAbilityFromSpec()
     {

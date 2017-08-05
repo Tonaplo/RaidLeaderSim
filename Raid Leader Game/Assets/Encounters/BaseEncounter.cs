@@ -93,7 +93,12 @@ public class BaseEncounter
                 m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), 40, 6, m_raid[i]));
             }
         }
-        
+
+        if (!hasHitTank)
+        {
+            m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), 40, 6, m_raid[0]));
+        }
+
     }
 
     public virtual IEnumerator DoBasicAttack(float castTime, int damage, RaiderScript target) {
@@ -116,16 +121,28 @@ public class BaseEncounter
             if (counter > 0)
             {
                 counter--;
-                m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(damage*1.1f), counter, target));
+                m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(damage * 1.1f), counter, target));
             }
             else
             {
                 RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
-                Debug.Log("target: " + target.Raider.GetName() + ", othertank: " + (otherTank ? otherTank.Raider.GetName() : "null"));
                 if (otherTank && !otherTank.IsDead())
                     m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(40), 6, otherTank));
                 else
                     m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(damage * 1.1f), 6, target));
+            }
+        }
+        else if(target.IsDead()) {
+            RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
+            if (otherTank && !otherTank.IsDead())
+                m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(40), 6, otherTank));
+            else
+            {
+                for (int i = 0; i < m_raid.Count; i++)
+                {
+                    if(!m_raid[i].IsDead())
+                        m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(40), 6, m_raid[i]));
+                }
             }
         }
     }

@@ -30,6 +30,7 @@ public class LoadGameController : MonoBehaviour {
 
     public void StartGameClicked()
     {
+        PlayerData.RecalculateRoster();
         SceneManager.LoadScene("MainGameScene");
     }
 
@@ -51,22 +52,22 @@ public class LoadGameController : MonoBehaviour {
         RaidText.gameObject.SetActive(true);
         NotFoundText.gameObject.SetActive(false);
 
-        Header.text = PlayerData.GetPlayerCharacter().GetName();
+        Header.text = PlayerData.PlayerCharacter.GetName();
 
-        CharacterText.text = "Class: " + PlayerData.GetPlayerCharacter().RaiderStats().GetClass() +
-                             "\nMain Spec: " + PlayerData.GetPlayerCharacter().RaiderStats().GetCurrentSpec() +
-                             "\nSkill Level: " + PlayerData.GetPlayerCharacter().RaiderStats().GetSkillLevel() +
-                             "\nGear Level: " + PlayerData.GetPlayerCharacter().RaiderStats().GetGearLevel() +
-                             "\nAverage Throughout: " + PlayerData.GetPlayerCharacter().RaiderStats().GetAverageThroughput();
+        CharacterText.text = "Class: " + PlayerData.PlayerCharacter.RaiderStats().GetClass() +
+                             "\nMain Spec: " + PlayerData.PlayerCharacter.RaiderStats().GetCurrentSpec() +
+                             "\nSkill Level: " + PlayerData.PlayerCharacter.RaiderStats().GetSkillLevel() +
+                             "\nGear Level: " + PlayerData.PlayerCharacter.RaiderStats().GetGearLevel() +
+                             "\nAverage Throughout: " + PlayerData.PlayerCharacter.RaiderStats().GetAverageThroughput();
 
         float averageGearLevel = 0.0f;
         float averageSkillLevel = 0.0f;
-        int numMembers = PlayerData.GetRoster().Count;
+        int numMembers = PlayerData.Roster.Count;
 
         for (int i = 0; i < numMembers; i++)
         {
-            averageGearLevel += PlayerData.GetRoster()[i].RaiderStats().GetGearLevel();
-            averageSkillLevel += PlayerData.GetRoster()[i].RaiderStats().GetSkillLevel();
+            averageGearLevel += PlayerData.Roster[i].RaiderStats().GetGearLevel();
+            averageSkillLevel += PlayerData.Roster[i].RaiderStats().GetSkillLevel();
         }
 
         averageGearLevel /= numMembers;

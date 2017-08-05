@@ -30,7 +30,7 @@ public class RaidSceneController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        all = PlayerData.GetRoster();
+        all = PlayerData.RaidTeam;
         CreateRaidHealthBars();
         CreateTestEncounter();
         SetupUI();

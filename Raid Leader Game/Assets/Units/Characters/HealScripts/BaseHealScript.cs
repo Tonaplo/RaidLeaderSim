@@ -66,9 +66,9 @@ public class BaseHealScript : BaseHealOrAttackScript
         {
             case 0:
                 {
-                    RaiderScript lowest = null;
+                    RaiderScript lowest = Raid[0];
                     int lowestDiff = 0;
-                    for (int i = 0; i < Raid.Count; i++)
+                    for (int i = 1; i < Raid.Count; i++)
                     {
                         if (Raid[i].IsDead())
                             continue;
@@ -80,8 +80,7 @@ public class BaseHealScript : BaseHealOrAttackScript
                         }
                     }
 
-                    if (lowest)
-                        targets.Add(lowest);
+                    targets.Add(lowest);
                 }
                 break;
             case 1:
@@ -233,7 +232,7 @@ public class BaseHealScript : BaseHealOrAttackScript
                     GetHealers(ref restOfRaid);
                     for (int i = 1; i < restOfRaid.Count; i++)
                     {
-                        if (restOfRaid[i].GetHealthPercent() < mediumDamageCutoff)
+                        if (restOfRaid[i].GetHealthPercent() < mediumDamageCutoff && restOfRaid[i].GetHealthPercent() > heavyDamageCutoff)
                             targets.Add(restOfRaid[i]);
                     }
                 }
@@ -256,5 +255,7 @@ public class BaseHealScript : BaseHealOrAttackScript
             default:
                 break;
         }
+
+        Debug.AssertFormat(targets.Count > 0, "Got 0 targets from raidstate" + state);
     }
 }

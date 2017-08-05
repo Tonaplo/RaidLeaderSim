@@ -6,13 +6,13 @@ public class DivinerHealScript : BaseHealScript
 {
 
 
-    float m_LowestMultiplier = 0.6f;
+    float m_LowestMultiplier = 0.7f;
 
     public override string GetDescription() { return "Also heals the lowest health target for " + GetPercentIncreaseString(m_LowestMultiplier + 1.0f) + " of throughput"; }
 
     public override void Setup()
     {
-        m_castTime = 2.0f;
+        m_castTime = 1.8f;
         m_baseMultiplier = 2.5f;
         m_name = "Arcane Mending";
 

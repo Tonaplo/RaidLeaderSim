@@ -53,6 +53,22 @@ public class RaiderScript : MonoBehaviour {
     }
 
     public void TakeDamage(int damage) {
+
+        //Tanks take up for 50% reduced damage, depending on their skill.
+        //The idea is that they mitigate better, the more skilled they are.
+        if (Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank)
+        {
+            
+            float reduction = ((float)Raider.RaiderStats().GetSkillThisAttempt() / (float)Enums.StaticValues.maxSkill) * 0.5f;
+
+            //Guardians take 15% reduced damage
+            if (Raider.RaiderStats().GetCurrentSpec() == Enums.CharacterSpec.Guardian)
+                reduction *= 1.15f;
+
+            //Debug.Log("Tank should have taken " + damage + ", but has " + reduction.ToString() + "% damage reduction, so will only take " + Mathf.RoundToInt(damage * (1.0f - reduction)));
+            damage = Mathf.RoundToInt(damage * (1.0f - reduction));
+        }
+
         HealthBar.ModifyHealth(-damage);
         if (IsDead())
             Die();

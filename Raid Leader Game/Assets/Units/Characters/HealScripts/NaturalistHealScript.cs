@@ -5,15 +5,15 @@ using System.Collections;
 public class NaturalistHealScript : BaseHealScript
 {
     float m_HoTMultiplier = 0.10f;
-    int m_maxSeconds = 4;
+    int m_maxSeconds = 6;
     float healInterval = 1.0f;
 
     public override string GetDescription() { return "Healed targets are healed again for " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " initial heal every second for " + m_maxSeconds + " seconds"; }
 
     public override void Setup()
     {
-        m_castTime = 1.8f;
-        m_baseMultiplier = 1.4f;
+        m_castTime = 1.7f;
+        m_baseMultiplier = 1.6f;
         m_name = "Nature's Touch";
 
         PriorityList = new List<Priority> { new Priority(1, Enums.RaidHealingState.RaidMultiMediumDamage),

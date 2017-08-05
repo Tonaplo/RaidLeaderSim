@@ -33,12 +33,12 @@ public class DataController : MonoBehaviour
 
     public void Save()
     {
-        FileStream file = File.Open(Application.persistentDataPath + "/" + PlayerData.GetPlayerCharacter().GetName() + ".dat", FileMode.OpenOrCreate);
+        FileStream file = File.Open(Application.persistentDataPath + "/" + PlayerData.PlayerCharacter.GetName() + ".dat", FileMode.OpenOrCreate);
         BinaryFormatter bf = new BinaryFormatter();
 
         SaveData data = new SaveData();
-        data.Player = PlayerData.GetPlayerCharacter();
-        data.Roster = PlayerData.GetRoster();
+        data.Player = PlayerData.PlayerCharacter;
+        data.Roster = PlayerData.Roster;
 
         bf.Serialize(file, data);
         file.Close();

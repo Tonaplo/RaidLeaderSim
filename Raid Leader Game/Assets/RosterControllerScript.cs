@@ -19,14 +19,14 @@ public class RosterControllerScript : MonoBehaviour {
         int width = 150;
         int xPosStart = 75;
         int yPosStart = 350;
-        for (int i = 0; i < PlayerData.GetRoster().Count; i++)
+        for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
             GameObject temp = GameObject.Instantiate(RaiderButtonPrefab);
             temp.SetActive(true);
             temp.transform.SetParent(transform);
             temp.transform.SetPositionAndRotation(new Vector3(xPosStart + ((i / 8) * (width) + 10), yPosStart - (((height + 5) * (i % 8))), 0), Quaternion.identity);
             temp.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
-            temp.GetComponent<RosterButtonScript>().SetupButton(PlayerData.GetRoster()[i], ref HeaderText, ref BodyText);
+            temp.GetComponent<RosterButtonScript>().SetupButton(PlayerData.Roster[i], ref HeaderText, ref BodyText);
             buttons.Add(temp);
         }
         buttons[0].GetComponent<RosterButtonScript>().OnClick();

@@ -27,11 +27,30 @@ public class CreateNewGameController : MonoBehaviour {
     public Text SpecDescriptionText;
 
     public InputField namefield;
+    public Button NextButton;
     public Button StartGameButton;
     public Text NameSuffixText;
+    
+    public InputField RaidTeamNameField;
+    public Text ClassText;
+    public Image RaidTeamBackground;
+    public Image TeamMemberCreationBackground;
+    public Text RaidRoster;
+
+    public Text TeamMemberHeader;
+    public Text TeamMemberAbilityDescription;
 
     Enums.CharacterClass m_playerClass = Enums.CharacterClass.Fighter;
     Enums.CharacterSpec m_playerMainSpec = Enums.CharacterSpec.Berserker;
+    string m_playerName;
+
+    int m_tanksNeeded = 2;
+    int m_healersNeeded = 3;
+    int m_dpsNeeded = 7;
+    int m_recruitBaseLevel = 10;
+    Enums.CharacterSpec m_recruitSpec;
+    string m_recruitName;
+    List<string> m_AllRecruitNames = new List<string>();
 
     // Use this for initialization
     void Start () {
@@ -44,6 +63,8 @@ public class CreateNewGameController : MonoBehaviour {
         ClassImage.gameObject.SetActive(false);
         SpecImage.gameObject.SetActive(false);
         NameImage.gameObject.SetActive(false);
+        StartGameButton.gameObject.SetActive(false);
+        NextButton.gameObject.SetActive(true);
     }
 	
 	// Update is called once per frame
@@ -173,9 +194,165 @@ public class CreateNewGameController : MonoBehaviour {
     public void OnNameFieldChanged()
     {
         if (namefield.text.Length == 0)
-            StartGameButton.interactable = false;
+            NextButton.interactable = false;
         else
-            StartGameButton.interactable = true;
+            NextButton.interactable = true;
+    }
+
+    public void OnRaidTeamNameFieldChanged()
+    {
+        FighterButton.gameObject.SetActive(false);
+        ShadowButton.gameObject.SetActive(false);
+        TotemicButton.gameObject.SetActive(false);
+        SorcererButton.gameObject.SetActive(false);
+        PaladinButton.gameObject.SetActive(false);
+        OccultistButton.gameObject.SetActive(false);
+        ClassText.text = "And so, " + RaidTeamNameField.text + " came to be. But what is a team without a roster?\nLet fill out your core team.\n\nThere are 12 spots in a raid team.\nYou have one spot, so we need to recruit 11 team mates:";
+        RaidTeamBackground.gameObject.SetActive(true);
+        TeamMemberCreationBackground.gameObject.SetActive(true);
+        
+        if (RaidTeamNameField.text.Length == 0)
+            ClassImage.gameObject.SetActive(false);
+        else
+            ClassImage.gameObject.SetActive(true);
+    }
+
+    public void OnAddRecruitClicked()
+    {
+        m_AllRecruitNames.Add(m_recruitName);
+        Raider recruit = new Raider(m_recruitName, RaiderStats.GenerateRaiderStatsFromSpec(m_recruitSpec, m_recruitBaseLevel));
+        PlayerData.AddRecruitToRoster(recruit);
+
+        Enums.CharacterRole newGuyRole = Utility.GetRoleFromSpec(m_recruitSpec);
+
+        switch (newGuyRole)
+        {
+            case Enums.CharacterRole.Tank:
+                m_tanksNeeded--;
+                break;
+            case Enums.CharacterRole.Healer:
+                m_healersNeeded--;
+                break;
+            case Enums.CharacterRole.RangedDPS:
+            case Enums.CharacterRole.MeleeDPS:
+                m_dpsNeeded--;
+                break;
+            default:
+                break;
+        }
+
+        if (m_dpsNeeded != 0)
+            GenerateNewRecruit();
+        else
+        {
+            OnStartGameButtonClicked();
+        }
+
+
+        UpdateRaidRosterText();
+    }
+
+    public void OnRejectRecruitClicked()
+    {
+        GenerateNewRecruit();
+    }
+
+    void UpdateRaidRosterText()
+    {
+        if(m_tanksNeeded != 0)
+            RaidRoster.text = "Recruiting Tanks - 2 total:\n\n";
+        else if (m_healersNeeded != 0)
+            RaidRoster.text = "Recruiting Healers - 3 total:\n\n";
+        else
+            RaidRoster.text = "Recruiting Tanks - 7 total:\n\n";
+        
+        PlayerData.SortRoster();
+        for (int i = 0; i < PlayerData.Roster.Count; i++)
+        {
+            if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Tank && m_tanksNeeded != 0)
+            {
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+            }
+            else if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Healer && m_tanksNeeded == 0 && m_healersNeeded != 0)
+            {
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+            }
+            else if (m_tanksNeeded == 0 && m_healersNeeded == 0 && m_dpsNeeded != 0 && (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS || PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS))
+            {
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+            }
+        }
+
+        /*
+        RaidRosterLeft.text = "";
+        RaidRosterRight.text = "";
+        bool hasFirstTankBeenAdded = false;
+        bool hasFirstHealerBeenAdded = false;
+        bool hasFirstDPSBeenAdded = false;
+        PlayerData.SortRoster();
+        Debug.Log("Roster Count : " + PlayerData.Roster.Count);
+        for (int i = 0; i < PlayerData.Roster.Count; i++)
+        {
+            if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Tank)
+            {
+                if (!hasFirstTankBeenAdded)
+                {
+                    hasFirstTankBeenAdded = true;
+                    RaidRosterLeft.text = "Tanks:\n";
+                }
+                RaidRosterLeft.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+            }
+            else if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Healer)
+            {
+                if (!hasFirstHealerBeenAdded)
+                {
+                    RaidRosterLeft.text += "\nHealers:\n";
+                    hasFirstHealerBeenAdded = true;
+                }
+                RaidRosterLeft.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+            }
+            else
+            {
+                if (!hasFirstDPSBeenAdded)
+                {
+                    hasFirstDPSBeenAdded = true;
+                    RaidRosterRight.text = "DPS:\n";
+                }
+                RaidRosterRight.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+            }
+            Debug.Log("Added " + PlayerData.Roster[i].GetName() + " to the roster text");
+        }
+        */
+    }
+
+    void GenerateNewRecruit()
+    {
+        Enums.CharacterRole recruitRole = Enums.CharacterRole.Tank;
+        Enums.CharacterClass recruitClass = Enums.CharacterClass.Fighter;
+        if (m_tanksNeeded != 0)
+        {
+            recruitClass = Utility.GenerateClassFromRole(recruitRole);
+        }
+        else if (m_healersNeeded != 0)
+        {
+            recruitRole = Enums.CharacterRole.Healer;
+            recruitClass = Utility.GenerateClassFromRole(recruitRole);
+        }
+        else
+        {
+            recruitRole = (Random.value > .5f ? Enums.CharacterRole.MeleeDPS : Enums.CharacterRole.RangedDPS);
+            recruitClass = Utility.GenerateClassFromRole(recruitRole);
+        }
+
+        m_recruitSpec = Utility.GetSpecFromRoleAndClass(recruitClass, recruitRole);
+        List<string> newNameList = new List<string>(m_AllRecruitNames);
+        Utility.GetRandomCharacterName(ref newNameList, 1);
+
+        newNameList.RemoveAll(x => m_AllRecruitNames.Contains(x));
+        m_recruitName = newNameList[0];
+        
+        TeamMemberHeader.text = m_recruitName + ", " + recruitClass.ToString() + " " + recruitRole.ToString() + "\n" + m_recruitSpec.ToString() + " spec";
+        TeamMemberAbilityDescription.text = Utility.GetDescriptionOfSpec(m_recruitSpec);
     }
 
     void UpdateSpecDescriptionText()
@@ -188,12 +365,59 @@ public class CreateNewGameController : MonoBehaviour {
         NameSuffixText.text = ", The " + m_playerClass.ToString() + " " + m_playerMainSpec;
     }
 
-    public void OnStartGameButtonClicked()
+    void UpdateDescriptionTextForRaidCreation()
     {
+        DescriptionText.text = "Welcome to the world of raid team leadership, " + m_playerName + 
+            ". You've made it clear who you are - now let's define your raid team.\n\nFirst off - What is your raid team called?                                     ";
+    }
+
+    public void OnNextButtonClicked()
+    {
+
+        m_playerName = namefield.text;
         int baseLevel = 10;
         int playerAdvantage = 3;
-        Raider player = new Raider(namefield.text, new RaiderStats(baseLevel, baseLevel+ playerAdvantage, 10, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
-        PlayerData.GenerateNewGameRoster(player, baseLevel);
+        Raider player = new Raider(m_playerName, new RaiderStats(baseLevel, baseLevel + playerAdvantage, 10, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
+        PlayerData.AddPlayerToRoster(player);
+        m_AllRecruitNames.Add(m_playerName);
+
+        switch (m_playerMainSpec)
+        {
+            case Enums.CharacterSpec.Guardian:
+            case Enums.CharacterSpec.Knight:
+                m_tanksNeeded--;
+                break;
+            case Enums.CharacterSpec.Cleric:
+            case Enums.CharacterSpec.Diviner:
+            case Enums.CharacterSpec.Naturalist:
+                m_healersNeeded--;
+                break;
+            case Enums.CharacterSpec.Berserker:
+            case Enums.CharacterSpec.Assassin:
+            case Enums.CharacterSpec.Scourge:
+            case Enums.CharacterSpec.Ranger:
+            case Enums.CharacterSpec.Wizard:
+            case Enums.CharacterSpec.Elementalist:
+            case Enums.CharacterSpec.Necromancer:
+            default:
+                m_dpsNeeded--;
+                break;
+        }
+        UpdateDescriptionTextForRaidCreation();
+        RaidTeamNameField.gameObject.SetActive(true);
+        ClassImage.gameObject.SetActive(false);
+        SpecImage.gameObject.SetActive(false);
+        NameImage.gameObject.SetActive(false);
+        StartGameButton.gameObject.SetActive(true);
+        NextButton.gameObject.SetActive(false);
+        GenerateNewRecruit();
+        UpdateRaidRosterText();
+    }
+
+    public void OnStartGameButtonClicked()
+    {
+        PlayerData.SortRoster();
+        PlayerData.RecalculateRoster();
         SceneManager.LoadScene("MainGameScene");
     }
 }

@@ -165,23 +165,62 @@ public static class Utility
 
     public static string GetDescriptionOfSpec(Enums.CharacterSpec spec)
     {
+
+        BaseHealOrAttackScript attackScript = new GuardianAttack();
+        BaseHealScript healScript = new ClericHealScript();
+        bool isHealScript = false;
         switch (spec)
         {
             case Enums.CharacterSpec.Guardian:
+                attackScript = new GuardianAttack();
+                break;
             case Enums.CharacterSpec.Knight:
-            case Enums.CharacterSpec.Cleric:
-            case Enums.CharacterSpec.Diviner:
-            case Enums.CharacterSpec.Naturalist:
+                attackScript = new KnightAttack();
+                break;
             case Enums.CharacterSpec.Berserker:
+                attackScript = new BerserkerAttack();
+                break;
             case Enums.CharacterSpec.Assassin:
+                attackScript = new AssasinAttack();
+                break;
             case Enums.CharacterSpec.Scourge:
+                attackScript = new ScourgeAttack();
+                break;
             case Enums.CharacterSpec.Ranger:
+                attackScript = new RangerAttack();
+                break;
             case Enums.CharacterSpec.Wizard:
+                attackScript = new WizardAttack();
+                break;
             case Enums.CharacterSpec.Elementalist:
+                attackScript = new ElementalistAttack();
+                break;
             case Enums.CharacterSpec.Necromancer:
-                return "Cool description of the " + spec.ToString() + " is still being worked on";
+                attackScript = new NecromancerAttack();
+                break;
+
+            case Enums.CharacterSpec.Cleric:
+                healScript = new ClericHealScript();
+                isHealScript = true;
+                break;
+            case Enums.CharacterSpec.Diviner:
+                healScript = new DivinerHealScript();
+                isHealScript = true;
+                break;
+            case Enums.CharacterSpec.Naturalist:
+                healScript = new NaturalistHealScript();
+                isHealScript = true;
+                break;
             default:
                 return "No spec found!";
+        }
+
+        if (!isHealScript) {
+            attackScript.Setup();
+            return attackScript.GetDescription();
+        } else {
+            healScript.Setup();
+            return healScript.GetDescription();
         }
     }
 
@@ -289,6 +328,143 @@ public static class Utility
                 return Enums.CharacterClass.Occultist;
             default:
                 return Enums.CharacterClass.Fighter;
+        }
+    }
+
+    public static Enums.CharacterClass GenerateClassFromRole(Enums.CharacterRole role)
+    {
+        int randomValue = 0;
+        switch (role)
+        {
+            case Enums.CharacterRole.Tank:
+                randomValue = UnityEngine.Random.Range(0, 2);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Fighter;
+                else
+                    return Enums.CharacterClass.Paladin;
+            case Enums.CharacterRole.MeleeDPS:
+                randomValue = UnityEngine.Random.Range(0, 3);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Fighter;
+                else if (randomValue == 1)
+                    return Enums.CharacterClass.Shadow;
+                else
+                    return Enums.CharacterClass.Occultist;
+            case Enums.CharacterRole.Healer:
+
+                randomValue = UnityEngine.Random.Range(0, 3);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Totemic;
+                else if (randomValue == 1)
+                    return Enums.CharacterClass.Sorcerer;
+                else
+                    return Enums.CharacterClass.Paladin;
+
+            default:
+            case Enums.CharacterRole.RangedDPS:
+
+                randomValue = UnityEngine.Random.Range(0, 4);
+                if (randomValue == 0)
+                    return Enums.CharacterClass.Totemic;
+                else if (randomValue == 1)
+                    return Enums.CharacterClass.Sorcerer;
+                else if (randomValue == 2)
+                    return Enums.CharacterClass.Shadow;
+                else
+                    return Enums.CharacterClass.Occultist;
+        }
+    }
+
+    public static Enums.CharacterRole GenerateRoleFromClass(Enums.CharacterClass Class)
+    {
+        //implement this correctly later
+        int randomValue = UnityEngine.Random.Range(0, 2);
+        switch (Class)
+        {
+            case Enums.CharacterClass.Fighter:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Tank;
+                else
+                    return Enums.CharacterRole.MeleeDPS;
+
+            case Enums.CharacterClass.Shadow:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.RangedDPS;
+                else
+                    return Enums.CharacterRole.MeleeDPS;
+            case Enums.CharacterClass.Totemic:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Healer;
+                else
+                    return Enums.CharacterRole.RangedDPS;
+            case Enums.CharacterClass.Sorcerer:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Healer;
+                else
+                    return Enums.CharacterRole.RangedDPS;
+            case Enums.CharacterClass.Paladin:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.Healer;
+                else
+                    return Enums.CharacterRole.Tank;
+            default:
+            case Enums.CharacterClass.Occultist:
+                if (randomValue == 0)
+                    return Enums.CharacterRole.RangedDPS;
+                else
+                    return Enums.CharacterRole.MeleeDPS;
+        }
+    }
+
+    public static Enums.CharacterSpec GetSpecFromRoleAndClass(Enums.CharacterClass Class, Enums.CharacterRole role)
+    {
+        switch (Class)
+        {
+            case Enums.CharacterClass.Fighter:
+                if (role == Enums.CharacterRole.Tank)
+                    return Enums.CharacterSpec.Guardian;
+                else
+                    return Enums.CharacterSpec.Berserker;
+                
+
+            case Enums.CharacterClass.Shadow:
+                if (role == Enums.CharacterRole.RangedDPS)
+                    return Enums.CharacterSpec.Ranger;
+                else
+                    return Enums.CharacterSpec.Assassin;
+                
+
+            case Enums.CharacterClass.Totemic:
+                if (role == Enums.CharacterRole.Healer)
+                    return Enums.CharacterSpec.Naturalist;
+                else
+                    return Enums.CharacterSpec.Elementalist;
+                
+
+            case Enums.CharacterClass.Sorcerer:
+                if (role == Enums.CharacterRole.Healer)
+                    return Enums.CharacterSpec.Diviner;
+                else
+                    return Enums.CharacterSpec.Wizard;
+                
+
+            case Enums.CharacterClass.Paladin:
+                if (role == Enums.CharacterRole.Healer)
+                    return Enums.CharacterSpec.Cleric;
+                else
+                    return Enums.CharacterSpec.Knight;
+                
+
+            case Enums.CharacterClass.Occultist:
+                if (role == Enums.CharacterRole.MeleeDPS)
+                    return Enums.CharacterSpec.Scourge;
+                else
+                    return Enums.CharacterSpec.Necromancer;
+                
+
+            default:
+                return Enums.CharacterSpec.Berserker;
+
         }
     }
 }

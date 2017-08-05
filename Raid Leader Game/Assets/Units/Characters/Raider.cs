@@ -12,6 +12,14 @@ public class Raider : BaseCharacter {
         stats = _stats;
     }
 
+    public void RecalculateRaider()
+    {
+        stats.ComputeAverageThroughput();
+        stats.ComputeThroughput();
+        stats.ComputeSkillThisAttempt();
+        CalculateMaxHealth();
+    }
+
     //Calculate Max Health based on Class
     public override void CalculateMaxHealth()
     {
@@ -21,7 +29,11 @@ public class Raider : BaseCharacter {
         switch (stats.GetRole())
         {
             case Enums.CharacterRole.Tank:
-                value *= 2.0f;
+                //Guardians have 15% more health
+                if(stats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)
+                    value *= 2.0f * 1.15f;
+                else
+                    value *= 2.0f;
                 break;
             case Enums.CharacterRole.Healer:
                 value *= 0.8f;

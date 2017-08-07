@@ -52,14 +52,16 @@ public class RaidSceneController : MonoBehaviour {
         temp.transform.SetParent(canvas.transform);
         m_damageMcs = temp.GetComponent<MeterControllerScript>();
         List<Raider> dps = all.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS || x.RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS);
-        m_damageMcs.Initialize(150, 140, 40, 175, dps.Count);
+        int dpsBarsCount = dps.Count > (int)Enums.StaticValues.maxNumDPSMeterBars ? (int)Enums.StaticValues.maxNumDPSMeterBars : dps.Count;
+        m_damageMcs.Initialize(150, 140, 40, 175, dpsBarsCount);
         m_damageMcs.CreateEntriesFromRaid(all);
 
         GameObject temptwo = GameObject.Instantiate(MeterPrefab);
         temptwo.transform.SetParent(canvas.transform);
         m_healingMcs = temptwo.GetComponent<MeterControllerScript>();
-        List<Raider> healers = all.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.Healer);
-        m_healingMcs.Initialize(330, 140, 40, 175, healers.Count);
+        List<Raider> healers = all.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.Healer|| x.RaiderStats().GetCurrentSpec() == Enums.CharacterSpec.Knight);
+        int healerBarsCount = healers.Count > (int)Enums.StaticValues.maxNumHealingMeterBars ? (int)Enums.StaticValues.maxNumHealingMeterBars : healers.Count;
+        m_healingMcs.Initialize(330, 140, 40, 175, healerBarsCount);
         m_healingMcs.CreateEntriesFromRaid(all);
     }
 

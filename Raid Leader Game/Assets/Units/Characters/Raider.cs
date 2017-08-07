@@ -20,6 +20,12 @@ public class Raider : BaseCharacter {
         CalculateMaxHealth();
     }
 
+    public void ChangeSpec()
+    {
+        stats.ChangeSpec();
+        RecalculateRaider();
+    }
+
     //Calculate Max Health based on Class
     public override void CalculateMaxHealth()
     {

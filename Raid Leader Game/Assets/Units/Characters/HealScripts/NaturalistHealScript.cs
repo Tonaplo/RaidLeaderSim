@@ -16,10 +16,12 @@ public class NaturalistHealScript : BaseHealScript
         m_baseMultiplier = 1.6f;
         m_name = "Nature's Touch";
 
-        PriorityList = new List<Priority> { new Priority(1, Enums.RaidHealingState.RaidMultiMediumDamage),
-                                            new Priority(2, Enums.RaidHealingState.RaidSingleMediumDamage),
-                                            new Priority(3, Enums.RaidHealingState.TankMediumDamage),
-                                            new Priority(4, Enums.RaidHealingState.TankHeavyDamage),
+        PriorityList = new List<Priority> {
+
+                                            new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
+                                            new Priority(2, Enums.RaidHealingState.RaidMultiMediumDamage),
+                                            new Priority(3, Enums.RaidHealingState.RaidSingleMediumDamage),
+                                            new Priority(1, Enums.RaidHealingState.TankMediumDamage),
                                             new Priority(5, Enums.RaidHealingState.RaidMultiHeavyDamage),
                                             new Priority(6, Enums.RaidHealingState.RaidSingleHeavyDamage),
                                             new Priority(7, Enums.RaidHealingState.RandomTargets), };

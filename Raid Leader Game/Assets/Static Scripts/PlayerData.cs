@@ -10,7 +10,7 @@ public static class PlayerData
     static string m_raidTeamName;
     
     public static List<Raider> Roster { get { return m_roster; } }
-    public static List<Raider> RaidTeam { get { return m_roster; } }
+    public static List<Raider> RaidTeam { get { return m_raidTeam; } }
     public static Raider PlayerCharacter { get { return m_playerChar; } }
     public static string RaidTeamName { get { return m_raidTeamName; } }
 
@@ -128,6 +128,16 @@ public static class PlayerData
             
             return result;
         });*/
+    }
+
+    public static void ClearCurrentRaidTeam()
+    {
+        m_raidTeam.Clear();
+    }
+
+    public static void AddRaiderToRaidTeam(Raider r)
+    {
+        m_raidTeam.Add(r);
     }
 
     public static void AddRecruitToRoster(Raider recruit)

@@ -19,6 +19,12 @@ public class RangerAttack : BaseHealOrAttackScript
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
     {
         m_counter = 0;
+        //Since Rangers are higly dependent on their cast time, if they have a good attempt, lower the casttime a bit
+        int averageThroughput = attacker.RaiderStats().GetAverageThroughput();
+        int throughput = attacker.RaiderStats().GetThroughput();
+        if (averageThroughput < throughput)
+            m_castTime *= (float)(averageThroughput) / (float)(throughput);
+
         rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
     }
 

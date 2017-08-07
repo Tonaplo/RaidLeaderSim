@@ -121,152 +121,7 @@ public class RaiderStats {
         return (int)(value > 1.0f ? value : 1);
     }
 
-    public static RaiderStats GenerateRaiderStatsFromClass(Enums.CharacterClass Class, int baseLevel)
-    {
-        RaiderStats returnValue = new RaiderStats(baseLevel);
-
-        returnValue.m_charRole = Utility.GenerateRoleFromClass(Class);
-        returnValue.m_charClass = Class;
-
-        FinishRaiderStatGeneration(ref returnValue);
-        return returnValue;
-    }
-
-    public static RaiderStats GenerateRaiderStatsFromRole(Enums.CharacterRole role, int baseLevel)
-    {
-        RaiderStats returnValue = new RaiderStats(baseLevel);
-        returnValue.m_charClass = Utility.GenerateClassFromRole(role);
-        returnValue.m_charRole = role;
-
-        FinishRaiderStatGeneration(ref returnValue);
-        
-        return returnValue;
-    }
-
-    public static RaiderStats GenerateRaiderStatsFromSpec(Enums.CharacterSpec spec, int baseLevel)
-    {
-        RaiderStats returnValue = new RaiderStats(baseLevel);
-
-        returnValue.m_charRole = Utility.GetRoleFromSpec(spec);
-        returnValue.m_charClass = Utility.GetClassFromSpec(spec);
-
-        FinishRaiderStatGeneration(ref returnValue);
-        return returnValue;
-    }
-
-    public void GetBaseAttackScript(out BaseHealOrAttackScript script)
-    {
-        switch (GetCurrentSpec())
-        {
-            case Enums.CharacterSpec.Guardian:
-                script = new GuardianAttack();
-                break;
-            case Enums.CharacterSpec.Knight:
-                script = new KnightAttack();
-                break;
-            case Enums.CharacterSpec.Cleric:
-                script = new ClericAttack();
-                break;
-            case Enums.CharacterSpec.Diviner:
-                script = new DivinerAttack();
-                break;
-            case Enums.CharacterSpec.Naturalist:
-                script = new NaturalistAttack();
-                break;
-            case Enums.CharacterSpec.Berserker:
-                script = new BerserkerAttack();
-                break;
-            case Enums.CharacterSpec.Assassin:
-                script = new AssasinAttack();
-                break;
-            case Enums.CharacterSpec.Scourge:
-                script = new ScourgeAttack();
-                break;
-            case Enums.CharacterSpec.Ranger:
-                script = new RangerAttack();
-                break;
-            case Enums.CharacterSpec.Wizard:
-                script = new WizardAttack();
-                break;
-            case Enums.CharacterSpec.Elementalist:
-                script = new ElementalistAttack();
-                break;
-            case Enums.CharacterSpec.Necromancer:
-            default:
-                script = new NecromancerAttack();
-                break;
-        }
-        script.Setup();
-    }
-
-    public void GetBaseHealingScript(out BaseHealScript script)
-    {
-        switch (GetCurrentSpec())
-        {
-            
-            case Enums.CharacterSpec.Cleric:
-                script = new ClericHealScript();
-                break;
-            case Enums.CharacterSpec.Diviner:
-                script = new DivinerHealScript();
-                break;
-            case Enums.CharacterSpec.Naturalist:
-                script = new NaturalistHealScript();
-                break;
-            case Enums.CharacterSpec.Berserker:
-            case Enums.CharacterSpec.Guardian:
-            case Enums.CharacterSpec.Knight:
-            case Enums.CharacterSpec.Assassin:
-            case Enums.CharacterSpec.Scourge:
-            case Enums.CharacterSpec.Ranger:
-            case Enums.CharacterSpec.Wizard:
-            case Enums.CharacterSpec.Elementalist:
-            case Enums.CharacterSpec.Necromancer:
-            default:
-                Debug.Assert(false);
-                script = new NaturalistHealScript();
-                break;
-        }
-
-        script.Setup();
-    }
-
-    //Internal Functions
-    
-    static int GenerateRandomLevelFromBase(int baseValue)
-    {
-        int first = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
-        int second = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
-        int third = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
-
-        return (int)((first + second + third) / 3);
-    }
-
-    static int GenerateVariation()
-    {
-        //We want to vary a maximum of 20% up AND down
-        int variation = 0;
-        int iterations = 5;
-        for (int i = 0; i < iterations; i++)
-        {
-            variation += UnityEngine.Random.Range(5, 20);
-        }
-
-        variation /= iterations;
-        return variation;
-    }
-
-    static void FinishRaiderStatGeneration(ref RaiderStats rs)
-    {
-        rs.m_charSpec = Utility.GetSpecFromRoleAndClass(rs.m_charClass, rs.m_charRole);
-        rs.SetAbilityFromSpec();
-        rs.SetCooldownFromSpec();
-        rs.SetBaseAbility();
-        rs.ComputeAverageThroughput();
-        rs.ComputeThroughput();
-    }
-
-    void ChangeSpec()
+    public void ChangeSpec()
     {
         Enums.CharacterRole role = GetRole();
         switch (GetClass())
@@ -318,6 +173,151 @@ public class RaiderStats {
         m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);
     }
 
+    public void GetBaseAttackScript(out BaseHealOrAttackScript script)
+    {
+        switch (GetCurrentSpec())
+        {
+            case Enums.CharacterSpec.Guardian:
+                script = new GuardianAttack();
+                break;
+            case Enums.CharacterSpec.Knight:
+                script = new KnightAttack();
+                break;
+            case Enums.CharacterSpec.Cleric:
+                script = new ClericAttack();
+                break;
+            case Enums.CharacterSpec.Diviner:
+                script = new DivinerAttack();
+                break;
+            case Enums.CharacterSpec.Naturalist:
+                script = new NaturalistAttack();
+                break;
+            case Enums.CharacterSpec.Berserker:
+                script = new BerserkerAttack();
+                break;
+            case Enums.CharacterSpec.Assassin:
+                script = new AssasinAttack();
+                break;
+            case Enums.CharacterSpec.Scourge:
+                script = new ScourgeAttack();
+                break;
+            case Enums.CharacterSpec.Ranger:
+                script = new RangerAttack();
+                break;
+            case Enums.CharacterSpec.Wizard:
+                script = new WizardAttack();
+                break;
+            case Enums.CharacterSpec.Elementalist:
+                script = new ElementalistAttack();
+                break;
+            case Enums.CharacterSpec.Necromancer:
+            default:
+                script = new NecromancerAttack();
+                break;
+        }
+        script.Setup();
+    }
+
+    public void GetBaseHealingScript(out BaseHealScript script)
+    {
+        switch (GetCurrentSpec())
+        {
+
+            case Enums.CharacterSpec.Cleric:
+                script = new ClericHealScript();
+                break;
+            case Enums.CharacterSpec.Diviner:
+                script = new DivinerHealScript();
+                break;
+            case Enums.CharacterSpec.Naturalist:
+                script = new NaturalistHealScript();
+                break;
+            case Enums.CharacterSpec.Berserker:
+            case Enums.CharacterSpec.Guardian:
+            case Enums.CharacterSpec.Knight:
+            case Enums.CharacterSpec.Assassin:
+            case Enums.CharacterSpec.Scourge:
+            case Enums.CharacterSpec.Ranger:
+            case Enums.CharacterSpec.Wizard:
+            case Enums.CharacterSpec.Elementalist:
+            case Enums.CharacterSpec.Necromancer:
+            default:
+                Debug.Assert(false);
+                script = new NaturalistHealScript();
+                break;
+        }
+
+        script.Setup();
+    }
+
+    public static RaiderStats GenerateRaiderStatsFromClass(Enums.CharacterClass Class, int baseLevel)
+    {
+        RaiderStats returnValue = new RaiderStats(baseLevel);
+
+        returnValue.m_charRole = Utility.GenerateRoleFromClass(Class);
+        returnValue.m_charClass = Class;
+
+        FinishRaiderStatGeneration(ref returnValue);
+        return returnValue;
+    }
+
+    public static RaiderStats GenerateRaiderStatsFromRole(Enums.CharacterRole role, int baseLevel)
+    {
+        RaiderStats returnValue = new RaiderStats(baseLevel);
+        returnValue.m_charClass = Utility.GenerateClassFromRole(role);
+        returnValue.m_charRole = role;
+
+        FinishRaiderStatGeneration(ref returnValue);
+        
+        return returnValue;
+    }
+
+    public static RaiderStats GenerateRaiderStatsFromSpec(Enums.CharacterSpec spec, int baseLevel)
+    {
+        RaiderStats returnValue = new RaiderStats(baseLevel);
+
+        returnValue.m_charRole = Utility.GetRoleFromSpec(spec);
+        returnValue.m_charClass = Utility.GetClassFromSpec(spec);
+
+        FinishRaiderStatGeneration(ref returnValue);
+        return returnValue;
+    }
+    
+    //Internal Functions
+    
+    static int GenerateRandomLevelFromBase(int baseValue)
+    {
+        int first = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
+        int second = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
+        int third = (int)UnityEngine.Random.Range(baseValue / 2, baseValue * 1.5f);
+
+        return (int)((first + second + third) / 3);
+    }
+
+    static int GenerateVariation()
+    {
+        //We want to vary a maximum of 20% up AND down
+        int variation = 0;
+        int iterations = 5;
+        for (int i = 0; i < iterations; i++)
+        {
+            variation += UnityEngine.Random.Range(5, 20);
+        }
+
+        variation /= iterations;
+        return variation;
+    }
+
+    static void FinishRaiderStatGeneration(ref RaiderStats rs)
+    {
+        rs.m_charSpec = Utility.GetSpecFromRoleAndClass(rs.m_charClass, rs.m_charRole);
+        rs.SetAbilityFromSpec();
+        rs.SetCooldownFromSpec();
+        rs.SetBaseAbility();
+        rs.ComputeAverageThroughput();
+        rs.ComputeThroughput();
+    }
+    
     void FinishRaiderStatGeneration()
     {
         m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);

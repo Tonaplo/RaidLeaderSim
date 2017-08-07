@@ -16,6 +16,9 @@ public static class Enums{
         damageAoECDIncrease     = 40,
         immunityIncrease        = 100,
         baseRaiderHealth        = 100,
+        raidTeamSize            = 12,
+        maxNumDPSMeterBars      = 6,
+        maxNumHealingMeterBars  = 4,
     }
 
     public enum CharacterRole {

@@ -84,6 +84,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\ChooseRaidTeamForAttemptControllerScript.cs" />
+    <Compile Include="Assets\ChooseTeamForAttemptTeamController.cs" />
+    <Compile Include="Assets\ChooseTeamForAttemptTeamMember.cs" />
     <Compile Include="Assets\CreateNewGameController.cs" />
     <Compile Include="Assets\Encounters\BaseAbility.cs" />
     <Compile Include="Assets\Encounters\BaseCooldown.cs" />
@@ -95,6 +98,7 @@
     <Compile Include="Assets\MainSceneMainController.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />
+    <Compile Include="Assets\RaidTeamMemberSelectionPrefabScript.cs" />
     <Compile Include="Assets\RosterButtonScript.cs" />
     <Compile Include="Assets\RosterControllerScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />

@@ -26,7 +26,9 @@ public class KnightAttack : BaseHealOrAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             int damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
-            int actualHealing = rs.TakeHealing((int)(damage * healPercent));
+            int healing = (int)(damage * healPercent);
+            healing = healing == 0 ? 1 : healing; //Make sure we always heal for at least 1
+            int actualHealing = rs.TakeHealing(healing);
             rsc.DoHeal(actualHealing, attacker.GetName(), GetName(), index);
             rsc.DealDamage(damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));

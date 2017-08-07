@@ -140,8 +140,11 @@ public class BaseEncounter
             {
                 for (int i = 0; i < m_raid.Count; i++)
                 {
-                    if(!m_raid[i].IsDead())
+                    if (!m_raid[i].IsDead())
+                    {
                         m_rsc.StartCoroutine(DoTankAttack(1.5f + Random.Range(0, 1.5f), (int)(40), 6, m_raid[i]));
+                        break;
+                    }
                 }
             }
         }

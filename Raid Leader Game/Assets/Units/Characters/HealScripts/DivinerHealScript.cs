@@ -40,7 +40,7 @@ public class DivinerHealScript : BaseHealScript
             List<RaiderScript> targets = new List<RaiderScript>();
             GetBestTargets(ref targets);
             int numTargets = targets.Count;
-            int heal = Mathf.RoundToInt(caster.RaiderStats().GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
+            int heal = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
             
             for (int i = 0; i < numTargets; i++)
             {
@@ -48,7 +48,7 @@ public class DivinerHealScript : BaseHealScript
                 rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
             }
             
-            int abilityHealAmount = Mathf.RoundToInt(caster.RaiderStats().GetSpellAmount(m_baseMultiplier) * m_LowestMultiplier);
+            int abilityHealAmount = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) * m_LowestMultiplier);
             List<RaiderScript> lowest = new List<RaiderScript>(Raid);
             TrimToLowestXFromList(ref lowest, 1);
 

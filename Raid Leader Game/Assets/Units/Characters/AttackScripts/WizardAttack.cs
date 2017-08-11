@@ -26,7 +26,7 @@ public class WizardAttack : BaseHealOrAttackScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
+            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
             damage *= Random.Range(m_minMultiplier, m_maxMultiplier);
 
             rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);

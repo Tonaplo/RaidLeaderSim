@@ -54,11 +54,11 @@ public class LoadGameController : MonoBehaviour {
 
         Header.text = PlayerData.PlayerCharacter.GetName();
 
-        CharacterText.text = "Class: " + PlayerData.PlayerCharacter.RaiderStats().GetClass() +
-                             "\nMain Spec: " + PlayerData.PlayerCharacter.RaiderStats().GetCurrentSpec() +
-                             "\nSkill Level: " + PlayerData.PlayerCharacter.RaiderStats().GetSkillLevel() +
-                             "\nGear Level: " + PlayerData.PlayerCharacter.RaiderStats().GetGearLevel() +
-                             "\nAverage Throughout: " + PlayerData.PlayerCharacter.RaiderStats().GetAverageThroughput();
+        CharacterText.text = "Class: " + PlayerData.PlayerCharacter.RaiderStats.GetClass() +
+                             "\nMain Spec: " + PlayerData.PlayerCharacter.RaiderStats.GetCurrentSpec() +
+                             "\nSkill Level: " + PlayerData.PlayerCharacter.RaiderStats.GetSkillLevel() +
+                             "\nGear Level: " + PlayerData.PlayerCharacter.RaiderStats.GetGearLevel() +
+                             "\nAverage Throughout: " + PlayerData.PlayerCharacter.RaiderStats.GetAverageThroughput();
 
         float averageGearLevel = 0.0f;
         float averageSkillLevel = 0.0f;
@@ -66,8 +66,8 @@ public class LoadGameController : MonoBehaviour {
 
         for (int i = 0; i < numMembers; i++)
         {
-            averageGearLevel += PlayerData.Roster[i].RaiderStats().GetGearLevel();
-            averageSkillLevel += PlayerData.Roster[i].RaiderStats().GetSkillLevel();
+            averageGearLevel += PlayerData.Roster[i].RaiderStats.GetGearLevel();
+            averageSkillLevel += PlayerData.Roster[i].RaiderStats.GetSkillLevel();
         }
 
         averageGearLevel /= numMembers;

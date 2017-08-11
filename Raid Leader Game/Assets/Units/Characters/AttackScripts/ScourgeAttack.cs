@@ -26,7 +26,7 @@ public class ScourgeAttack : BaseHealOrAttackScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
+            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
             if (rsc.GetBossHealthPercent() < m_bossHealthPercent)
             {
                 damage *= m_multiplier;

@@ -52,8 +52,8 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
 
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
-            Enums.CharacterRole mainRole = PlayerData.Roster[i].RaiderStats().GetRole();
-            Enums.CharacterRole offRole = PlayerData.Roster[i].RaiderStats().GetOffSpecRole();
+            Enums.CharacterRole mainRole = PlayerData.Roster[i].RaiderStats.GetRole();
+            Enums.CharacterRole offRole = PlayerData.Roster[i].RaiderStats.GetOffSpecRole();
             if (mainRole == currentRole || (currentRole == Enums.CharacterRole.RangedDPS && mainRole == Enums.CharacterRole.MeleeDPS))
                 newChoices.Add(PlayerData.Roster[i]);
              else if (offRole == currentRole || (currentRole == Enums.CharacterRole.RangedDPS && offRole == Enums.CharacterRole.MeleeDPS))
@@ -84,9 +84,9 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
     public void AddRaiderToTeam(Raider r)
     {
         PlayerData.AddRaiderToRaidTeam(r);
-        TeamListControllerScript.AddMember(r.GetName(), r.RaiderStats().GetCurrentSpec(), r.RaiderStats().GetRole(), r.RaiderStats().GetAverageThroughput());
+        TeamListControllerScript.AddMember(r.GetName(), r.RaiderStats.GetCurrentSpec(), r.RaiderStats.GetRole(), r.RaiderStats.GetAverageThroughput());
 
-        if (PlayerData.RaidTeam.Count == (int)Enums.StaticValues.raidTeamSize)
+        if (PlayerData.RaidTeam.Count == StaticValues.RaidTeamSize)
         {
             m_selectionStep++;
             SetupChoiceButtons();

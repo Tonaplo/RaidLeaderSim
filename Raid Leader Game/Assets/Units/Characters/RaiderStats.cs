@@ -61,9 +61,9 @@ public class RaiderStats {
     {
         m_skillLevel += amount;
 
-        //Clamp the skill level between 1 and 100
-        if (m_skillLevel > (int)Enums.StaticValues.maxSkill)
-            m_skillLevel = (int)Enums.StaticValues.maxSkill;
+        //Clamp the skill level
+        if (m_skillLevel > StaticValues.MaxSkill)
+            m_skillLevel = StaticValues.MaxSkill;
         else if (m_skillLevel < 1)
             m_skillLevel = 1;
 
@@ -101,7 +101,7 @@ public class RaiderStats {
         floatAmount *= (1.0f + ((float)GetGearLevel() / 30.0f));
 
         //Adjust so we always contribute 'something'
-        floatAmount = (float)Enums.StaticValues.minimumThroughput > floatAmount ? (float)Enums.StaticValues.minimumThroughput : floatAmount;
+        floatAmount = (float)StaticValues.MinimumThroughput > floatAmount ? StaticValues.MinimumThroughput : floatAmount;
 
         return (int)floatAmount;
     }

@@ -29,7 +29,7 @@ public class BerserkerAttack : BaseHealOrAttackScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
+            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
             if (rs.GetHealthPercent() > m_healthPercent) {
                 rs.TakeDamage((int)(rs.GetMaxHealth() * m_damageTakenPercent));
                 m_multiplier *= 1.25f;

@@ -38,20 +38,20 @@ public static class PlayerData
         int numHealers = 3;
         int numDPS = 7;
 
-        switch (player.RaiderStats().GetRole())
+        switch (player.RaiderStats.GetRole())
         {
             case Enums.CharacterRole.Tank:
                 numTanks--;
-                tankSpecs.Remove(player.RaiderStats().GetCurrentSpec());
+                tankSpecs.Remove(player.RaiderStats.GetCurrentSpec());
                 break;
             case Enums.CharacterRole.Healer:
                 numHealers--;
-                healerSpecs.Remove(player.RaiderStats().GetCurrentSpec());
+                healerSpecs.Remove(player.RaiderStats.GetCurrentSpec());
                 break;
             case Enums.CharacterRole.RangedDPS:
             case Enums.CharacterRole.MeleeDPS:
                 numDPS--;
-                DPSSpecs.Remove(player.RaiderStats().GetCurrentSpec());
+                DPSSpecs.Remove(player.RaiderStats.GetCurrentSpec());
                 break;
             default:
                 break;
@@ -85,7 +85,7 @@ public static class PlayerData
     {
         for (int i = 0; i < m_roster.Count; i++)
         {
-            //roster[i].RaiderStats().SetTestValue();
+            //roster[i].RaiderStats.SetTestValue();
             m_roster[i].RecalculateRaider();
         }
     }
@@ -93,9 +93,9 @@ public static class PlayerData
     public static void SortRoster()
     {
 
-        List<Raider> tanks = m_roster.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.Tank);
-        List<Raider> healers = m_roster.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.Healer);
-        List<Raider> dps = m_roster.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS || x.RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS);
+        List<Raider> tanks = m_roster.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.Tank);
+        List<Raider> healers = m_roster.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.Healer);
+        List<Raider> dps = m_roster.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS || x.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS);
 
         m_roster.Clear();
 
@@ -107,8 +107,8 @@ public static class PlayerData
             if (x.GetName() == y.GetName())
                 return 0;
 
-            Enums.CharacterRole xRole = x.RaiderStats().GetRole();
-            Enums.CharacterRole yRole = y.RaiderStats().GetRole();
+            Enums.CharacterRole xRole = x.RaiderStats.GetRole();
+            Enums.CharacterRole yRole = y.RaiderStats.GetRole();
 
             bool isXDPS = (xRole == Enums.CharacterRole.MeleeDPS) || (xRole == Enums.CharacterRole.RangedDPS);
             bool isYDPS = (yRole == Enums.CharacterRole.MeleeDPS) || (yRole == Enums.CharacterRole.RangedDPS);
@@ -135,6 +135,18 @@ public static class PlayerData
         m_raidTeam.Clear();
     }
 
+    public static bool CanRaidWithRoster()
+    {
+        int count = 0;
+        for (int i = 0; i < Roster.Count; i++)
+        {
+            if (Roster[i].IsEligibleForActivity())
+                count++;
+        }
+
+        return (count >= StaticValues.RaidTeamSize);
+    }
+
     public static void AddRaiderToRaidTeam(Raider r)
     {
         m_raidTeam.Add(r);
@@ -149,6 +161,14 @@ public static class PlayerData
     {
         m_playerChar = player;
         AddRecruitToRoster(player);
+    }
+
+    public static void RemoveMemberFromRoster(Raider r)
+    {
+        if (r == m_playerChar)
+            return;
+
+        m_roster.Remove(r);
     }
 
     public static void SetRaidTeamName(string newTeamName)

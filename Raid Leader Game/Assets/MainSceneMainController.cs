@@ -38,6 +38,7 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickRaid()
     {
-        SceneManager.LoadScene("ChooseRaidTeamForAttempt");
+        if(PlayerData.CanRaidWithRoster())
+            SceneManager.LoadScene("ChooseRaidTeamForAttempt");
     }
 }

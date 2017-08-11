@@ -21,11 +21,11 @@ public class EncounterAbility : BaseAbility
     public bool CanCounterAbility(Raider character)
     {
         //Cant counter something we're not used for
-        return character.RaiderStats().GetAbility().Ability() == Ability();
+        return character.RaiderStats.GetAbility().Ability() == Ability();
     }
 
     bool AttemptToCounter() {
-        BaseAbility ability = m_counter.RaiderStats().GetAbility();
+        BaseAbility ability = m_counter.RaiderStats.GetAbility();
         
         if (!CanCounterAbility(m_counter))
             return false;

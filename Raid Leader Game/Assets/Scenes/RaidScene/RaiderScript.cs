@@ -33,7 +33,7 @@ public class RaiderScript : MonoBehaviour {
         HealthBar = hbs;
         HealthBar.SetupHealthBar((index % 3) * 80 + 465, 310 - (index / 3) * 60, 100, 70, m_raider.GetMaxHealth());
         HealthBar.SetUseName(m_raider.GetName(), true);
-        HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats().GetClass());
+        HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats.GetClass());
     }
 
     public IEnumerator StartFight(float offset, int index, Raider attacker, RaidSceneController rsc)
@@ -41,13 +41,13 @@ public class RaiderScript : MonoBehaviour {
         yield return new WaitForSeconds(offset);
 
         BaseHealOrAttackScript script;
-        attacker.RaiderStats().GetBaseAttackScript(out script);
+        attacker.RaiderStats.GetBaseAttackScript(out script);
         script.StartFight(index, attacker, rsc, this);
 
-        if (attacker.RaiderStats().GetRole() == Enums.CharacterRole.Healer)
+        if (attacker.RaiderStats.GetRole() == Enums.CharacterRole.Healer)
         {
             BaseHealScript healScript;
-            attacker.RaiderStats().GetBaseHealingScript(out healScript);
+            attacker.RaiderStats.GetBaseHealingScript(out healScript);
             healScript.StartFight(index, attacker, rsc, this);
         }
     }
@@ -56,13 +56,13 @@ public class RaiderScript : MonoBehaviour {
 
         //Tanks take up for 50% reduced damage, depending on their skill.
         //The idea is that they mitigate better, the more skilled they are.
-        if (Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank)
+        if (Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank)
         {
             
-            float reduction = ((float)Raider.RaiderStats().GetSkillThisAttempt() / (float)Enums.StaticValues.maxSkill) * 0.5f;
+            float reduction = ((float)Raider.RaiderStats.GetSkillThisAttempt() / (float)StaticValues.MaxSkill) * 0.5f;
 
             //Guardians take 15% reduced damage
-            if (Raider.RaiderStats().GetCurrentSpec() == Enums.CharacterSpec.Guardian)
+            if (Raider.RaiderStats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)
                 reduction *= 1.15f;
 
             //Debug.Log("Tank should have taken " + damage + ", but has " + reduction.ToString() + "% damage reduction, so will only take " + Mathf.RoundToInt(damage * (1.0f - reduction)));

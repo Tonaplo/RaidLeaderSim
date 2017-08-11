@@ -27,7 +27,7 @@ public class ElementalistAttack : BaseHealOrAttackScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier) * m_percentReduction;
+            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier) * m_percentReduction;
             int roll = Random.Range(0, 100);
             if (m_chance >= roll)
             {

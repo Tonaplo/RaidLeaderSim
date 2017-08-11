@@ -21,7 +21,7 @@ public class GuardianAttack : BaseHealOrAttackScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            int damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
+            int damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
             rsc.DealDamage(damage, attacker.GetName(), GetName(), index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }

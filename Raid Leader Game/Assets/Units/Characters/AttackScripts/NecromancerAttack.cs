@@ -26,7 +26,7 @@ public class NecromancerAttack : BaseHealOrAttackScript
 
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
+            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
             int roll = Random.Range(0, 100);
             if (m_chance >= roll)
             {

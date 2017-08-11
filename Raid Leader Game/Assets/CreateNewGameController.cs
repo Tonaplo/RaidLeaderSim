@@ -271,17 +271,17 @@ public class CreateNewGameController : MonoBehaviour {
         PlayerData.SortRoster();
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
-            if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Tank && m_tanksNeeded != 0)
+            if (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.Tank && m_tanksNeeded != 0)
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
             }
-            else if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Healer && m_tanksNeeded == 0 && m_healersNeeded != 0)
+            else if (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.Healer && m_tanksNeeded == 0 && m_healersNeeded != 0)
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
             }
-            else if (m_tanksNeeded == 0 && m_healersNeeded == 0 && m_dpsNeeded != 0 && (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS || PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS))
+            else if (m_tanksNeeded == 0 && m_healersNeeded == 0 && m_dpsNeeded != 0 && (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS || PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS))
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
             }
         }
     }
@@ -294,22 +294,22 @@ public class CreateNewGameController : MonoBehaviour {
         bool firstHealer = true;
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
-            if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Tank)
+            if (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.Tank)
             {
-                TeamMemberHeader.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                TeamMemberHeader.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
             }
-            else if (PlayerData.Roster[i].RaiderStats().GetRole() == Enums.CharacterRole.Healer)
+            else if (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.Healer)
             {
                 if (firstHealer)
                 {
                     firstHealer = false;
                     TeamMemberHeader.text += "\nHealers:\n";
                 }
-                TeamMemberHeader.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                TeamMemberHeader.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
             }
             else
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats().GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
             }
         }
     }
@@ -367,7 +367,7 @@ public class CreateNewGameController : MonoBehaviour {
         UpdateRosterTextWithFullTeam();
         ClassText.text = "A great collection of talent, ready for raiding!\n\nYou're ready and you've got yourself a team. Good luck!";
         DescriptionText.fontSize = 20;
-        DescriptionText.text = PlayerData.RaidTeamName + "\nManaged by " + m_playerName + ", the " + PlayerData.PlayerCharacter.RaiderStats().GetCurrentSpec() +".";
+        DescriptionText.text = PlayerData.RaidTeamName + "\nManaged by " + m_playerName + ", the " + PlayerData.PlayerCharacter.RaiderStats.GetCurrentSpec() +".";
         StartGameButton.interactable = true;
         AddMember.gameObject.SetActive(false);
         RejectMember.gameObject.SetActive(false);

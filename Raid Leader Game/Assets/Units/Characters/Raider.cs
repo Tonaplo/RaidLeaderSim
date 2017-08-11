@@ -1,19 +1,26 @@
 ﻿using System;
+using UnityEngine;
 
 [Serializable]
 public class Raider : BaseCharacter {
 
     
     RaiderStats stats;
-    public RaiderStats RaiderStats() { return stats; }
+    public RaiderStats RaiderStats { get { return stats; } }
 
-    
+    DateTime m_activityFinished;
+    public DateTime ActivityFinished { get { return m_activityFinished; } }
+
+    Enums.CharacterStatus m_charStatus;
+    public Enums.CharacterStatus CharacterStatus { get { return m_charStatus; } }
+
     public Raider(string _name, RaiderStats _stats) : base(_name) {
         stats = _stats;
     }
 
     public void RecalculateRaider()
     {
+        CheckForTrainingEnd();
         stats.ComputeAverageThroughput();
         stats.ComputeThroughput();
         stats.ComputeSkillThisAttempt();
@@ -29,14 +36,15 @@ public class Raider : BaseCharacter {
     //Calculate Max Health based on Class
     public override void CalculateMaxHealth()
     {
-        float value = (int)Enums.StaticValues.baseRaiderHealth;
+        float value = StaticValues.BaseRaiderHealth;
         SetBaseHealth((int)value);
-
+        float pointsPerGearlevel = 1.0f;
         switch (stats.GetRole())
         {
             case Enums.CharacterRole.Tank:
                 //Guardians have 15% more health
-                if(stats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)
+                pointsPerGearlevel = 2.0f;
+                if (stats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)
                     value *= 2.0f * 1.15f;
                 else
                     value *= 2.0f;
@@ -48,12 +56,57 @@ public class Raider : BaseCharacter {
                 value *= 0.9f;
                 break;
             case Enums.CharacterRole.MeleeDPS:
+                pointsPerGearlevel = 1.5f;
                 value *= 1.1f;
                 break;
             default:
                 break;
         }
-        value += RaiderStats().GetGearLevel();
+        value += (int)(RaiderStats.GetGearLevel() * pointsPerGearlevel);
         SetMaxHealth((int)value);
+    }
+
+    public void TrainRaider()
+    {
+        if (!IsEligibleForActivity())
+            return;
+
+        m_activityFinished = DateTime.Now;
+        m_activityFinished = m_activityFinished.AddSeconds(StaticValues.TrainingDuration);
+        m_charStatus = Enums.CharacterStatus.InTraining;
+    }
+
+    public bool CheckForTrainingEnd()
+    {
+        if (m_charStatus != Enums.CharacterStatus.InTraining)
+            return false;
+        
+        if (DateTime.Now > m_activityFinished)
+        {
+            int currentSkillLevel = stats.GetSkillLevel();
+            int increase = (int)((float)currentSkillLevel * UnityEngine.Random.Range(0.01f, 0.05f));
+            increase = increase == 0 ? 1 : increase;
+            stats.ModifySkillLevel(increase);
+            m_charStatus = Enums.CharacterStatus.Ready;
+            return true;
+        }
+        return false;
+    }
+
+    public bool IsEligibleForActivity()
+    {
+        switch (m_charStatus)
+        {
+            case Enums.CharacterStatus.OnVacation:
+            case Enums.CharacterStatus.InTraining:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    public bool IsInStatus(Enums.CharacterStatus s)
+    {
+        return s == m_charStatus;
     }
 }

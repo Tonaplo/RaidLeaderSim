@@ -41,7 +41,7 @@ public class ClericHealScript : BaseHealScript
             List<RaiderScript> targets = new List<RaiderScript>();
             GetBestTargets(ref targets);
             int numTargets = targets.Count;
-            int heal = Mathf.RoundToInt(caster.RaiderStats().GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
+            int heal = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
 
             for (int i = 0; i < numTargets; i++)
             {

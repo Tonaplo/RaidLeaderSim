@@ -20,8 +20,8 @@ public class RangerAttack : BaseHealOrAttackScript
     {
         m_counter = 0;
         //Since Rangers are higly dependent on their cast time, if they have a good attempt, lower the casttime a bit
-        int averageThroughput = attacker.RaiderStats().GetAverageThroughput();
-        int throughput = attacker.RaiderStats().GetThroughput();
+        int averageThroughput = attacker.RaiderStats.GetAverageThroughput();
+        int throughput = attacker.RaiderStats.GetThroughput();
         if (averageThroughput < throughput)
             m_castTime *= (float)(averageThroughput) / (float)(throughput);
 
@@ -33,7 +33,7 @@ public class RangerAttack : BaseHealOrAttackScript
         yield return new WaitForSeconds(castTime);
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats().GetSpellAmount(m_baseMultiplier);
+            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
 
             m_counter++;
 

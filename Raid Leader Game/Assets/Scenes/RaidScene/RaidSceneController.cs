@@ -51,16 +51,16 @@ public class RaidSceneController : MonoBehaviour {
         GameObject temp = GameObject.Instantiate(MeterPrefab);
         temp.transform.SetParent(canvas.transform);
         m_damageMcs = temp.GetComponent<MeterControllerScript>();
-        List<Raider> dps = all.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS || x.RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS);
-        int dpsBarsCount = dps.Count > (int)Enums.StaticValues.maxNumDPSMeterBars ? (int)Enums.StaticValues.maxNumDPSMeterBars : dps.Count;
+        List<Raider> dps = all.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
+        int dpsBarsCount = dps.Count > StaticValues.MaxNumDPSMeterBars ? StaticValues.MaxNumDPSMeterBars : dps.Count;
         m_damageMcs.Initialize(150, 140, 40, 175, dpsBarsCount);
         m_damageMcs.CreateEntriesFromRaid(all);
 
         GameObject temptwo = GameObject.Instantiate(MeterPrefab);
         temptwo.transform.SetParent(canvas.transform);
         m_healingMcs = temptwo.GetComponent<MeterControllerScript>();
-        List<Raider> healers = all.FindAll(x => x.RaiderStats().GetRole() == Enums.CharacterRole.Healer|| x.RaiderStats().GetCurrentSpec() == Enums.CharacterSpec.Knight);
-        int healerBarsCount = healers.Count > (int)Enums.StaticValues.maxNumHealingMeterBars ? (int)Enums.StaticValues.maxNumHealingMeterBars : healers.Count;
+        List<Raider> healers = all.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.Healer|| x.RaiderStats.GetCurrentSpec() == Enums.CharacterSpec.Knight);
+        int healerBarsCount = healers.Count > StaticValues.MaxNumHealingMeterBars ? StaticValues.MaxNumHealingMeterBars : healers.Count;
         m_healingMcs.Initialize(330, 140, 40, 175, healerBarsCount);
         m_healingMcs.CreateEntriesFromRaid(all);
     }
@@ -119,7 +119,7 @@ public class RaidSceneController : MonoBehaviour {
                 raidText.text = "Total Stats:\n\n";
                 for (int i = 0; i < all.Count; i++)
                 {
-                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats().GetCurrentSpec().ToString() + " (ThPut: " + all[i].RaiderStats().GetThroughput() + ", skill: " + all[i].RaiderStats().GetSkillLevel() + ", STA: " + all[i].RaiderStats().GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats().GetGearLevel() + ", var: " + all[i].RaiderStats().GetVariance() + " %)\n";
+                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats.GetCurrentSpec().ToString() + " (ThPut: " + all[i].RaiderStats.GetThroughput() + ", skill: " + all[i].RaiderStats.GetSkillLevel() + ", STA: " + all[i].RaiderStats.GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats.GetGearLevel() + ", var: " + all[i].RaiderStats.GetVariance() + " %)\n";
                 }
                 m_damageMcs.FightEnded(Time.time - m_fightStartTime);
                 m_healingMcs.FightEnded(Time.time - m_fightStartTime);
@@ -158,8 +158,8 @@ public class RaidSceneController : MonoBehaviour {
     void CalculateEncounterSkill() {
         if (currentSubStep >= 0 || currentSubStep <= (all.Count - 1))
         {
-            all[currentSubStep].RaiderStats().ComputeSkillThisAttempt();
-            string newText = all[currentSubStep].GetName() + ": " + all[currentSubStep].RaiderStats().GetThroughput().ToString() + " throughput this try ( " + all[currentSubStep].RaiderStats().GetAverageThroughput().ToString() + " average throughout)\n";
+            all[currentSubStep].RaiderStats.ComputeSkillThisAttempt();
+            string newText = all[currentSubStep].GetName() + ": " + all[currentSubStep].RaiderStats.GetThroughput().ToString() + " throughput this try ( " + all[currentSubStep].RaiderStats.GetAverageThroughput().ToString() + " average throughout)\n";
 
             raidText.text = newText + raidText.text;
 

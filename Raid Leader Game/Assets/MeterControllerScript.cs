@@ -67,7 +67,7 @@ public class MeterControllerScript : MonoBehaviour {
         m_entries = new List<Entry>();
         for (int i = 0; i < raid.Count; i++)
         {
-            m_entries.Add(new Entry(raid[i].GetName(), i, raid[i].RaiderStats().GetClass()));
+            m_entries.Add(new Entry(raid[i].GetName(), i, raid[i].RaiderStats.GetClass()));
         }
 
         if (raid.Count < m_bars.Count)

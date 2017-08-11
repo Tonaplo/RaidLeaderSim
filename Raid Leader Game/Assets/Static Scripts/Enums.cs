@@ -3,24 +3,6 @@ using System.Collections;
 
 public static class Enums{
 
-    public enum StaticValues { 
-        minimumThroughput       = 5,
-        maxSkill                = 100,
-        easyMultiplier          = 75,
-        hardMultiplier          = 125,
-        interruptIncrease       = 30,
-        stunIncrease            = 25,
-        healingSTCCIncrease     = 20,
-        healingAoECDIncrease    = 80,
-        damageSTCCIncrease      = 30,
-        damageAoECDIncrease     = 40,
-        immunityIncrease        = 100,
-        baseRaiderHealth        = 100,
-        raidTeamSize            = 12,
-        maxNumDPSMeterBars      = 6,
-        maxNumHealingMeterBars  = 4,
-    }
-
     public enum CharacterRole {
         Tank,
         Healer,
@@ -116,8 +98,11 @@ public static class Enums{
         Hard        //140%
     }
 
-    public enum CharacterFlags { 
-        CHARACTER_FLAG_IS_MOVING = 1 << 0,
+    public enum CharacterStatus { 
+        Ready,
+        OnVacation,
+        InTraining,
+        //Add more
     }
 
     public enum EncounterPhaseType {

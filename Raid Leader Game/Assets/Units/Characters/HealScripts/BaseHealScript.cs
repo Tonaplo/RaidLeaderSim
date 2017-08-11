@@ -111,19 +111,19 @@ public class BaseHealScript : BaseHealOrAttackScript
 
     protected void GetTanks(ref List<RaiderScript> tanks)
     {
-        tanks.AddRange(Raid.FindAll(x => x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.Tank));
+        tanks.AddRange(Raid.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank));
         TrimDeadFromList(ref tanks);
     }
 
     protected void GetHealers(ref List<RaiderScript> healers)
     {
-        healers.AddRange(Raid.FindAll(x => x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.Healer));
+        healers.AddRange(Raid.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer));
         TrimDeadFromList(ref healers);
     }
 
     protected void GetDPS(ref List<RaiderScript> dps)
     {
-        dps.AddRange(Raid.FindAll(x => x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.MeleeDPS || x.Raider.RaiderStats().GetRole() == Enums.CharacterRole.RangedDPS));
+        dps.AddRange(Raid.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS));
         TrimDeadFromList(ref dps);
     }
 

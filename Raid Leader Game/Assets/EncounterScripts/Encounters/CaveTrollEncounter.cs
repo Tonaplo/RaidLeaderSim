@@ -19,7 +19,6 @@ public class CaveTrollEncounter : BaseEncounter
     float m_ClubSwingCastTime = 2.5f;
     
     float m_PebbleThrowCastTime = 1.5f;
-    float m_AvalanceCastTime = 2.5f;
     
 
     IEnumerator m_currentAbilityCoroutine;
@@ -86,12 +85,13 @@ public class CaveTrollEncounter : BaseEncounter
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Avalance", "Every " + GetAvalanceWaitTime() + " seconds, the Troll bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", m_AvalanceCastTime,Enums.Ability.Interrupt, null ),
+            new EncounterAbility("Avalance", "Every " + GetAvalanceWaitTime() + " seconds, the Troll bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
         };
     }
 
     public override void CurrentAbilityCountered()
     {
+        m_currentAbility = null;
         m_rsc.StopCoroutine(m_currentAbilityCoroutine);
         m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
         m_rsc.EndCastingAbility();
@@ -158,12 +158,26 @@ public class CaveTrollEncounter : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 30.0f;
+                return 20.0f;
             case Enums.Difficulties.Normal:
             default:
-                return 20.0f;
+                return 12.0f;
             case Enums.Difficulties.Hard:
-                return 10.0f;
+                return 5.0f;
+        }
+    }
+
+    float GetAvalanceCastTime()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 5.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 2.5f;
+            case Enums.Difficulties.Hard:
+                return 1.0f;
         }
     }
 
@@ -230,7 +244,7 @@ public class CaveTrollEncounter : BaseEncounter
         {
             m_currentAbility = m_encounterAbilities[0];
             m_rsc.BeginCastingAbility(m_currentAbility);
-            m_currentAbilityCoroutine = CastAvalance(m_AvalanceCastTime);
+            m_currentAbilityCoroutine = CastAvalance(GetAvalanceCastTime());
             m_rsc.StartCoroutine(m_currentAbilityCoroutine);
         }
     }

@@ -9,6 +9,8 @@ public class GuardianAttack : BaseHealOrAttackScript
         m_castTime = 1.0f;
         m_baseMultiplier = 0.5f;
         m_name = "Counterattack";
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Dont Know Yet", "Dont Know Yet", Enums.Cooldowns.TankCooldown);
     }
     
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs) {
@@ -22,7 +24,7 @@ public class GuardianAttack : BaseHealOrAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             int damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
-            rsc.DealDamage(damage, attacker.GetName(), GetName(), index);
+            rsc.DealDamage(damage, attacker.GetName(), Name, index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

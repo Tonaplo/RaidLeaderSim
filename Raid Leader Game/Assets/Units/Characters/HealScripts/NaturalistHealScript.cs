@@ -7,14 +7,19 @@ public class NaturalistHealScript : BaseHealScript
     float m_HoTMultiplier = 0.10f;
     int m_maxSeconds = 6;
     float healInterval = 1.0f;
+    float m_cooldownHoTMultiplier = 0.90f;
 
-    public override string GetDescription() { return "Healed targets are healed again for " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " initial heal every second for " + m_maxSeconds + " seconds"; }
+    public override string GetDescription() { return "Healed targets are healed again for " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " of the initial heal every second for " + m_maxSeconds + " seconds"; }
 
     public override void Setup()
     {
         m_castTime = 1.7f;
         m_baseMultiplier = 1.6f;
         m_name = "Nature's Touch";
+
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Quickening", "The next " + m_cooldownDuration + " seconds, healed targets are healed again for " + GetPercentIncreaseString(m_cooldownHoTMultiplier + 1.0f) + " instead of " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " of the initial heal", Enums.Cooldowns.HealingCooldown);
 
         PriorityList = new List<Priority> {
 
@@ -47,7 +52,7 @@ public class NaturalistHealScript : BaseHealScript
             for (int i = 0; i < numTargets; i++)
             {
                 int actualHealing = targets[i].TakeHealing(heal);
-                rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
+                rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
                 int hotHeal = (int)(heal * m_HoTMultiplier);
                 hotHeal = hotHeal == 0 ? 1 : hotHeal;
                 rs.StartCoroutine(DoHoT(healInterval, m_maxSeconds, hotHeal, index, caster, rsc, rs, targets[i]));
@@ -65,7 +70,7 @@ public class NaturalistHealScript : BaseHealScript
         {
             counter--;
             int actualHealing = target.TakeHealing(heal);
-            rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
+            rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
             rs.StartCoroutine(DoHoT(healInterval, counter, heal, index, caster, rsc, rs, target));
         }
     }

@@ -14,6 +14,9 @@ public class AssasinAttack : BaseHealOrAttackScript
         m_castTime = 0.5f;
         m_baseMultiplier = 0.7f;
         m_name = "Vein Slit";
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Not Sure Yet", "Dont know yet.", Enums.Cooldowns.DPSCooldown);
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -33,7 +36,7 @@ public class AssasinAttack : BaseHealOrAttackScript
                 damage *= m_multiplier;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
+            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

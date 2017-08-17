@@ -111,7 +111,7 @@ public class RosterButtonScript : MonoBehaviour {
 
     void SetupMove()
     {
-        m_abilityText.text = "Special Move - " + attackOrHealScript.GetName() + ":";
+        m_abilityText.text = "Special Move - " + attackOrHealScript.Name + ":";
         m_abilityText.text += "\nCast Time: " + attackOrHealScript.GetBaseCastTimeAsString();
         m_abilityText.text += "                       Multiplier: " + attackOrHealScript.GetBaseMultiplierAsString();
         m_abilityText.text += "\n\n" + attackOrHealScript.GetDescription();
@@ -126,8 +126,8 @@ public class RosterButtonScript : MonoBehaviour {
 
     void SetupCooldown()
     {
-        m_abilityText.text = "Cooldown - " + m_raider.RaiderStats.GetCooldown().Name + ":";
-        m_abilityText.text += "\nCan be used as a " + m_raider.RaiderStats.GetCooldown().Cooldown;
-        m_abilityText.text += "\n\n" + m_raider.RaiderStats.GetCooldown().Description;
+        m_abilityText.text = "Cooldown - " + attackOrHealScript.Cooldown.Name + ":";
+        m_abilityText.text += "\nCan be used as a " + attackOrHealScript.Cooldown.Cooldown;
+        m_abilityText.text += "\n\n" + attackOrHealScript.Cooldown.Description;
     }
 }

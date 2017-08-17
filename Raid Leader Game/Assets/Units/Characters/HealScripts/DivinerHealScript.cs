@@ -7,6 +7,7 @@ public class DivinerHealScript : BaseHealScript
 
 
     float m_LowestMultiplier = 0.7f;
+    float m_cooldownCastTimeMultiplier = 0.5f;
 
     public override string GetDescription() { return "Also heals the lowest health target for " + GetPercentIncreaseString(m_LowestMultiplier + 1.0f) + " of throughput"; }
 
@@ -15,6 +16,10 @@ public class DivinerHealScript : BaseHealScript
         m_castTime = 1.8f;
         m_baseMultiplier = 2.5f;
         m_name = "Arcane Mending";
+
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Quickening", "Reduces casttime of " + m_name + " by " + GetPercentIncreaseString(m_cooldownCastTimeMultiplier + 1.0f) + " for " + m_cooldownDuration + " seconds.", Enums.Cooldowns.HealingCooldown);
 
         PriorityList = new List<Priority> { new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
                                             new Priority(2, Enums.RaidHealingState.TankMediumDamage),
@@ -45,7 +50,7 @@ public class DivinerHealScript : BaseHealScript
             for (int i = 0; i < numTargets; i++)
             {
                 int actualHealing = targets[i].TakeHealing(heal);
-                rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
+                rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
             }
             
             int abilityHealAmount = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) * m_LowestMultiplier);
@@ -55,7 +60,7 @@ public class DivinerHealScript : BaseHealScript
             for (int i = 0; i < lowest.Count; i++)
             {
                 int actualHealing = lowest[i].TakeHealing(abilityHealAmount);
-                rsc.DoHeal(actualHealing, caster.GetName(), GetName(), index);
+                rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
             }
 
             rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));

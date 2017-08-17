@@ -14,6 +14,9 @@ public class ElementalistAttack : BaseHealOrAttackScript
         m_castTime = 1.9f;
         m_baseMultiplier = 2.7f;
         m_name = "Fireball";
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Rapid Fire", "Removes the " + GetPercentIncreaseString((1.0f - m_percentReduction) + 1.0f) + " damage penalty for " + m_cooldownDuration + " seconds.", Enums.Cooldowns.DPSCooldown);
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -34,7 +37,7 @@ public class ElementalistAttack : BaseHealOrAttackScript
                 damage *= m_multiplier;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
+            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

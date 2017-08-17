@@ -170,12 +170,12 @@ public class CreateNewGameController : MonoBehaviour {
         SpecOneButton.interactable = false;
         SpecTwoButton.interactable = true;
         UpdateSpecDescriptionText();
+        NameImage.gameObject.SetActive(true);
         UpdateNameSuffixText();
     }
 
     public void SpecOneButtonClick()
     {
-        NameImage.gameObject.SetActive(true);
         m_playerMainSpec = Utility.GetOtherSpec(m_playerMainSpec);
         SpecOneButton.interactable = false;
         SpecTwoButton.interactable = true;
@@ -185,7 +185,6 @@ public class CreateNewGameController : MonoBehaviour {
 
     public void SpecTwoButtonClick()
     {
-        NameImage.gameObject.SetActive(true);
         m_playerMainSpec = Utility.GetOtherSpec(m_playerMainSpec);
         SpecOneButton.interactable = true;
         SpecTwoButton.interactable = false;
@@ -212,11 +211,15 @@ public class CreateNewGameController : MonoBehaviour {
         ClassText.text = "And so, " + RaidTeamNameField.text + " came to be. But what is a team without a roster?\nLet fill out your core team.\n\nThere are 12 spots in a raid team.\nYou have one spot, so we need to recruit 11 team mates:";
         RaidTeamBackground.gameObject.SetActive(true);
         TeamMemberCreationBackground.gameObject.SetActive(true);
-        
+
         if (RaidTeamNameField.text.Length == 0)
+        {
             ClassImage.gameObject.SetActive(false);
+        }
         else
+        {
             ClassImage.gameObject.SetActive(true);
+        }
     }
 
     public void OnAddRecruitClicked()

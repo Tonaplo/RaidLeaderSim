@@ -13,6 +13,9 @@ public class WizardAttack : BaseHealOrAttackScript
         m_castTime = 2.0f;
         m_baseMultiplier = 2.8f;
         m_name = "Arcane Blast";
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Not Sure Yet", "Dont know yet.", Enums.Cooldowns.DPSCooldown);
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -29,7 +32,7 @@ public class WizardAttack : BaseHealOrAttackScript
             float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
             damage *= Random.Range(m_minMultiplier, m_maxMultiplier);
 
-            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
+            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

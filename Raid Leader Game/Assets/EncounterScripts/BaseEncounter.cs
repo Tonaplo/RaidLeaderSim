@@ -9,6 +9,7 @@ public class BaseEncounter
 
     protected string m_name;
     protected HealthBarScript m_healthBar;
+    protected EncounterAbility m_currentAbility;
     protected Enums.Difficulties m_difficulty = Enums.Difficulties.Normal;
     protected List<EncounterAbility> m_encounterAbilities = new List<EncounterAbility>();
     protected List<EncounterAttackDescription> m_attacks;
@@ -16,13 +17,13 @@ public class BaseEncounter
     
     public string Name { get { return m_name; }  }
     public HealthBarScript HealthBar  {  get { return m_healthBar; }   }
-    public Enums.Difficulties Difficulty  {  get { return m_difficulty; }  }
+    public Enums.Difficulties Difficulty  {  get { return m_difficulty; } }
+    public EncounterAbility CurrentAbility { get { return m_currentAbility; } }
     public List<EncounterAbility> EncounterAbilities  {  get { return m_encounterAbilities; } }
     public List<EncounterAttackDescription> EncounterAttacks { get { return m_attacks; } }
     public List<CharacterItem> Loot { get { return m_loot; } }
     
     protected int m_baseHealth;
-    protected EncounterAbility m_currentAbility;
     protected RaidSceneController m_rsc;
     protected List<RaiderScript> m_raid;
 

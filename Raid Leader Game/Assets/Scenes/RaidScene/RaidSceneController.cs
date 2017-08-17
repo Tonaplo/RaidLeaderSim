@@ -206,7 +206,7 @@ public class RaidSceneController : MonoBehaviour {
 
         bool success = encounter.AttemptToCounterCurrentAbility(counter);
 
-        raidText.text = counter.GetName() + " tried to counter and" + (success ? " succeeded!\n" : " failed!\n") + raidText.text;
+        raidText.text = counter.GetName() + " tried to counter "+ encounter.CurrentAbility.Name + " and" + (success ? " succeeded!\n" : " failed!\n") + raidText.text;
         if (success)
         {
             EndCastingAbility();

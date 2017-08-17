@@ -15,7 +15,6 @@ public class RaiderStats {
     Enums.CharacterClass m_charClass;
     Enums.CharacterSpec m_charSpec;
     BaseAbility m_ability;
-    BaseCooldown m_cooldown;
 
     public GearStats Gear { get { return m_gear; } }
     public SkillStats Skills { get { return m_skill; } }
@@ -35,7 +34,6 @@ public class RaiderStats {
     public Enums.CharacterSpec GetOffSpec() { return Utility.GetOtherSpec(GetCurrentSpec()); }
     public Enums.CharacterRole GetOffSpecRole() { return Utility.GetRoleFromSpec(GetOffSpec()); }
     public BaseAbility GetAbility() { return m_ability; }
-    public BaseCooldown GetCooldown() { return m_cooldown; }
 
     public RaiderStats(int baseLevel)
     {
@@ -78,7 +76,6 @@ public class RaiderStats {
         Gear.CalculateItemlevels();
         Skills.CalculateAverageSkillLevel();
         SetAbilityFromSpec();
-        SetCooldownFromSpec();
         ComputeAverageThroughput();
         ComputeSkillThisAttempt();
         ComputeThroughput();
@@ -313,7 +310,6 @@ public class RaiderStats {
     {
         rs.m_charSpec = Utility.GetSpecFromRoleAndClass(rs.m_charClass, rs.m_charRole);
         rs.SetAbilityFromSpec();
-        rs.SetCooldownFromSpec();
         rs.ComputeAverageThroughput();
         rs.ComputeThroughput();
     }
@@ -322,7 +318,6 @@ public class RaiderStats {
     {
         m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);
         SetAbilityFromSpec();
-        SetCooldownFromSpec();
         ComputeAverageThroughput();
         ComputeThroughput();
     }
@@ -367,55 +362,6 @@ public class RaiderStats {
                 break;
             case Enums.CharacterSpec.Scourge:
                 m_ability = new BaseAbility("ScourgeStun", "Provides the m_ability to stun", Enums.Ability.Stun);
-                break;
-            default:
-                Debug.LogAssertion("Spec Not Found!");
-                break;
-        }
-    }
-
-    void SetCooldownFromSpec()
-    {
-        //Code to give them correct abilities
-        m_cooldown = new BaseCooldown();
-        
-        switch (m_charSpec)
-        {
-            case Enums.CharacterSpec.Guardian:
-                m_cooldown.Initialize("Immunity", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
-                break;
-            case Enums.CharacterSpec.Knight:
-                m_cooldown.Initialize("TankCooldown", "Provides the m_ability to TankCooldown", Enums.Cooldowns.TankCooldown);
-                break;
-            case Enums.CharacterSpec.Cleric:
-                m_cooldown.Initialize("HealingCooldown", "Provides the m_ability to HealingCooldown", Enums.Cooldowns.HealingCooldown);
-                break;
-            case Enums.CharacterSpec.Diviner:
-                m_cooldown.Initialize("HealingCooldown", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
-                break;
-            case Enums.CharacterSpec.Naturalist:
-                m_cooldown.Initialize("TankCooldown", "Provides the m_ability to TankCooldown", Enums.Cooldowns.TankCooldown);
-                break;
-            case Enums.CharacterSpec.Berserker:
-                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to AoECooldown", Enums.Cooldowns.AoECooldown);
-                break;
-            case Enums.CharacterSpec.Assassin:
-                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to SingleTargetCooldown", Enums.Cooldowns.SingleTargetCooldown);
-                break;
-            case Enums.CharacterSpec.Ranger:
-                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to AoECooldown", Enums.Cooldowns.AoECooldown);
-                break;
-            case Enums.CharacterSpec.Wizard:
-                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to SingleTargetCooldown", Enums.Cooldowns.SingleTargetCooldown);
-                break;
-            case Enums.CharacterSpec.Elementalist:
-                m_cooldown.Initialize("Immunity", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
-                break;
-            case Enums.CharacterSpec.Necromancer:
-                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to SingleTargetCooldown", Enums.Cooldowns.SingleTargetCooldown);
-                break;
-            case Enums.CharacterSpec.Scourge:
-                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to AoECooldown", Enums.Cooldowns.AoECooldown);
                 break;
             default:
                 Debug.LogAssertion("Spec Not Found!");

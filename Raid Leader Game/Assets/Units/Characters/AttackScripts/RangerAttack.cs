@@ -6,6 +6,7 @@ public class RangerAttack : BaseHealOrAttackScript
     int m_counter;
     int m_maxCount = 4;
     float m_multiplier = 3.1f;
+    float m_rapidFireMultipler = 0.5f;
 
     public override string GetDescription() { return "Every " + m_maxCount + "th attack will deal " + GetPercentIncreaseString(m_multiplier) + " damage."; }
 
@@ -14,6 +15,9 @@ public class RangerAttack : BaseHealOrAttackScript
         m_castTime = 1.9f;
         m_baseMultiplier = 2.2f;
         m_name = "Aimed Shot";
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Rapid Fire", "Reduces casttime by " + GetPercentIncreaseString(m_rapidFireMultipler) + " for " + m_cooldownDuration + " seconds.", Enums.Cooldowns.DPSCooldown);
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -43,7 +47,7 @@ public class RangerAttack : BaseHealOrAttackScript
                 m_counter = 0;
             }
 
-            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
+            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

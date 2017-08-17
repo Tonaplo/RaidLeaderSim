@@ -7,6 +7,7 @@ public class ClericHealScript : BaseHealScript
 
 
     float m_maxHealIncrease = 1.5f;
+    float m_cooldownMaxHealIncrease = 3.0f;
 
     public override string GetDescription() { return "Heals targets up to " + GetPercentIncreaseString(m_maxHealIncrease+1.0f) + " more, based on targets health. Lower health means more healing."; }
 
@@ -15,12 +16,9 @@ public class ClericHealScript : BaseHealScript
         m_castTime = 1.5f;
         m_baseMultiplier = 1.5f;
         m_name = "Divine Light";
-    }
-
-    public override void StartFight(int index, Raider caster, RaidSceneController rsc, RaiderScript rs)
-    {
-        Raid = rsc.GetRaid();
-        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));
+        m_cooldownDuration = 15.0f;
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Deep Healing", "Targets are now healed up to " + GetPercentIncreaseString(m_cooldownMaxHealIncrease + 1.0f) + " more for " + m_cooldownDuration +" seconds.", Enums.Cooldowns.HealingCooldown);
 
         PriorityList = new List<Priority> {
                                             new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
@@ -30,6 +28,12 @@ public class ClericHealScript : BaseHealScript
                                             new Priority(5, Enums.RaidHealingState.RaidSingleMediumDamage),
                                             new Priority(6, Enums.RaidHealingState.TankMediumDamage),
                                             new Priority(7, Enums.RaidHealingState.LowestHealthPercent), };
+    }
+
+    public override void StartFight(int index, Raider caster, RaidSceneController rsc, RaiderScript rs)
+    {
+        Raid = rsc.GetRaid();
+        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));
     }
 
     IEnumerator DoHeal(float castTime, int index, Raider caster, RaidSceneController rsc, RaiderScript rs)
@@ -48,7 +52,7 @@ public class ClericHealScript : BaseHealScript
                 float increase = (((100.0f - targets[i].GetHealthPercent())/100.0f)* m_maxHealIncrease) + 1.0f;
                 int actualHealing = Mathf.RoundToInt(increase * heal);
                 int realhealing = targets[i].TakeHealing(actualHealing);
-                rsc.DoHeal(realhealing, caster.GetName(), GetName(), index);
+                rsc.DoHeal(realhealing, caster.GetName(), Name, index);
             }
 
             rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));

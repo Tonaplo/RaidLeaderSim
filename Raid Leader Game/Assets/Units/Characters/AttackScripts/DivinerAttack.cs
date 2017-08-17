@@ -11,6 +11,8 @@ public class DivinerAttack : BaseHealOrAttackScript
         m_castTime = 1.5f;
         m_baseMultiplier = 0.3f;
         m_name = "Magic Bolt";
+        m_cooldown = new BaseCooldown();
+        m_cooldown.Initialize("Nothing", "Dont Know Yet", Enums.Cooldowns.TankCooldown);
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
@@ -25,7 +27,7 @@ public class DivinerAttack : BaseHealOrAttackScript
         if (!rsc.IsBossDead() && !rs.IsDead())
         {
             float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
-            rsc.DealDamage((int)damage, attacker.GetName(), GetName(), index);
+            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
         }
     }

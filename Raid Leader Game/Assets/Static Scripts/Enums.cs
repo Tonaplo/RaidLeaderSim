@@ -42,15 +42,12 @@ public static class Enums{
         Stun,
         Slow,
         Dispel,
-        ThroughputBoost,
     }
 
     public enum Cooldowns {
-        SingleTargetCooldown,
-        AoECooldown,
+        DPSCooldown,
         HealingCooldown,
         TankCooldown,
-        Immunity,
     }
 
     public enum EncounterAdds { 

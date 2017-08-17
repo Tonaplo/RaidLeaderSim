@@ -7,9 +7,11 @@ public class BaseHealOrAttackScript
     protected float m_castTime;
     protected float m_baseMultiplier;
     protected string m_name;
+    protected BaseCooldown m_cooldown;
+    protected float m_cooldownDuration;
 
-    public string GetName() { return m_name; }
-
+    public string Name { get { return m_name; } }
+    public BaseCooldown Cooldown { get { return m_cooldown; } }
     public string GetBaseCastTimeAsString() { return m_castTime + " seconds"; }
     public string GetBaseMultiplierAsString() { return m_baseMultiplier.ToString() + " times throughput"; }
 
@@ -20,7 +22,10 @@ public class BaseHealOrAttackScript
     public virtual void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs) {; }
 
     //Derived versions should describe what they do
-    public virtual string GetDescription() { return ""; }
+    public virtual string GetDescription() {
+        Debug.LogAssertion("GetDescription() should be overridden!");
+        return "";
+    }
 
     protected string GetPercentIncreaseString(float multiplier)
     {

@@ -7,7 +7,14 @@ public class RosterControllerScript : MonoBehaviour {
 
     public GameObject RaiderButtonPrefab;
     public Text HeaderText;
-    public Text BodyText;
+    public Button GearButton;
+    public Button SkillButton;
+    public Text LeftBodyText;
+    public Text RightBodyText;
+    public Button MoveButton;
+    public Button CounterButton;
+    public Button CooldownButton;
+    public Text AbilityText;
     public Image TextBackGround;
     public Button ChangeSpecButton;
     public Button BeginTrainingButton;
@@ -20,9 +27,11 @@ public class RosterControllerScript : MonoBehaviour {
     // Use this for initialization
     void Start () {
         buttons = new List<GameObject>();
+        PlayerData.SortRoster();
         SetupRoster();
         SetCurrentRaider(buttons[0].GetComponent<RosterButtonScript>().Raider);
-        gameObject.SetActive(false);
+        SkillButtonOnClick();
+        MoveButtonOnClick();
     }
 	
 	// Update is called once per frame
@@ -43,7 +52,7 @@ public class RosterControllerScript : MonoBehaviour {
             temp.transform.SetParent(transform);
             temp.transform.SetPositionAndRotation(new Vector3(xPosStart + ((i / 8) * (width) + 10), yPosStart - (((height + 5) * (i % 8))), 0), Quaternion.identity);
             temp.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
-            temp.GetComponent<RosterButtonScript>().SetupButton(PlayerData.Roster[i], ref HeaderText, ref BodyText, this);
+            temp.GetComponent<RosterButtonScript>().SetupButton(PlayerData.Roster[i], ref HeaderText, ref LeftBodyText, ref RightBodyText, ref AbilityText, this);
             buttons.Add(temp);
         }
         buttons[0].GetComponent<RosterButtonScript>().OnClick();
@@ -79,6 +88,7 @@ public class RosterControllerScript : MonoBehaviour {
     public void OnChangeSpecButtonClicked()
     {
         m_currentRaider.ChangeSpec();
+        m_currentButton.GetComponent<RosterButtonScript>().OnClick();
     }
 
     public void OnBeginTrainingClicked()
@@ -116,5 +126,43 @@ public class RosterControllerScript : MonoBehaviour {
         }
         buttons = new List<GameObject>();
         SetupRoster();
+    }
+
+    public void GearButtonOnClick()
+    {
+        SkillButton.interactable = true;
+        GearButton.interactable = false;
+        m_currentButton.GetComponent<RosterButtonScript>().OnClick();
+    }
+
+    public void SkillButtonOnClick()
+    {
+        SkillButton.interactable = false;
+        GearButton.interactable = true;
+        m_currentButton.GetComponent<RosterButtonScript>().OnClick();
+    }
+
+    public void MoveButtonOnClick()
+    {
+        MoveButton.interactable = false;
+        CounterButton.interactable = true;
+        CooldownButton.interactable = true;
+        m_currentButton.GetComponent<RosterButtonScript>().OnClick();
+    }
+
+    public void CounterButtonOnClick()
+    {
+        MoveButton.interactable = true;
+        CounterButton.interactable = false;
+        CooldownButton.interactable = true;
+        m_currentButton.GetComponent<RosterButtonScript>().OnClick();
+    }
+
+    public void CooldownButtonOnClick()
+    {
+        MoveButton.interactable = true;
+        CounterButton.interactable = true;
+        CooldownButton.interactable = false;
+        m_currentButton.GetComponent<RosterButtonScript>().OnClick();
     }
 }

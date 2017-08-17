@@ -8,6 +8,7 @@ public class HealthBarScript : MonoBehaviour {
     public Slider HealthBarSlider;
     public Image Fill;
     public Text HealthBarText;
+    public Button RaiderButton;
 
     bool m_useName = false;
     string m_name;
@@ -16,7 +17,8 @@ public class HealthBarScript : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
-
+        RaiderButton.interactable = false;
+        RaiderButton.GetComponent<Image>().color = new Color(0,0,0,0);
     }
 
     public void SetUseName(string name, bool on) {

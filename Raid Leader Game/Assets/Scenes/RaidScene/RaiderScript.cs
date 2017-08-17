@@ -1,13 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RaiderScript : MonoBehaviour {
 
-    Raider m_raider;
     public HealthBarScript HealthBar;
-
+    
+    Raider m_raider;
     public Raider Raider { get { return m_raider; } }
+
+    public Button HealthBarButton;
+    RaidSceneController m_rsc;
 
     // Use this for initialization
     void Start() {
@@ -34,12 +38,15 @@ public class RaiderScript : MonoBehaviour {
         HealthBar.SetupHealthBar((index % 3) * 80 + 465, 310 - (index / 3) * 60, 100, 70, m_raider.GetMaxHealth());
         HealthBar.SetUseName(m_raider.GetName(), true);
         HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats.GetClass());
+        HealthBarButton = HealthBar.RaiderButton;
+        HealthBar.RaiderButton.onClick.AddListener( delegate () { AttemptToCounterAbility(); });
     }
 
     public IEnumerator StartFight(float offset, int index, Raider attacker, RaidSceneController rsc)
     {
         yield return new WaitForSeconds(offset);
 
+        m_rsc = rsc;
         BaseHealOrAttackScript script;
         attacker.RaiderStats.GetBaseAttackScript(out script);
         script.StartFight(index, attacker, rsc, this);
@@ -59,7 +66,7 @@ public class RaiderScript : MonoBehaviour {
         if (Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank)
         {
             
-            float reduction = ((float)Raider.RaiderStats.GetSkillThisAttempt() / (float)StaticValues.MaxSkill) * 0.5f;
+            float reduction = ((float)Raider.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Throughput) / (float)StaticValues.MaxSkill) * 0.5f;
 
             //Guardians take 15% reduced damage
             if (Raider.RaiderStats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)
@@ -84,5 +91,11 @@ public class RaiderScript : MonoBehaviour {
     void Die()
     {
         enabled = false;
+        m_rsc.RaiderDied();
+    }
+
+    void AttemptToCounterAbility()
+    {
+        m_rsc.AttemptToCounterCurrentEncounterAbility(m_raider);
     }
 }

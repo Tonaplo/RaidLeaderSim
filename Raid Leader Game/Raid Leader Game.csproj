@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>2017.1.0p2</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -86,23 +84,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\AwardLootItemInstanceScript.cs" />
+    <Compile Include="Assets\ChooseEncounterAbilityPrefabScript.cs" />
+    <Compile Include="Assets\ChooseEncounterAttackPrefabScript.cs" />
+    <Compile Include="Assets\ChooseEncounterSceneController.cs" />
     <Compile Include="Assets\ChooseRaidTeamForAttemptControllerScript.cs" />
     <Compile Include="Assets\ChooseTeamForAttemptTeamController.cs" />
     <Compile Include="Assets\ChooseTeamForAttemptTeamMember.cs" />
     <Compile Include="Assets\CreateNewGameController.cs" />
-    <Compile Include="Assets\Encounters\BaseAbility.cs" />
-    <Compile Include="Assets\Encounters\BaseCooldown.cs" />
-    <Compile Include="Assets\Encounters\BaseEncounter.cs" />
-    <Compile Include="Assets\Encounters\EncounterAbility.cs" />
-    <Compile Include="Assets\Encounters\EncounterAbilityEffect.cs" />
-    <Compile Include="Assets\Encounters\Phase.cs" />
+    <Compile Include="Assets\EncounterScripts\BaseAbility.cs" />
+    <Compile Include="Assets\EncounterScripts\BaseCooldown.cs" />
+    <Compile Include="Assets\EncounterScripts\BaseEncounter.cs" />
+    <Compile Include="Assets\EncounterScripts\EncounterAbility.cs" />
+    <Compile Include="Assets\EncounterScripts\EncounterAbilityEffect.cs" />
+    <Compile Include="Assets\EncounterScripts\EncounterAttackDescription.cs" />
+    <Compile Include="Assets\EncounterScripts\Encounters\CaveTrollEncounter.cs" />
     <Compile Include="Assets\LoadGameController.cs" />
     <Compile Include="Assets\MainSceneMainController.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />
+    <Compile Include="Assets\RaidMemberItemReward.cs" />
     <Compile Include="Assets\RaidTeamMemberSelectionPrefabScript.cs" />
     <Compile Include="Assets\RosterButtonScript.cs" />
     <Compile Include="Assets\RosterControllerScript.cs" />
+    <Compile Include="Assets\Scenes\RaidScene\BossCastBarScript.cs" />
+    <Compile Include="Assets\Scenes\RaidScene\EncounterVictorySceneController.cs" />
     <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
@@ -112,6 +118,7 @@
     <Compile Include="Assets\Static Scripts\PlayerData.cs" />
     <Compile Include="Assets\Static Scripts\StaticValues.cs" />
     <Compile Include="Assets\Static Scripts\Utility.cs" />
+    <Compile Include="Assets\Units\CharacterItem.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\AssasinAttack.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\BerserkerAttack.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\ClericAttack.cs" />
@@ -127,12 +134,14 @@
     <Compile Include="Assets\Units\Characters\BaseCharacter.cs" />
     <Compile Include="Assets\Units\Characters\BaseHealOrAttackScript.cs" />
     <Compile Include="Assets\Units\Characters\EncounterAdd.cs" />
+    <Compile Include="Assets\Units\Characters\GearStats.cs" />
     <Compile Include="Assets\Units\Characters\HealScripts\BaseHealScript.cs" />
     <Compile Include="Assets\Units\Characters\HealScripts\ClericHealScript.cs" />
     <Compile Include="Assets\Units\Characters\HealScripts\DivinerHealScript.cs" />
     <Compile Include="Assets\Units\Characters\HealScripts\NaturalistHealScript.cs" />
     <Compile Include="Assets\Units\Characters\Raider.cs" />
     <Compile Include="Assets\Units\Characters\RaiderStats.cs" />
+    <Compile Include="Assets\Units\Characters\SkillStats.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

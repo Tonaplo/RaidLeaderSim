@@ -36,20 +36,6 @@ public static class Enums{
         Necromancer,    //Ranged DPS - Occultist
     }
 
-    public enum CharacterAttack
-    {
-        TankStrike,
-        RangedFireball,
-        MeleeStab,
-        HealerSmite,
-    }
-
-    public enum AttackValueTypes
-    {
-        CastTime,
-        BaseDamageMultiplier,
-    }
-
     public enum Ability
     {
         Interrupt,
@@ -85,9 +71,10 @@ public static class Enums{
         ResolveCooldownCounters = 5,
         FightStart = 6,
         FightInProgress = 7,
-        FightWon = 8,
-        FightLost = 9,
-        GoToMainScreen = 10,
+        FightDone = 8,
+        FightWon = 9,
+        FightLost = 10,
+        GoToMainScreen = 11,
 
     }
 
@@ -112,12 +99,30 @@ public static class Enums{
 
     public enum RaidHealingState
     {
-        TankMediumDamage    = 1 << 1,
-        TankHeavyDamage     = 1 << 2,
-        RaidSingleMediumDamage = 1 << 4,
-        RaidSingleHeavyDamage  = 1 << 5,
-        RaidMultiMediumDamage = 1 << 7,
-        RaidMultiHeavyDamage = 1 << 8,
-        RandomTargets       = 1 << 9,
+        TankMediumDamage        = 1 << 1,
+        TankHeavyDamage         = 1 << 2,
+        RaidSingleMediumDamage  = 1 << 4,
+        RaidSingleHeavyDamage   = 1 << 5,
+        RaidMultiMediumDamage   = 1 << 7,
+        RaidMultiHeavyDamage    = 1 << 8,
+        LowestHealthPercent     = 1 << 9,
+    }
+
+    public enum GearTypes
+    {
+        Head = 0,
+        Chest = 1,
+        Leg = 2,
+        Weapon = 3,
+        Jewel = 4,
+        NumGearTypes = 5,
+    }
+
+    public enum SkillTypes
+    {
+        Throughput = 0,
+        Positional = 1,
+        Mechanical = 2,
+        NumSkillTypes = 3,
     }
 }

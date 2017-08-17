@@ -7,8 +7,8 @@ using UnityEngine;
 public class RaiderStats {
 
     //base stats
-    int m_gearLevel = 0;
-    int m_skillLevel = 0;
+    GearStats m_gear;
+    SkillStats m_skill;
     int m_variation = 0;
     int m_averageThroughput = 0;
     Enums.CharacterRole m_charRole;
@@ -17,13 +17,14 @@ public class RaiderStats {
     BaseAbility m_ability;
     BaseCooldown m_cooldown;
 
-    //per fight stats
-    int skillThisAttempt = 0;
-    int throughput = 0;
+    public GearStats Gear { get { return m_gear; } }
+    public SkillStats Skills { get { return m_skill; } }
 
-    public int GetGearLevel() { return m_gearLevel; }
-    public int GetSkillLevel() { return m_skillLevel; }
-    public int GetSkillThisAttempt() { return skillThisAttempt; }
+    //per fight stats
+    float m_varianceMultiplierThisAttempt = 0.0f;
+    int throughput = 0;
+    
+    public float GetVarianceMultiplierThisAttempt() { return m_varianceMultiplierThisAttempt; }
     public int GetVariance() { return m_variation; }
     public float GetVarianceMultiplier() { return 1.0f + (UnityEngine.Random.Range(-GetVariance(), GetVariance()))/100.0f; }
     public int GetAverageThroughput() { return m_averageThroughput; }
@@ -36,11 +37,21 @@ public class RaiderStats {
     public BaseAbility GetAbility() { return m_ability; }
     public BaseCooldown GetCooldown() { return m_cooldown; }
 
-    RaiderStats(int baseLevel)
+    public RaiderStats(int baseLevel)
     {
-        //Generate skill and gear level
-        m_skillLevel = GenerateRandomLevelFromBase(baseLevel);
-        m_gearLevel = GenerateRandomLevelFromBase(baseLevel);
+        int[] starterValues = new int[(int)Enums.SkillTypes.NumSkillTypes];
+        for (int i = 0; i < (int)Enums.SkillTypes.NumSkillTypes; i++)
+        {
+            starterValues[i] = GenerateRandomLevelFromBase(baseLevel);
+        }
+        m_skill = new SkillStats(starterValues);
+
+        starterValues = new int[(int)Enums.GearTypes.NumGearTypes];
+        for (int i = 0; i < (int)Enums.GearTypes.NumGearTypes; i++)
+        {
+            starterValues[i] = GenerateRandomLevelFromBase(baseLevel);
+        }
+        m_gear = new GearStats(starterValues);
         
         m_variation = GenerateVariation();
         ComputeAverageThroughput();
@@ -48,8 +59,8 @@ public class RaiderStats {
 
     public RaiderStats(int _gearLevel, int _skillLevel, int _variation, Enums.CharacterRole _charRole, Enums.CharacterClass _charClass)
     {
-        m_gearLevel = _gearLevel;
-        m_skillLevel = _skillLevel;
+        m_gear = new GearStats(_gearLevel);
+        m_skill = new SkillStats(_skillLevel);
         m_variation = _variation;
         m_charRole = _charRole;
         m_charClass = _charClass;
@@ -57,61 +68,51 @@ public class RaiderStats {
         ComputeAverageThroughput();
     }
 
-    public void ModifySkillLevel(int amount)
+    public void TrainingFinished()
     {
-        m_skillLevel += amount;
-
-        //Clamp the skill level
-        if (m_skillLevel > StaticValues.MaxSkill)
-            m_skillLevel = StaticValues.MaxSkill;
-        else if (m_skillLevel < 1)
-            m_skillLevel = 1;
-
-        ComputeAverageThroughput();
+        m_skill.TrainingFinished();
     }
 
-    public void ModifyGearLevel(int amount)
+    public void ReCalculateRaiderStats()
     {
-        m_gearLevel += amount;
-
-        //GearLevel can never be below 0
-        m_gearLevel = m_gearLevel < 0 ? 0 : m_gearLevel;
-
+        Gear.CalculateItemlevels();
+        Skills.CalculateAverageSkillLevel();
+        SetAbilityFromSpec();
+        SetCooldownFromSpec();
         ComputeAverageThroughput();
+        ComputeSkillThisAttempt();
+        ComputeThroughput();
     }
-
+    
     public int ComputeThroughput()
     {
-        throughput = ComputeThroughputInternal(GetSkillThisAttempt());
+        throughput = Mathf.RoundToInt(ComputeThroughputInternal() * GetVarianceMultiplierThisAttempt());
         return throughput;
     }
 
     public int ComputeAverageThroughput()
     {
-        m_averageThroughput = ComputeThroughputInternal(GetSkillLevel());
+        m_averageThroughput = ComputeThroughputInternal();
         return m_averageThroughput;
     }
 
-    int ComputeThroughputInternal(int basevalue)
+    int ComputeThroughputInternal()
     {
         //Cast to float for precision
-        float floatAmount = basevalue;
-
+        float floatAmount = m_gear.TotalItemLevel / 2;
+        
         //Multiply with Gearlevel - increases the base by a percentage
-        floatAmount *= (1.0f + ((float)GetGearLevel() / 30.0f));
+        floatAmount *= (0.5f + ((float)m_skill.GetSkillLevel(Enums.SkillTypes.Throughput) / 25.0f));
 
         //Adjust so we always contribute 'something'
-        floatAmount = (float)StaticValues.MinimumThroughput > floatAmount ? StaticValues.MinimumThroughput : floatAmount;
+        floatAmount = StaticValues.MinimumThroughput > floatAmount ? StaticValues.MinimumThroughput : floatAmount;
 
         return (int)floatAmount;
     }
 
     public void ComputeSkillThisAttempt()
     {
-        skillThisAttempt = (int)(GetSkillLevel() * GetVarianceMultiplier());
-        //Note that this enables characters to go over the 100 skill cap
-        if (skillThisAttempt <= 0)
-            skillThisAttempt = 1;
+        m_varianceMultiplierThisAttempt = GetVarianceMultiplier();
 
         ComputeThroughput();
     }
@@ -313,7 +314,6 @@ public class RaiderStats {
         rs.m_charSpec = Utility.GetSpecFromRoleAndClass(rs.m_charClass, rs.m_charRole);
         rs.SetAbilityFromSpec();
         rs.SetCooldownFromSpec();
-        rs.SetBaseAbility();
         rs.ComputeAverageThroughput();
         rs.ComputeThroughput();
     }
@@ -323,17 +323,13 @@ public class RaiderStats {
         m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);
         SetAbilityFromSpec();
         SetCooldownFromSpec();
-        SetBaseAbility();
         ComputeAverageThroughput();
         ComputeThroughput();
     }
-
     
-
     void SetAbilityFromSpec()
     {
         //Code to give them correct abilities
-
         switch (m_charSpec)
         {
             case Enums.CharacterSpec.Guardian:
@@ -366,7 +362,14 @@ public class RaiderStats {
             case Enums.CharacterSpec.Elementalist:
                 m_ability = new BaseAbility("ElementalistSlow", "Provides the m_ability to slow", Enums.Ability.Slow);
                 break;
+            case Enums.CharacterSpec.Necromancer:
+                m_ability = new BaseAbility("NecromancerSlow", "Provides the m_ability to slow", Enums.Ability.Slow);
+                break;
+            case Enums.CharacterSpec.Scourge:
+                m_ability = new BaseAbility("ScourgeStun", "Provides the m_ability to stun", Enums.Ability.Stun);
+                break;
             default:
+                Debug.LogAssertion("Spec Not Found!");
                 break;
         }
     }
@@ -375,66 +378,56 @@ public class RaiderStats {
     {
         //Code to give them correct abilities
         m_cooldown = new BaseCooldown();
+        
         switch (m_charSpec)
         {
             case Enums.CharacterSpec.Guardian:
                 m_cooldown.Initialize("Immunity", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
                 break;
             case Enums.CharacterSpec.Knight:
-                m_cooldown.Initialize("TankCD", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
+                m_cooldown.Initialize("TankCooldown", "Provides the m_ability to TankCooldown", Enums.Cooldowns.TankCooldown);
                 break;
             case Enums.CharacterSpec.Cleric:
-                m_cooldown.Initialize("HealingCooldown", "Provides the m_ability to immune", Enums.Cooldowns.HealingCooldown);
+                m_cooldown.Initialize("HealingCooldown", "Provides the m_ability to HealingCooldown", Enums.Cooldowns.HealingCooldown);
                 break;
             case Enums.CharacterSpec.Diviner:
                 m_cooldown.Initialize("HealingCooldown", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
                 break;
             case Enums.CharacterSpec.Naturalist:
-                m_cooldown.Initialize("TankCooldown", "Provides the m_ability to immune", Enums.Cooldowns.TankCooldown);
+                m_cooldown.Initialize("TankCooldown", "Provides the m_ability to TankCooldown", Enums.Cooldowns.TankCooldown);
                 break;
             case Enums.CharacterSpec.Berserker:
-                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to immune", Enums.Cooldowns.AoECooldown);
+                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to AoECooldown", Enums.Cooldowns.AoECooldown);
                 break;
             case Enums.CharacterSpec.Assassin:
-                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to immune", Enums.Cooldowns.SingleTargetCooldown);
+                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to SingleTargetCooldown", Enums.Cooldowns.SingleTargetCooldown);
                 break;
             case Enums.CharacterSpec.Ranger:
-                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to immune", Enums.Cooldowns.AoECooldown);
+                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to AoECooldown", Enums.Cooldowns.AoECooldown);
                 break;
             case Enums.CharacterSpec.Wizard:
-                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to immune", Enums.Cooldowns.SingleTargetCooldown);
+                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to SingleTargetCooldown", Enums.Cooldowns.SingleTargetCooldown);
                 break;
             case Enums.CharacterSpec.Elementalist:
                 m_cooldown.Initialize("Immunity", "Provides the m_ability to immune", Enums.Cooldowns.Immunity);
                 break;
-            default:
+            case Enums.CharacterSpec.Necromancer:
+                m_cooldown.Initialize("SingleTargetCooldown", "Provides the m_ability to SingleTargetCooldown", Enums.Cooldowns.SingleTargetCooldown);
                 break;
-        }
-    }
-
-    void SetBaseAbility()
-    {
-        switch (m_charRole)
-        {
-            case Enums.CharacterRole.Tank:
-                break;
-            case Enums.CharacterRole.Healer:
-                break;
-            case Enums.CharacterRole.RangedDPS:
-                break;
-            case Enums.CharacterRole.MeleeDPS:
+            case Enums.CharacterSpec.Scourge:
+                m_cooldown.Initialize("AoECooldown", "Provides the m_ability to AoECooldown", Enums.Cooldowns.AoECooldown);
                 break;
             default:
+                Debug.LogAssertion("Spec Not Found!");
                 break;
         }
-        m_ability = null;
     }
 
     //DEBUG
     public void SetTestValue()
     {
-        m_gearLevel = 10;
-        m_skillLevel = 10;
+        m_gear = new GearStats(10);
+        m_skill = new SkillStats(10);
         m_variation = 0;
 
         FinishRaiderStatGeneration();

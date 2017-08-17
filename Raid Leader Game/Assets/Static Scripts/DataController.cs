@@ -15,6 +15,7 @@ public class DataController : MonoBehaviour
         public Raider Player;
         public List<Raider> Roster;
         public string TeamName;
+        public int TeamGold;
 
     }
     public static DataController controller;
@@ -41,6 +42,7 @@ public class DataController : MonoBehaviour
         data.Player = PlayerData.PlayerCharacter;
         data.Roster = PlayerData.Roster;
         data.TeamName = PlayerData.RaidTeamName;
+        data.TeamGold = PlayerData.RaidTeamGold;
 
         bf.Serialize(file, data);
         file.Close();
@@ -55,7 +57,7 @@ public class DataController : MonoBehaviour
             SaveData data = (SaveData)bf.Deserialize(file);
             file.Close();
 
-            PlayerData.InitializeDataFromSaveData(data.Player, data.Roster, data.TeamName);
+            PlayerData.InitializeDataFromSaveData(data.Player, data.Roster, data.TeamName, data.TeamGold);
 
             return true;
         }

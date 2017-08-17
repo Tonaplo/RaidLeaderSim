@@ -11,6 +11,7 @@ public class RaidSceneController : MonoBehaviour {
     public Text raidText;
     public Text encounterText;
     public Canvas canvas;
+    public BossCastBarScript BossCastScript;
 
     Enums.EncounterSteps currentStep = Enums.EncounterSteps.EncounterStart;
     int currentSubStep = -1;
@@ -21,6 +22,7 @@ public class RaidSceneController : MonoBehaviour {
     MeterControllerScript m_damageMcs;
     MeterControllerScript m_healingMcs;
     float m_fightStartTime;
+    int m_numDeadRaidMembers = 0;
 
     public List<RaiderScript> GetRaid() { return m_raiderScripts; }
 
@@ -32,7 +34,7 @@ public class RaidSceneController : MonoBehaviour {
     void Start () {
         all = PlayerData.RaidTeam;
         CreateRaidHealthBars();
-        CreateTestEncounter();
+        CreateEncounter();
         SetupUI();
         
 
@@ -68,14 +70,15 @@ public class RaidSceneController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (currentStep == Enums.EncounterSteps.FightInProgress && IsBossDead()) {
+        if ((currentStep == Enums.EncounterSteps.FightInProgress && IsBossDead()) || (m_numDeadRaidMembers == StaticValues.RaidTeamSize))
+        {
             currentStep++;
             AdvanceNextStep();
         }
     }
 
     public void AdvanceNextStep() {
-
+        
         encounterText.text = "Current step is " + (int)currentStep;
         switch (currentStep)
         {
@@ -110,24 +113,27 @@ public class RaidSceneController : MonoBehaviour {
                 }
                 encounter.BeginEncounter();
                 m_fightStartTime = Time.time;
+                raidText.text = "";
                 currentStep++;
-                encounterText.text = "Current step is " + (int)currentStep;
                 break;
             case Enums.EncounterSteps.FightInProgress:
                 break;
-            case Enums.EncounterSteps.FightWon:
+            case Enums.EncounterSteps.FightDone:
                 raidText.text = "Total Stats:\n\n";
                 for (int i = 0; i < all.Count; i++)
                 {
-                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats.GetCurrentSpec().ToString() + " (ThPut: " + all[i].RaiderStats.GetThroughput() + ", skill: " + all[i].RaiderStats.GetSkillLevel() + ", STA: " + all[i].RaiderStats.GetSkillThisAttempt() + ", gear: " + all[i].RaiderStats.GetGearLevel() + ", var: " + all[i].RaiderStats.GetVariance() + " %)\n";
+                    raidText.text += all[i].GetName() + " - " + all[i].RaiderStats.GetCurrentSpec().ToString() + " (ThPut: " + all[i].RaiderStats.GetThroughput() + ", skill: " + all[i].RaiderStats.Skills.AverageSkillLevel + ", VTA: " + all[i].RaiderStats.GetVarianceMultiplierThisAttempt() + ", gear: " + all[i].RaiderStats.Gear.AverageItemLevel + ", var: " + all[i].RaiderStats.GetVariance() + " %)\n";
                 }
                 m_damageMcs.FightEnded(Time.time - m_fightStartTime);
                 m_healingMcs.FightEnded(Time.time - m_fightStartTime);
                 currentStep++;
                 break;
-            case Enums.EncounterSteps.FightLost:
+            case Enums.EncounterSteps.FightWon:
+                if(encounter.IsDead())
+                    SceneManager.LoadScene("EncounterVictoryScene");
                 currentStep++;
                 break;
+            case Enums.EncounterSteps.FightLost:
             case Enums.EncounterSteps.GoToMainScreen:
                 DataController.controller.Save();
                 SceneManager.LoadScene("MainGameScene");
@@ -153,6 +159,60 @@ public class RaidSceneController : MonoBehaviour {
     public void DoHeal(int healAmount, string healer, string heal, int index)
     {
         m_healingMcs.AddAmountToEntry(healer, index, healAmount);
+    }
+
+    public void RaiderDied()
+    {
+        m_numDeadRaidMembers++;
+    }
+
+    public void BeginCastingAbility(EncounterAbility ab)
+    {
+        BossCastScript.InitiateCast(ab.CastTime, ab.Name);
+
+        for (int i = 0; i < m_raiderScripts.Count; i++)
+        {
+            if (m_raiderScripts[i].Raider.RaiderStats.GetAbility().Ability == ab.Ability && !m_raiderScripts[i].IsDead())
+            {
+                m_raiderScripts[i].HealthBarButton.interactable = true;
+                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.98f);
+            }
+            else {
+                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.grey.r , Color.grey.g , Color.grey.b, 0.98f);
+            }
+        }
+    }
+
+    public void EndCastingAbility()
+    {
+        for (int i = 0; i < m_raiderScripts.Count; i++)
+        {
+            m_raiderScripts[i].HealthBarButton.interactable = false;
+            m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+        }
+    }
+
+    public void AttemptToCounterCurrentEncounterAbility(Raider counter)
+    {
+        for (int i = 0; i < m_raiderScripts.Count; i++)
+        {
+            if (m_raiderScripts[i].Raider == counter)
+            {
+                m_raiderScripts[i].HealthBarButton.interactable = false;
+                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.grey.r, Color.grey.g, Color.grey.b, 0.98f);
+                break;
+            }
+        }
+
+        bool success = encounter.AttemptToCounterCurrentAbility(counter);
+
+        raidText.text = counter.GetName() + " tried to counter and" + (success ? " succeeded!\n" : " failed!\n") + raidText.text;
+        if (success)
+        {
+            EndCastingAbility();
+            BossCastScript.StopCasting();
+            encounter.CurrentAbilityCountered();
+        }
     }
 
     void CalculateEncounterSkill() {
@@ -184,6 +244,11 @@ public class RaidSceneController : MonoBehaviour {
             currentSubStep = 0;
             currentStep++;
         }
+        else
+        {
+            currentSubStep = 0;
+            currentStep++;
+        }
     }
 
     void CreateRaidHealthBars()
@@ -192,6 +257,7 @@ public class RaidSceneController : MonoBehaviour {
         for (int i = 0; i < all.Count; i++)
         {
             GameObject tempTwo = GameObject.Instantiate(HealthBarPrefab);
+            tempTwo.name = all[i].GetName();
             tempTwo.transform.SetParent(canvas.transform);
             tempTwo.AddComponent<RaiderScript>();
             m_raiderScripts.Add(tempTwo.AddComponent<RaiderScript>());
@@ -199,19 +265,15 @@ public class RaidSceneController : MonoBehaviour {
         }
     }
     
-    //DEBUG FUNCTIONS
+    void CreateEncounter() {
 
-    void CreateTestEncounter() {
-        List<EncounterAbility> abilities = new List<EncounterAbility>();
-
-        abilities.Add(new EncounterAbility("First Ability", "Generic m_ability that should be interrupted", Enums.Ability.Interrupt, new EncounterAbilityEffect(10, 10)));
-        abilities.Add(new EncounterAbility("Second Ability", "Generic m_ability that should be dispelled", Enums.Ability.Dispel, new EncounterAbilityEffect(10, 10)));
-
-        List<BaseCooldown> cooldowns = new List<BaseCooldown>();
+        encounter = Utility.CurrentEncounter;
 
         GameObject temp = GameObject.Instantiate(HealthBarPrefab);
+        temp.name = encounter.Name;
         temp.transform.SetParent(canvas.transform);
 
-        encounter = new BaseEncounter("Basic Encounter", 20000, Enums.Difficulties.Easy, abilities, cooldowns, m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
+        encounter.InitializeForRaid(m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
+        Utility.SetCurrentEncounter(encounter);
     }
 }

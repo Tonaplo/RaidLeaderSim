@@ -56,7 +56,7 @@ public class RaidTeamMemberSelectionPrefabScript : MonoBehaviour {
             MainSpecButtonText.fontSize = 10;
         }
         else
-            MainSpecButtonText.text = m_rosterMember.RaiderStats.GetCurrentSpec() + "\n" + GetRoleString(mainSpecRole);
+            MainSpecButtonText.text = m_rosterMember.RaiderStats.GetCurrentSpec() + "\n" + Utility.GetRoleString(mainSpecRole);
 
         Enums.CharacterRole offSpecRole = m_rosterMember.RaiderStats.GetOffSpecRole();
         bool isOffSpecDPS = (offSpecRole == Enums.CharacterRole.MeleeDPS) || (offSpecRole == Enums.CharacterRole.RangedDPS);
@@ -73,19 +73,9 @@ public class RaidTeamMemberSelectionPrefabScript : MonoBehaviour {
             OffSpecButtonText.fontSize = 10;
         }
         else
-            OffSpecButtonText.text = m_rosterMember.RaiderStats.GetOffSpec() + "\n" + GetRoleString(offSpecRole);
+            OffSpecButtonText.text = m_rosterMember.RaiderStats.GetOffSpec() + "\n" + Utility.GetRoleString(offSpecRole);
     }
-
-    string GetRoleString(Enums.CharacterRole role) {
-        if (role == Enums.CharacterRole.RangedDPS)
-            return "RDPS";
-
-        if (role == Enums.CharacterRole.MeleeDPS)
-            return "MDPS";
-
-        return role.ToString();
-    }
-
+    
     public void ChooseMainSpec()
     {
         MainSpecButton.interactable = false;

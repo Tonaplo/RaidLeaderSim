@@ -12,15 +12,18 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
     public Button NextButton;
     public Text NextButtonText;
     public Button RaidButton;
+    public RectTransform RaidContainerRectTransform;
+    public Scrollbar rosterScrollBar;
 
     int m_selectionStep = 0;
     List<GameObject> m_listOfRosterButtons = new List<GameObject>();
 
 	// Use this for initialization
 	void Start () {
+        PlayerData.ClearCurrentRaidTeam();
         RaidButton.interactable = false;
         RosterMemberPrefab.SetActive(false);
-        SetupChoiceButtons();
+        PopulateList();
         NextButtonText.text = "Choose Healers";
     }
 	
@@ -29,7 +32,7 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
 		
 	}
 
-    void SetupChoiceButtons()
+    void PopulateList()
     {
         for (int i = 0; i < m_listOfRosterButtons.Count; i++)
         {
@@ -48,7 +51,7 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
             currentRole = Enums.CharacterRole.RangedDPS;
         else
             return;
-        
+
 
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
@@ -56,23 +59,56 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
             Enums.CharacterRole offRole = PlayerData.Roster[i].RaiderStats.GetOffSpecRole();
             if (mainRole == currentRole || (currentRole == Enums.CharacterRole.RangedDPS && mainRole == Enums.CharacterRole.MeleeDPS))
                 newChoices.Add(PlayerData.Roster[i]);
-             else if (offRole == currentRole || (currentRole == Enums.CharacterRole.RangedDPS && offRole == Enums.CharacterRole.MeleeDPS))
+            else if (offRole == currentRole || (currentRole == Enums.CharacterRole.RangedDPS && offRole == Enums.CharacterRole.MeleeDPS))
                 newChoices.Add(PlayerData.Roster[i]);
         }
 
         newChoices.RemoveAll(x => PlayerData.RaidTeam.Contains(x));
 
+        RectTransform rowRectTransform = RosterMemberPrefab.GetComponent<RectTransform>();
 
+        //calculate the width and height of each child item.
+        int columnCount = 1;
+        float width = 285;
+        float height = 50;
+        int rowCount = newChoices.Count;
+        if (newChoices.Count % rowCount > 0)
+            rowCount++;
+
+        //adjust the height of the container so that it will just barely fit all its children
+        float scrollHeight = height * rowCount;
+        RaidContainerRectTransform.offsetMin = new Vector2(RaidContainerRectTransform.offsetMin.x, -scrollHeight / 2);
+        RaidContainerRectTransform.offsetMax = new Vector2(RaidContainerRectTransform.offsetMax.x, scrollHeight / 2);
+
+        int j = 0;
         for (int i = 0; i < newChoices.Count; i++)
         {
-            GameObject temp = GameObject.Instantiate(RosterMemberPrefab);
-            temp.SetActive(true);
-            temp.transform.SetParent(RosterMemberImage.transform);
-            Vector3 position = RosterMemberPrefab.transform.position + new Vector3(0, -(50 * i), 0);
-            temp.transform.SetPositionAndRotation(position, Quaternion.identity);
-            temp.GetComponent<RaidTeamMemberSelectionPrefabScript>().Initialize(newChoices[i], currentRole, this);
-            m_listOfRosterButtons.Add(temp);
+            //this is used instead of a double for loop because itemCount may not fit perfectly into the rows/columns
+            if (i % columnCount == 0)
+                j++;
+
+            //create a new item, name it, and set the parent
+            GameObject newItem = Instantiate(RosterMemberPrefab) as GameObject;
+            newItem.SetActive(true);
+            newItem.name = gameObject.name + " item at (" + i + "," + j + ")";
+            newItem.transform.SetParent(RaidContainerRectTransform.transform);
+
+            //move and size the new item
+            RectTransform rectTransform = newItem.GetComponent<RectTransform>();
+
+            float x = -RaidContainerRectTransform.rect.width / 2 + width * (i % columnCount);
+            float y = RaidContainerRectTransform.rect.height / 2 - height * j;
+            rectTransform.offsetMin = new Vector2(x, y);
+
+            x = rectTransform.offsetMin.x + width;
+            y = rectTransform.offsetMin.y + height;
+            rectTransform.offsetMax = new Vector2(x, y);
+
+            newItem.GetComponent<RaidTeamMemberSelectionPrefabScript>().Initialize(newChoices[i], currentRole, this);
+            m_listOfRosterButtons.Add(newItem);
         }
+
+        rosterScrollBar.value = 1.0f;
     }
 
     public void ResetRaidTeam()
@@ -89,7 +125,7 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
         if (PlayerData.RaidTeam.Count == StaticValues.RaidTeamSize)
         {
             m_selectionStep++;
-            SetupChoiceButtons();
+            PopulateList();
             RaidButton.interactable = true;
         }
     }
@@ -101,7 +137,7 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
             NextButton.gameObject.SetActive(false);
 
         m_selectionStep++;
-        SetupChoiceButtons();
+        PopulateList();
     }
 
     public void OnClickExitAttempt()

@@ -22,7 +22,7 @@ public class DivinerHealScript : BaseHealScript
                                             new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
                                             new Priority(5, Enums.RaidHealingState.RaidSingleHeavyDamage),
                                             new Priority(6, Enums.RaidHealingState.RaidSingleMediumDamage),
-                                            new Priority(7, Enums.RaidHealingState.RandomTargets), };
+                                            new Priority(7, Enums.RaidHealingState.LowestHealthPercent), };
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)

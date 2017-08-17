@@ -29,7 +29,7 @@ public class ClericHealScript : BaseHealScript
                                             new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
                                             new Priority(5, Enums.RaidHealingState.RaidSingleMediumDamage),
                                             new Priority(6, Enums.RaidHealingState.TankMediumDamage),
-                                            new Priority(7, Enums.RaidHealingState.RandomTargets), };
+                                            new Priority(7, Enums.RaidHealingState.LowestHealthPercent), };
     }
 
     IEnumerator DoHeal(float castTime, int index, Raider caster, RaidSceneController rsc, RaiderScript rs)

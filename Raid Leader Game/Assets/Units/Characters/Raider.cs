@@ -21,9 +21,7 @@ public class Raider : BaseCharacter {
     public void RecalculateRaider()
     {
         CheckForTrainingEnd();
-        stats.ComputeAverageThroughput();
-        stats.ComputeThroughput();
-        stats.ComputeSkillThisAttempt();
+        stats.ReCalculateRaiderStats();
         CalculateMaxHealth();
     }
 
@@ -43,11 +41,13 @@ public class Raider : BaseCharacter {
         {
             case Enums.CharacterRole.Tank:
                 //Guardians have 15% more health
-                pointsPerGearlevel = 2.0f;
                 if (stats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)
                     value *= 2.0f * 1.15f;
                 else
                     value *= 2.0f;
+
+                pointsPerGearlevel = 2.0f;
+
                 break;
             case Enums.CharacterRole.Healer:
                 value *= 0.8f;
@@ -62,7 +62,7 @@ public class Raider : BaseCharacter {
             default:
                 break;
         }
-        value += (int)(RaiderStats.GetGearLevel() * pointsPerGearlevel);
+        value += (int)(RaiderStats.Gear.TotalItemLevel * pointsPerGearlevel);
         SetMaxHealth((int)value);
     }
 
@@ -83,10 +83,7 @@ public class Raider : BaseCharacter {
         
         if (DateTime.Now > m_activityFinished)
         {
-            int currentSkillLevel = stats.GetSkillLevel();
-            int increase = (int)((float)currentSkillLevel * UnityEngine.Random.Range(0.01f, 0.05f));
-            increase = increase == 0 ? 1 : increase;
-            stats.ModifySkillLevel(increase);
+            stats.TrainingFinished();
             m_charStatus = Enums.CharacterStatus.Ready;
             return true;
         }

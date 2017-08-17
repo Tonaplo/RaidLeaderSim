@@ -17,7 +17,9 @@ public class MainSceneMainController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         m_rosterScript = RosterControllerPrefab.GetComponent<RosterControllerScript>();
+
         m_rosterScript.SetActive(false);
+        OnClickRoster();
     }
 	
 	// Update is called once per frame
@@ -27,7 +29,6 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickRoster()
     {
-
         m_rosterScript.SetActive(true);
     }
 
@@ -39,6 +40,6 @@ public class MainSceneMainController : MonoBehaviour {
     public void OnClickRaid()
     {
         if(PlayerData.CanRaidWithRoster())
-            SceneManager.LoadScene("ChooseRaidTeamForAttempt");
+            SceneManager.LoadScene("ChooseEncounterScene");
     }
 }

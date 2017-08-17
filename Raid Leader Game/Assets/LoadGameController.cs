@@ -36,13 +36,18 @@ public class LoadGameController : MonoBehaviour {
 
     public void LoadButtonClicked()
     {
-        if (input.text.Length != 0)
+        if (StartButton.interactable != true)
         {
-            if (DataController.controller.Load(input.text))
-                LoadSuccessful();
-            else
-                LoadFailed();
+            if (input.text.Length != 0)
+            {
+                if (DataController.controller.Load(input.text))
+                    LoadSuccessful();
+                else
+                    LoadFailed();
+            }
         }
+        else
+            StartGameClicked();
     }
 
     void LoadSuccessful()
@@ -56,8 +61,8 @@ public class LoadGameController : MonoBehaviour {
 
         CharacterText.text = "Class: " + PlayerData.PlayerCharacter.RaiderStats.GetClass() +
                              "\nMain Spec: " + PlayerData.PlayerCharacter.RaiderStats.GetCurrentSpec() +
-                             "\nSkill Level: " + PlayerData.PlayerCharacter.RaiderStats.GetSkillLevel() +
-                             "\nGear Level: " + PlayerData.PlayerCharacter.RaiderStats.GetGearLevel() +
+                             "\nSkill Level: " + PlayerData.PlayerCharacter.RaiderStats.Skills.AverageSkillLevel +
+                             "\nGear Level: " + PlayerData.PlayerCharacter.RaiderStats.Gear.AverageItemLevel +
                              "\nAverage Throughout: " + PlayerData.PlayerCharacter.RaiderStats.GetAverageThroughput();
 
         float averageGearLevel = 0.0f;
@@ -66,8 +71,8 @@ public class LoadGameController : MonoBehaviour {
 
         for (int i = 0; i < numMembers; i++)
         {
-            averageGearLevel += PlayerData.Roster[i].RaiderStats.GetGearLevel();
-            averageSkillLevel += PlayerData.Roster[i].RaiderStats.GetSkillLevel();
+            averageGearLevel += PlayerData.Roster[i].RaiderStats.Gear.AverageItemLevel;
+            averageSkillLevel += PlayerData.Roster[i].RaiderStats.Skills.AverageSkillLevel;
         }
 
         averageGearLevel /= numMembers;

@@ -148,7 +148,7 @@ public class BaseHealScript : BaseHealOrAttackScript
 
     void GetRaidState(out int stateMask)
     {
-        stateMask = (int)Enums.RaidHealingState.RandomTargets;
+        stateMask = (int)Enums.RaidHealingState.LowestHealthPercent;
 
         List<RaiderScript> tanks = new List<RaiderScript>();
         GetTanks(ref tanks);
@@ -249,8 +249,17 @@ public class BaseHealScript : BaseHealOrAttackScript
                     }
                 }
                 break;
-            case Enums.RaidHealingState.RandomTargets:
-                targets = GetRandomTargets();
+            case Enums.RaidHealingState.LowestHealthPercent:
+                {
+                    int lowestIndex = 0;
+                    for (int i = 1; i < Raid.Count; i++)
+                    {
+                        if (Raid[i].GetHealthPercent() < Raid[lowestIndex].GetHealthPercent())
+                            lowestIndex = i;
+                    }
+
+                    targets.Add(Raid[lowestIndex]);
+                }
                 break;
             default:
                 break;

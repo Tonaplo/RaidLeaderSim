@@ -12,7 +12,9 @@ public class RosterButtonScript : MonoBehaviour {
     Image Fill;
     Raider m_raider;
     Text m_headerText;
-    Text m_bodyText;
+    Text m_leftBodyText;
+    Text m_rightBodyText;
+    Text m_abilityText;
     RosterControllerScript m_rcs;
 
     BaseHealOrAttackScript attackOrHealScript;
@@ -27,11 +29,13 @@ public class RosterButtonScript : MonoBehaviour {
 		
 	}
 
-    public void SetupButton(Raider r, ref Text header, ref Text body, RosterControllerScript rcs)
+    public void SetupButton(Raider r, ref Text header, ref Text lbody, ref Text rbody, ref Text abilityT, RosterControllerScript rcs)
     {
         m_raider = r;
         m_headerText = header;
-        m_bodyText = body;
+        m_leftBodyText = lbody;
+        m_rightBodyText = rbody;
+        m_abilityText = abilityT;
         m_rcs = rcs;
         ButtonText.text = r.GetName() + "\n" + r.RaiderStats.GetRole();
 
@@ -39,8 +43,30 @@ public class RosterButtonScript : MonoBehaviour {
             Fill = GetComponent<Image>();
 
         Fill.color = Utility.GetColorFromClass(r.RaiderStats.GetClass());
+    }
 
-        if (r.RaiderStats.GetRole() == Enums.CharacterRole.Healer)
+    public void OnClick() {
+        m_headerText.text = m_raider.GetName();
+        SetupClass();
+
+        if (m_rcs.SkillButton.IsInteractable())
+            SetupGear();
+        else
+            SetupSkills();
+
+        if (!m_rcs.MoveButton.IsInteractable())
+            SetupMove();
+        else if (!m_rcs.CounterButton.IsInteractable())
+            SetupCounter();
+        else
+            SetupCooldown();
+
+        m_rcs.SetCurrentRaider(m_raider);
+    }
+
+    void SetupClass()
+    {
+        if (m_raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer)
         {
             BaseHealScript healScript;
             m_raider.RaiderStats.GetBaseHealingScript(out healScript);
@@ -48,36 +74,60 @@ public class RosterButtonScript : MonoBehaviour {
         }
         else
             m_raider.RaiderStats.GetBaseAttackScript(out attackOrHealScript);
+
+        m_leftBodyText.text = "Class: " + m_raider.RaiderStats.GetClass() + "\n";
+        m_leftBodyText.text += "Current Spec: " + m_raider.RaiderStats.GetCurrentSpec() + " (" + m_raider.RaiderStats.GetRole() + ")\n";
+        m_leftBodyText.text += "Off Spec: " + m_raider.RaiderStats.GetOffSpec() + " (" + m_raider.RaiderStats.GetOffSpecRole() + ")\n";
+        m_leftBodyText.text += "Performance Variance: " + m_raider.RaiderStats.GetVariance() + "%\n";
+        m_leftBodyText.text += "Average Throughput: " + m_raider.RaiderStats.GetAverageThroughput() + "\n";
     }
 
-    public void OnClick() {
-        m_headerText.text = m_raider.GetName();
+    void SetupSkills()
+    {
+        m_rightBodyText.text = "Skills:\n";
 
-        m_bodyText.text = "Class: " + m_raider.RaiderStats.GetClass() + "\n";
-        m_bodyText.text += "Current Spec: " + m_raider.RaiderStats.GetCurrentSpec() + " (" + m_raider.RaiderStats.GetRole() + ")\n";
-        m_bodyText.text += "Off Spec: " + m_raider.RaiderStats.GetOffSpec() + " (" + m_raider.RaiderStats.GetOffSpecRole() + ")\n\n";
-        m_bodyText.text += "Skill Level: " + m_raider.RaiderStats.GetSkillLevel() + " \\ 100";
+        for (int i = 0; i < (int)Enums.SkillTypes.NumSkillTypes; i++)
+        {
+            m_rightBodyText.text += ((Enums.SkillTypes)i).ToString() + ": " + m_raider.RaiderStats.Skills.GetSkillLevel((Enums.SkillTypes)i) + " \\ 100\n";
+        }
 
         if (m_raider.IsInStatus(Enums.CharacterStatus.InTraining))
         {
             TimeSpan remaining = (m_raider.ActivityFinished - DateTime.Now);
-            m_bodyText.text += "                In training: " + ((int)remaining.TotalSeconds).ToString() + " sec left\n";
+            m_rightBodyText.text += "In training: " + ((int)remaining.TotalSeconds).ToString() + " sec left";
         }
-        else
-            m_bodyText.text += "\n";
+    }
 
-        m_bodyText.text += "Gear Level: " + m_raider.RaiderStats.GetGearLevel() + "\n";
-        m_bodyText.text += "Performance Variance: " + m_raider.RaiderStats.GetVariance() + "%\n";
-        m_bodyText.text += "Average Throughput: " + m_raider.RaiderStats.GetAverageThroughput() + "\n";
+    void SetupGear()
+    {
+        m_rightBodyText.text = "Gear:\n";
+        for (int i = 0; i < (int)Enums.GearTypes.NumGearTypes; i++)
+        {
+            m_rightBodyText.text += ((Enums.GearTypes)i).ToString() + ": " + m_raider.RaiderStats.Gear.GetItemLevelOfSlot((Enums.GearTypes)i) + " \\ 100\n";
+        }
+        m_rightBodyText.text += "Average Itemlevel: " + m_raider.RaiderStats.Gear.AverageItemLevel + "\n";
+        m_rightBodyText.text += "Total Itemlevel: " + m_raider.RaiderStats.Gear.TotalItemLevel;
+    }
 
-        
+    void SetupMove()
+    {
+        m_abilityText.text = "Special Move - " + attackOrHealScript.GetName() + ":";
+        m_abilityText.text += "\nCast Time: " + attackOrHealScript.GetBaseCastTimeAsString();
+        m_abilityText.text += "                       Multiplier: " + attackOrHealScript.GetBaseMultiplierAsString();
+        m_abilityText.text += "\n\n" + attackOrHealScript.GetDescription();
+    }
 
+    void SetupCounter()
+    {
+        m_abilityText.text = "Counter Ability - " + m_raider.RaiderStats.GetAbility().Name + ":";
+        m_abilityText.text += "\nCan be used to counter " + m_raider.RaiderStats.GetAbility().Ability;
+        m_abilityText.text += "\n\n" + m_raider.RaiderStats.GetAbility().Description;
+    }
 
-        m_bodyText.text += "\nAbility - " + attackOrHealScript.GetName() + ":";
-        m_bodyText.text += "\nCast Time: " + attackOrHealScript.GetBaseCastTimeAsString();
-        m_bodyText.text += "\nMultiplier: " + attackOrHealScript.GetBaseMultiplierAsString();
-        m_bodyText.text += "\n\n" + attackOrHealScript.GetDescription();
-
-        m_rcs.SetCurrentRaider(m_raider);
+    void SetupCooldown()
+    {
+        m_abilityText.text = "Cooldown - " + m_raider.RaiderStats.GetCooldown().Name + ":";
+        m_abilityText.text += "\nCan be used as a " + m_raider.RaiderStats.GetCooldown().Cooldown;
+        m_abilityText.text += "\n\n" + m_raider.RaiderStats.GetCooldown().Description;
     }
 }

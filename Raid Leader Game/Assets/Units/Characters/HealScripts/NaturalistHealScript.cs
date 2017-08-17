@@ -24,7 +24,7 @@ public class NaturalistHealScript : BaseHealScript
                                             new Priority(1, Enums.RaidHealingState.TankMediumDamage),
                                             new Priority(5, Enums.RaidHealingState.RaidMultiHeavyDamage),
                                             new Priority(6, Enums.RaidHealingState.RaidSingleHeavyDamage),
-                                            new Priority(7, Enums.RaidHealingState.RandomTargets), };
+                                            new Priority(7, Enums.RaidHealingState.LowestHealthPercent), };
     }
 
     public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)

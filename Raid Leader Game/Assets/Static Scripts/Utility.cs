@@ -4,7 +4,15 @@ using System.Collections.Generic;
 
 public static class Utility
 {
+    static BaseEncounter m_currentEncounter;
+    public static BaseEncounter CurrentEncounter{ get { return m_currentEncounter; } }
     static List<string> names;
+
+    public static void DebugInitalize()
+    {
+        Initialize();
+        PlayerData.GenerateDebugRoster();
+    }
 
     public static void Initialize() {
         names = new List<string>
@@ -97,6 +105,7 @@ public static class Utility
 
     }
 
+    #region Character Related
     public static void GetRandomCharacterName(ref List<string> outNames, int numNamesNeeded) {
         List<string> namePool = new List<string>(names);
 
@@ -121,16 +130,27 @@ public static class Utility
         return Random.Range(baseCastTime * 0.8f, 1.2f * baseCastTime);
     }
 
+    public static string GetRoleString(Enums.CharacterRole role)
+    {
+        if (role == Enums.CharacterRole.RangedDPS)
+            return "RDPS";
+
+        if (role == Enums.CharacterRole.MeleeDPS)
+            return "MDPS";
+
+        return role.ToString();
+    }
+
     public static Color GetColorFromClass(Enums.CharacterClass Class)
     {
         switch (Class)
         {
             case Enums.CharacterClass.Fighter:
-                return Color.grey;
+                return new Color(0.65f, 0.32f, 0.18f);
             case Enums.CharacterClass.Shadow:
                 return Color.yellow;
             case Enums.CharacterClass.Totemic:
-                return Color.green;
+                return new Color(0.05f, 0.5f, 0.05f);
             case Enums.CharacterClass.Sorcerer:
                 return Color.cyan;
             case Enums.CharacterClass.Paladin:
@@ -221,22 +241,6 @@ public static class Utility
         } else {
             healScript.Setup();
             return healScript.GetDescription();
-        }
-    }
-
-    public static string GetAttackName(Enums.CharacterAttack attack) {
-        switch (attack)
-        {
-            case Enums.CharacterAttack.TankStrike:
-                return "Strike";
-            case Enums.CharacterAttack.RangedFireball:
-                return "Fireball";
-            case Enums.CharacterAttack.MeleeStab:
-                return "Stab";
-            case Enums.CharacterAttack.HealerSmite:
-                return "Smite";
-            default:
-                return "Undefined!";
         }
     }
 
@@ -467,4 +471,20 @@ public static class Utility
 
         }
     }
+    #endregion
+
+    #region Encounter related
+
+    public static void SetCurrentEncounter(BaseEncounter e) { m_currentEncounter = e; }
+
+    #endregion
+
+    #region Varios
+    public static string GetPercentIncreaseString(float multiplier)
+    {
+        int percentIncrease = Mathf.RoundToInt((multiplier - 1.0f) * 100.0f);
+
+        return percentIncrease + "%";
+    }
+    #endregion
 }

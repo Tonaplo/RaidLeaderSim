@@ -26,18 +26,37 @@ public class RosterControllerScript : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        buttons = new List<GameObject>();
-        PlayerData.SortRoster();
-        SetupRoster();
-        SetCurrentRaider(buttons[0].GetComponent<RosterButtonScript>().Raider);
-        SkillButtonOnClick();
-        MoveButtonOnClick();
+        
+        Reactivate();
     }
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
+
+    public void Reactivate()
+    {
+        gameObject.SetActive(true);
+        if (buttons != null)
+        {
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                Destroy(buttons[i]);
+            }
+            buttons.Clear();
+        }
+        else
+        {
+            buttons = new List<GameObject>();
+        }
+        
+        PlayerData.SortRoster();
+        SetupRoster();
+        SetCurrentRaider(buttons[0].GetComponent<RosterButtonScript>().Raider);
+        SkillButtonOnClick();
+        MoveButtonOnClick();
+    }
 
     void SetupRoster()
     {
@@ -57,11 +76,6 @@ public class RosterControllerScript : MonoBehaviour {
         }
         buttons[0].GetComponent<RosterButtonScript>().OnClick();
         m_currentButton = buttons[0];
-    }
-    
-    public void SetActive(bool on)
-    {
-        gameObject.SetActive(on);
     }
 
     public void SetCurrentRaider(Raider r)

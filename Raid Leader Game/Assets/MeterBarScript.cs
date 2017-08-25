@@ -11,8 +11,11 @@ public class MeterBarScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
-	}
+        NameText.fontSize = 12;
+        NameText.resizeTextForBestFit = false;
+        AmountText.fontSize = 12;
+        AmountText.resizeTextForBestFit = false;
+    }
 	
 	// Update is called once per frame
 	void Update () {

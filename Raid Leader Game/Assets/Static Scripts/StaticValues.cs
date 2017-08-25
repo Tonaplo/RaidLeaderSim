@@ -8,4 +8,5 @@ public static class StaticValues {
     public static int MaxNumDPSMeterBars      = 6;
     public static int MaxNumHealingMeterBars  = 4;
     public static int TrainingDuration        = 1000; //This is in seconds, needs to be increased later
+    public static int ItemLevelTitanforge     = 2;
 }

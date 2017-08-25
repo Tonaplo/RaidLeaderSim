@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class MeterControllerScript : MonoBehaviour {
 
+    public Text MeterTitle;
     public GameObject BarPrefab;
     
     List<Bar> m_bars;
@@ -45,7 +46,15 @@ public class MeterControllerScript : MonoBehaviour {
         public int Index { get { return m_index; } }
     }
     
-    public void Initialize(int xPos, int yPos, int height, int width, int numDisplayedBars) {
+    public void Initialize(string title, int xPos, int yPos, int height, int width, int numDisplayedBars) {
+
+        GetComponent<Image>().color = new Color(Color.grey.r, Color.grey.g, Color.grey.b, 0.75f);
+        GetComponent<Image>().transform.SetPositionAndRotation(new Vector3(xPos , yPos- 45, 0), Quaternion.identity);
+        GetComponent<RectTransform>().sizeDelta = new Vector2(width *1.05f, 145);
+
+        MeterTitle.transform.SetParent(this.transform);
+        MeterTitle.transform.SetPositionAndRotation(new Vector3(xPos+ (width/2.5f), yPos + height/4, 0), Quaternion.identity);
+        MeterTitle.text = title;
         m_bars = new List<Bar>();
         for (int i = 0; i < numDisplayedBars; i++)
         {

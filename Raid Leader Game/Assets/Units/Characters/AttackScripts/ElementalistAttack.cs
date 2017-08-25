@@ -1,44 +1,36 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System;
 
+[Serializable]
 public class ElementalistAttack : BaseHealOrAttackScript
 {
-    float m_multiplier = 2.0f;
-    float m_percentReduction = 0.85f;
-    int m_chance = 50;
-
-    public override string GetDescription() { return "Deals " + GetPercentIncreaseString((1.0f-m_percentReduction)+ 1.0f) + " less damage, but has a " + m_chance + "% chance to deal " + GetPercentIncreaseString(m_multiplier + 1.0f) + " damage"; }
+    public override string GetDescription() { return "Has a " + m_damageStruct.m_baseCritChance + "% chance to deal " + Utility.GetPercentString(m_damageStruct.m_baseCritEffect) + " damage"; }
 
     public override void Setup()
     {
+        m_damageStruct = new DamageStruct();
         m_castTime = 1.9f;
-        m_baseMultiplier = 2.7f;
-        m_name = "Fireball";
-        m_cooldownDuration = 15.0f;
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Rapid Fire", "Removes the " + GetPercentIncreaseString((1.0f - m_percentReduction) + 1.0f) + " damage penalty for " + m_cooldownDuration + " seconds.", Enums.Cooldowns.DPSCooldown);
+        m_damageStruct.m_baseMultiplier = 2.3f;
+        m_damageStruct.m_baseCritChance = 50;
+        m_damageStruct.m_baseCritEffect = 2.0f;
+        m_name = "Eruption";
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier) * m_percentReduction;
-            int roll = Random.Range(0, 100);
-            if (m_chance >= roll)
-            {
-                damage *= m_multiplier;
-            }
-
-            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+            DamageStruct thisAttack = new DamageStruct(m_damageStruct);
+            rs.DealDamage(index, Name, thisAttack);
+            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
     }
 }

@@ -1,77 +1,73 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
+[Serializable]
 public class NaturalistHealScript : BaseHealScript
 {
     float m_HoTMultiplier = 0.10f;
     int m_maxSeconds = 6;
     float healInterval = 1.0f;
-    float m_cooldownHoTMultiplier = 0.90f;
 
-    public override string GetDescription() { return "Healed targets are healed again for " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " of the initial heal every second for " + m_maxSeconds + " seconds"; }
+    public override string GetDescription() { return "Healed targets are healed again for " + Utility.GetPercentString(m_HoTMultiplier) + " of the initial heal every second for " + m_maxSeconds + " seconds"; }
 
     public override void Setup()
     {
+        m_healStruct = new HealStruct();
         m_castTime = 1.7f;
-        m_baseMultiplier = 1.6f;
+        m_healStruct.m_healMultiplier = 1.6f;
         m_name = "Nature's Touch";
 
-        m_cooldownDuration = 15.0f;
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Quickening", "The next " + m_cooldownDuration + " seconds, healed targets are healed again for " + GetPercentIncreaseString(m_cooldownHoTMultiplier + 1.0f) + " instead of " + GetPercentIncreaseString(m_HoTMultiplier + 1.0f) + " of the initial heal", Enums.Cooldowns.HealingCooldown);
-
         PriorityList = new List<Priority> {
-
                                             new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
-                                            new Priority(2, Enums.RaidHealingState.RaidMultiMediumDamage),
-                                            new Priority(3, Enums.RaidHealingState.RaidSingleMediumDamage),
-                                            new Priority(1, Enums.RaidHealingState.TankMediumDamage),
-                                            new Priority(5, Enums.RaidHealingState.RaidMultiHeavyDamage),
-                                            new Priority(6, Enums.RaidHealingState.RaidSingleHeavyDamage),
+                                            new Priority(2, Enums.RaidHealingState.RaidSingleHeavyDamage),
+                                            new Priority(3, Enums.RaidHealingState.RaidMultiHeavyDamage),
+                                            new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
+                                            new Priority(5, Enums.RaidHealingState.RaidSingleMediumDamage),
+                                            new Priority(6, Enums.RaidHealingState.TankMediumDamage),
                                             new Priority(7, Enums.RaidHealingState.LowestHealthPercent), };
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        Raid = rsc.GetRaid();
-        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoHeal(float castTime, int index, Raider caster, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoHeal(float castTime, int index, Raider caster, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
+            HealStruct thisHeal = new HealStruct(m_healStruct);
             List<RaiderScript> targets = new List<RaiderScript>();
-            GetBestTargets(ref targets);    
+            GetBestTargets(ref targets);
             int numTargets = targets.Count;
-            int heal = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) / (numTargets*1.1f));
+            thisHeal.m_healMultiplier *= (1.0f / numTargets);
 
             for (int i = 0; i < numTargets; i++)
             {
-                int actualHealing = targets[i].TakeHealing(heal);
-                rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
-                int hotHeal = (int)(heal * m_HoTMultiplier);
+                int hotHeal = rs.DoHealing(index, Name, ref thisHeal, targets[i]);
+                hotHeal = (int)(hotHeal * thisHeal.m_HoTMultiplier);
                 hotHeal = hotHeal == 0 ? 1 : hotHeal;
-                rs.StartCoroutine(DoHoT(healInterval, m_maxSeconds, hotHeal, index, caster, rsc, rs, targets[i]));
+
+                rs.StartCoroutine(DoHoT(healInterval, m_maxSeconds, hotHeal, index, caster, rs, targets[i]));
             }
 
-            rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));
+            rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, caster, rs));
         }
     }
 
-    IEnumerator DoHoT(float castTime, int counter, int heal, int index, Raider caster, RaidSceneController rsc, RaiderScript rs, RaiderScript target)
+    IEnumerator DoHoT(float castTime, int counter, int heal, int index, Raider caster, RaiderScript rs, RaiderScript target)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (counter > 0 && !rsc.IsBossDead() && !rs.IsDead() && !target.IsDead())
+        if (counter > 0 && !rs.IsBossDead() && !rs.IsDead() && !target.IsDead())
         {
             counter--;
-            int actualHealing = target.TakeHealing(heal);
-            rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
-            rs.StartCoroutine(DoHoT(healInterval, counter, heal, index, caster, rsc, rs, target));
+            target.TakeHealing(Name, caster.GetName(), index, heal);
+            rs.StartCoroutine(DoHoT(healInterval, counter, heal, index, caster, rs, target));
         }
     }
 }

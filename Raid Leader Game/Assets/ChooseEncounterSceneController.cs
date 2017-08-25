@@ -29,7 +29,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
     // Add new Encounters here
     void Start () {
         m_encounters = new List<BaseEncounter> {
-            new CaveTrollEncounter(),
+            new MoAKeeperOfTheMine(),
         };
 
         for (int i = 0; i < m_encounters.Count; i++)
@@ -156,8 +156,6 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         m_abilityObjects.Clear();
 
         List<EncounterAbility> abilities = m_currentlySelectedEncounter.EncounterAbilities;
-
-        RectTransform rowRectTransform = AbilityPrefab.GetComponent<RectTransform>();
 
         //calculate the width and height of each child item.
         int columnCount = abilities.Count;

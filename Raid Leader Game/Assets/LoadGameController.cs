@@ -36,18 +36,13 @@ public class LoadGameController : MonoBehaviour {
 
     public void LoadButtonClicked()
     {
-        if (StartButton.interactable != true)
+        if (input.text.Length != 0)
         {
-            if (input.text.Length != 0)
-            {
-                if (DataController.controller.Load(input.text))
-                    LoadSuccessful();
-                else
-                    LoadFailed();
-            }
+            if (DataController.controller.Load(input.text))
+                LoadSuccessful();
+            else
+                LoadFailed();
         }
-        else
-            StartGameClicked();
     }
 
     void LoadSuccessful()

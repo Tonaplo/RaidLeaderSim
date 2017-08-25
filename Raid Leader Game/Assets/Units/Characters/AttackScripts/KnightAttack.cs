@@ -1,39 +1,36 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System;
 
+[Serializable]
 public class KnightAttack : BaseHealOrAttackScript
 {
-    float healPercent = 0.15f;
 
-    public override string GetDescription() { return "Heals self for " + GetPercentIncreaseString(1.0f + healPercent) + " of damage dealt."; }
+    public override string GetDescription() { return "Heals self for " + Utility.GetPercentString(m_damageStruct.m_baseLeech) + " of damage dealt."; }
 
     public override void Setup()
     {
+        m_damageStruct = new DamageStruct();
         m_castTime = 1.0f;
-        m_baseMultiplier = 0.5f;
+        m_damageStruct.m_baseMultiplier = 0.5f;
+        m_damageStruct.m_baseLeech = 0.15f;
         m_name = "Shield Bash";
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Dont Know Yet", "Dont Know Yet", Enums.Cooldowns.TankCooldown);
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
-            int damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
-            int healing = (int)(damage * healPercent);
-            healing = healing == 0 ? 1 : healing; //Make sure we always heal for at least 1
-            int actualHealing = rs.TakeHealing(healing);
-            rsc.DoHeal(actualHealing, attacker.GetName(), Name, index);
-            rsc.DealDamage(damage, attacker.GetName(), Name, index);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+            DamageStruct thisAttack = new DamageStruct(m_damageStruct);
+            rs.DealDamage(index, Name, thisAttack);
+            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
     }
 }

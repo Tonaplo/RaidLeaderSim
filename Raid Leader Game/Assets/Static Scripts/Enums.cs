@@ -40,7 +40,7 @@ public static class Enums{
     {
         Interrupt,
         Stun,
-        Slow,
+        Immune,
         Dispel,
     }
 
@@ -48,6 +48,11 @@ public static class Enums{
         DPSCooldown,
         HealingCooldown,
         TankCooldown,
+    }
+
+    public enum CooldownTargets {
+        Self,
+        Raid,
     }
 
     public enum EncounterAdds { 

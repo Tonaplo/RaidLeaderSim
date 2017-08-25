@@ -1,11 +1,15 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BaseHealScript : BaseHealOrAttackScript
 {
+    protected HealStruct m_healStruct;
 
     int heavyDamageCutoff = 40;
     int mediumDamageCutoff = 70;
+
+    public override string GetBaseMultiplierAsString(Raider r) { return (r.RaiderStats.GetAverageThroughput() * m_healStruct.m_healMultiplier).ToString() + " average healing per cast."; }
 
     public class Priority
     {
@@ -18,6 +22,12 @@ public class BaseHealScript : BaseHealOrAttackScript
 
         public int GetPriority() { return m_priority; }
         public Enums.RaidHealingState GetState() { return m_state; }
+    }
+
+    public void SetupHealScript(RaidSceneController rsc)
+    {
+        m_raid = rsc.GetRaid();
+        Setup();
     }
 
     protected List<RaiderScript> m_raid;

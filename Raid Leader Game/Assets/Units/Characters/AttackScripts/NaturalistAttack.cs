@@ -1,33 +1,34 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System;
 
+[Serializable]
 public class NaturalistAttack : BaseHealOrAttackScript
 {
     public override string GetDescription() { return "Attempts to drown the target by splashing water on it."; }
 
     public override void Setup()
     {
+        m_damageStruct = new DamageStruct();
         m_castTime = 1.5f;
-        m_baseMultiplier = 0.3f;
+        m_damageStruct.m_baseMultiplier = 0.3f;
         m_name = "Splash";
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Nothing", "Dont Know Yet", Enums.Cooldowns.TankCooldown);
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
-            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+            DamageStruct thisAttack = new DamageStruct(m_damageStruct);
+            rs.DealDamage(index, Name, thisAttack);
+            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
     }
 }

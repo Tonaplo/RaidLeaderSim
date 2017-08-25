@@ -12,6 +12,7 @@ public class RaidSceneController : MonoBehaviour {
     public Text encounterText;
     public Canvas canvas;
     public BossCastBarScript BossCastScript;
+    public RaidSceneControlPanel CooldownController;
 
     Enums.EncounterSteps currentStep = Enums.EncounterSteps.EncounterStart;
     int currentSubStep = -1;
@@ -24,6 +25,8 @@ public class RaidSceneController : MonoBehaviour {
     float m_fightStartTime;
     int m_numDeadRaidMembers = 0;
 
+    public BaseEncounter Encounter {get  { return encounter; } }
+
     public List<RaiderScript> GetRaid() { return m_raiderScripts; }
 
     public int GetBossHealthPercent() {
@@ -32,11 +35,11 @@ public class RaidSceneController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        //Utility.DebugInitalize();
         all = PlayerData.RaidTeam;
         CreateRaidHealthBars();
         CreateEncounter();
         SetupUI();
-        
 
         totalDamage = new int[all.Count];
         for (int i = 0; i < all.Count; i++)
@@ -49,13 +52,13 @@ public class RaidSceneController : MonoBehaviour {
     {
         raidText.text = "";
         encounterText.text = "Current step is " + (int)currentStep;
-
+        
         GameObject temp = GameObject.Instantiate(MeterPrefab);
         temp.transform.SetParent(canvas.transform);
         m_damageMcs = temp.GetComponent<MeterControllerScript>();
         List<Raider> dps = all.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
         int dpsBarsCount = dps.Count > StaticValues.MaxNumDPSMeterBars ? StaticValues.MaxNumDPSMeterBars : dps.Count;
-        m_damageMcs.Initialize(150, 140, 40, 175, dpsBarsCount);
+        m_damageMcs.Initialize("Damage:", 485, 120, 40, 130, dpsBarsCount);
         m_damageMcs.CreateEntriesFromRaid(all);
 
         GameObject temptwo = GameObject.Instantiate(MeterPrefab);
@@ -63,8 +66,10 @@ public class RaidSceneController : MonoBehaviour {
         m_healingMcs = temptwo.GetComponent<MeterControllerScript>();
         List<Raider> healers = all.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.Healer|| x.RaiderStats.GetCurrentSpec() == Enums.CharacterSpec.Knight);
         int healerBarsCount = healers.Count > StaticValues.MaxNumHealingMeterBars ? StaticValues.MaxNumHealingMeterBars : healers.Count;
-        m_healingMcs.Initialize(330, 140, 40, 175, healerBarsCount);
+        m_healingMcs.Initialize("Healing:", 625, 120, 40, 130, healerBarsCount);
         m_healingMcs.CreateEntriesFromRaid(all);
+
+        CooldownController.Initialize();
     }
 
 	
@@ -72,6 +77,8 @@ public class RaidSceneController : MonoBehaviour {
 	void Update () {
         if ((currentStep == Enums.EncounterSteps.FightInProgress && IsBossDead()) || (m_numDeadRaidMembers == StaticValues.RaidTeamSize))
         {
+            BossCastScript.StopCasting();
+            EndCastingAbility();
             currentStep++;
             AdvanceNextStep();
         }
@@ -119,18 +126,24 @@ public class RaidSceneController : MonoBehaviour {
             case Enums.EncounterSteps.FightInProgress:
                 break;
             case Enums.EncounterSteps.FightDone:
-                raidText.text = "Total Stats:\n\n";
+                /*raidText.text = "Total Stats:\n\n";
                 for (int i = 0; i < all.Count; i++)
                 {
                     raidText.text += all[i].GetName() + " - " + all[i].RaiderStats.GetCurrentSpec().ToString() + " (ThPut: " + all[i].RaiderStats.GetThroughput() + ", skill: " + all[i].RaiderStats.Skills.AverageSkillLevel + ", VTA: " + all[i].RaiderStats.GetVarianceMultiplierThisAttempt() + ", gear: " + all[i].RaiderStats.Gear.AverageItemLevel + ", var: " + all[i].RaiderStats.GetVariance() + " %)\n";
-                }
+                }*/
                 m_damageMcs.FightEnded(Time.time - m_fightStartTime);
                 m_healingMcs.FightEnded(Time.time - m_fightStartTime);
-                currentStep++;
+                if (encounter.IsDead())
+                {
+                    GrantSkillIncreasesFromEncounterVictory();
+                }
+                    currentStep++;
                 break;
             case Enums.EncounterSteps.FightWon:
-                if(encounter.IsDead())
+                if (encounter.IsDead())
+                {
                     SceneManager.LoadScene("EncounterVictoryScene");
+                }
                 currentStep++;
                 break;
             case Enums.EncounterSteps.FightLost:
@@ -168,11 +181,12 @@ public class RaidSceneController : MonoBehaviour {
 
     public void BeginCastingAbility(EncounterAbility ab)
     {
+        raidText.text = encounter.Name + " begins casting " + ab.Name + "!\n" + raidText.text;
         BossCastScript.InitiateCast(ab.CastTime, ab.Name);
 
         for (int i = 0; i < m_raiderScripts.Count; i++)
         {
-            if (m_raiderScripts[i].Raider.RaiderStats.GetAbility().Ability == ab.Ability && !m_raiderScripts[i].IsDead())
+            if (m_raiderScripts[i].Raider.RaiderStats.Ability.Ability == ab.Ability && !m_raiderScripts[i].IsDead())
             {
                 m_raiderScripts[i].HealthBarButton.interactable = true;
                 m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.98f);
@@ -213,6 +227,79 @@ public class RaidSceneController : MonoBehaviour {
             BossCastScript.StopCasting();
             encounter.CurrentAbilityCountered();
         }
+    }
+
+    public void UseRaiderCooldown(RaiderScript raider)
+    {
+        if (raider.Raider.RaiderStats.Cooldown.Cooldowneffects.m_targets == Enums.CooldownTargets.Self)
+        {
+            raider.AddCooldown(raider.Raider.RaiderStats.Cooldown);
+        }
+        else if (raider.Raider.RaiderStats.Cooldown.Cooldowneffects.m_targets == Enums.CooldownTargets.Raid)
+        {
+            for (int i = 0; i < m_raiderScripts.Count; i++)
+            {
+                m_raiderScripts[i].AddCooldown(raider.Raider.RaiderStats.Cooldown);
+            }
+        }
+        else
+        {
+            Debug.LogAssertion("CooldownTargetType not found!");
+        }
+    }
+
+    public void RaiderTaunt(RaiderScript taunter)
+    {
+        encounter.SetCurrentTarget(taunter);
+    }
+
+    void GrantSkillIncreasesFromEncounterVictory()
+    {
+        int maxAmountOfSkillUps = 2;
+        float encounterDifficultyInfluence = 2.5f;
+
+        switch (encounter.Difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                break;
+            case Enums.Difficulties.Normal:
+                maxAmountOfSkillUps = 3;
+                encounterDifficultyInfluence = 1.50f;
+                break;
+            case Enums.Difficulties.Hard:
+                maxAmountOfSkillUps = 4;
+                encounterDifficultyInfluence = 1.05f;
+                break;
+            default:
+                break;
+        }
+
+        List<int> indices = new List<int>();
+
+        m_raiderScripts.Sort(delegate (RaiderScript x, RaiderScript y)
+        {
+            return Random.Range(-1, 2);
+        });
+
+        for (int i = 0; i < m_raiderScripts.Count; i++)
+        {
+            if (indices.Count >= maxAmountOfSkillUps)
+                break;
+
+            int cutOff = (int)(m_raiderScripts[i].Raider.RaiderStats.Gear.AverageItemLevel * encounterDifficultyInfluence);
+            int roll = Random.Range(0, 100);
+            if (cutOff < roll)
+                indices.Add(i);
+        }
+
+        for (int i = 0; i < indices.Count; i++)
+        {
+            Enums.SkillTypes type = (Enums.SkillTypes)Random.Range(0, (int)Enums.SkillTypes.NumSkillTypes);
+            int newSkillLevel = m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.GetSkillLevel(type) + 1;
+            m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.ModifySkill(newSkillLevel, type);
+            raidText.text = m_raiderScripts[indices[i]].Raider.GetName() + " had " + type.ToString() + " skill increased to " + newSkillLevel + "!\n" + raidText.text;
+        }
+
     }
 
     void CalculateEncounterSkill() {

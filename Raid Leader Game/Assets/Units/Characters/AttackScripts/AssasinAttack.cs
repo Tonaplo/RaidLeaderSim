@@ -1,43 +1,55 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System;
 
+[Serializable]
 public class AssasinAttack : BaseHealOrAttackScript
 {
     
-    float m_multiplier = 2.0f;
-    int m_bossHealthPercent = 75;
+    float m_multiplier = 0.15f;
+    int m_poisonDuration = 5;
 
-    public override string GetDescription() { return "Deals " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage to enemies above " + m_bossHealthPercent + "% health"; }
+    public override string GetDescription() { return "Leaves a poison, dealing " + Utility.GetPercentString(m_multiplier) + " damage to enemies every second for  " + m_poisonDuration + " seconds."; }
 
     public override void Setup()
     {
+        m_damageStruct = new DamageStruct();
         m_castTime = 0.5f;
-        m_baseMultiplier = 0.7f;
+        m_damageStruct.m_baseMultiplier = 0.6f;
         m_name = "Vein Slit";
-        m_cooldownDuration = 15.0f;
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Not Sure Yet", "Dont know yet.", Enums.Cooldowns.DPSCooldown);
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
-            if (rsc.GetBossHealthPercent() > m_bossHealthPercent)
-            {
-                damage *= m_multiplier;
-            }
+            DamageStruct thisAttack = new DamageStruct(m_damageStruct);
 
-            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+            int damageDealt = rs.DealDamage(index, Name, thisAttack);
+            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
+
+            rs.StartCoroutine(DoPoisonDoT(1.0f, m_poisonDuration, index, attacker, rs));
+        }
+    }
+
+    IEnumerator DoPoisonDoT(float castTime, int counter, int index, Raider attacker, RaiderScript rs)
+    {
+        yield return new WaitForSeconds(castTime);
+
+        if (counter > 0 && !rs.IsBossDead() && !rs.IsDead())
+        {
+            counter--;
+            DamageStruct thisAttack = new DamageStruct(m_damageStruct);
+            thisAttack.m_baseMultiplier *= m_multiplier;
+            rs.DealDamage(index, Name, thisAttack);
+            rs.StartCoroutine(DoPoisonDoT(1.0f, counter, index, attacker, rs));
         }
     }
 }

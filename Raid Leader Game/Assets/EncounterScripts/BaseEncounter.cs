@@ -8,6 +8,8 @@ public class BaseEncounter
     #region variables and getters and setters
 
     protected string m_name;
+    protected int m_counter;
+    protected RaiderScript m_currentTarget;
     protected HealthBarScript m_healthBar;
     protected EncounterAbility m_currentAbility;
     protected Enums.Difficulties m_difficulty = Enums.Difficulties.Normal;
@@ -15,7 +17,9 @@ public class BaseEncounter
     protected List<EncounterAttackDescription> m_attacks;
     protected List<CharacterItem> m_loot;
     
-    public string Name { get { return m_name; }  }
+    public string Name { get { return m_name; } }
+    public int Stacks { get { return m_counter; } }
+    public RaiderScript CurrentTarget { get { return m_currentTarget; } }
     public HealthBarScript HealthBar  {  get { return m_healthBar; }   }
     public Enums.Difficulties Difficulty  {  get { return m_difficulty; } }
     public EncounterAbility CurrentAbility { get { return m_currentAbility; } }
@@ -67,6 +71,11 @@ public class BaseEncounter
         return m_currentAbility.AttemptToCounter();
     }
 
+    public void SetCurrentTarget(RaiderScript raider)
+    {
+        m_currentTarget = raider;
+    }
+
     public virtual void SetupLoot()
     {
         Debug.LogAssertion("Calling SetupLoot on the BaseEncounter - this should always be overridden!");
@@ -95,17 +104,41 @@ public class BaseEncounter
         Debug.LogAssertion("Calling CurrentAbilityCountered on the BaseEncounter - this should always be overridden!");
     }
 
+    protected void HandleAbilityTypeCountered(Enums.Ability abilityType)
+    {
+        /*
+         So the idea is that different abilities behave differently when countered
+            - Stuns and Interrupts mean that the caster should stop casting immediately
+            - Immunes mean that the caster should continue casting, but his ability has no effect on his target
+            - Dispell should'nt have anything to do with a cast bar at all and thus should do nothing
+         */
+        switch (abilityType)
+        {
+            case Enums.Ability.Interrupt:
+            case Enums.Ability.Stun:
+                m_rsc.EndCastingAbility();
+                m_rsc.EndCastingAbility();
+                break;
+            case Enums.Ability.Immune:
+                break;
+            case Enums.Ability.Dispel:
+                break;
+            default:
+                break;
+        }
+    }
+
     protected float GetDifficultyMultiplier()
     {
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 0.6f;
+                return 0.8f;
             case Enums.Difficulties.Normal:
             default:
                 return 1.0f;
             case Enums.Difficulties.Hard:
-                return 1.4f;
+                return 1.2f;
         }
     }
 
@@ -132,5 +165,30 @@ public class BaseEncounter
         }
 
         return targets;
+    }
+
+    protected void GenerateLoot(int normalItemLevel, int numNormalLootPieces)
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                normalItemLevel = 10;
+                numNormalLootPieces = 4;
+                break;
+            case Enums.Difficulties.Normal:
+            default:
+                break;
+            case Enums.Difficulties.Hard:
+                normalItemLevel = 20;
+                numNormalLootPieces = 6;
+                break;
+        }
+
+        m_loot = new List<CharacterItem>();
+
+        for (int i = 0; i < numNormalLootPieces; i++)
+        {
+            m_loot.Add(new CharacterItem(normalItemLevel + Random.Range(0, StaticValues.ItemLevelTitanforge + 1)));
+        }
     }
 }

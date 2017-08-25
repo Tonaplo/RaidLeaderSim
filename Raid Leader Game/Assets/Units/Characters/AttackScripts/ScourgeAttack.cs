@@ -1,42 +1,39 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System;
 
+[Serializable]
 public class ScourgeAttack : BaseHealOrAttackScript
 {
-    float m_multiplier = 3.5f;
-    int m_bossHealthPercent = 20;
+    float m_maxCastTime = 0.9f;
+    float m_minCastTime = 0.2f;
 
-    public override string GetDescription() { return "Deals " + GetPercentIncreaseString(m_multiplier+1.0f) + " damage to enemies below " + m_bossHealthPercent + "% health."; }
+    public override string GetDescription() { return "Pauses between attacks can last as much as " + m_maxCastTime +" seconds, and as little as " + m_minCastTime + " seconds." ; }
 
     public override void Setup()
     {
-        m_castTime = 0.5f;
-        m_baseMultiplier = 0.68f;
-        m_name = "Scent of Death";
-        m_cooldownDuration = 15.0f;
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Not Sure Yet", "Dont know yet.", Enums.Cooldowns.DPSCooldown);
+        m_damageStruct = new DamageStruct();
+        m_castTime = (m_maxCastTime+m_minCastTime)/2.0f;
+        m_damageStruct.m_baseMultiplier = 1.0f;
+        m_name = "Chaos";
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
-            float damage = attacker.RaiderStats.GetSpellAmount(m_baseMultiplier);
-            if (rsc.GetBossHealthPercent() < m_bossHealthPercent)
-            {
-                damage *= m_multiplier;
-            }
-
-            rsc.DealDamage((int)damage, attacker.GetName(), Name, index);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+            DamageStruct thisAttack = new DamageStruct(m_damageStruct);
+            rs.DealDamage(index, Name, thisAttack);
+            
+            float newRandomCastTime = UnityEngine.Random.Range(m_minCastTime, m_maxCastTime);
+            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(newRandomCastTime)), index, attacker, rs));
         }
     }
 }

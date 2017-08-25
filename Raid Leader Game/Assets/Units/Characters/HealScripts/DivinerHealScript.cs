@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System;
 
+[Serializable]
 public class DivinerHealScript : BaseHealScript
 {
 
@@ -9,61 +11,57 @@ public class DivinerHealScript : BaseHealScript
     float m_LowestMultiplier = 0.7f;
     float m_cooldownCastTimeMultiplier = 0.5f;
 
-    public override string GetDescription() { return "Also heals the lowest health target for " + GetPercentIncreaseString(m_LowestMultiplier + 1.0f) + " of throughput"; }
+    public override string GetDescription() { return "Also heals the lowest health target for " + Utility.GetPercentString(m_LowestMultiplier) + " of throughput"; }
 
     public override void Setup()
     {
+        m_healStruct = new HealStruct();
         m_castTime = 1.8f;
-        m_baseMultiplier = 2.5f;
+        m_healStruct.m_healMultiplier = 2.5f;
         m_name = "Arcane Mending";
 
-        m_cooldownDuration = 15.0f;
-        m_cooldown = new BaseCooldown();
-        m_cooldown.Initialize("Quickening", "Reduces casttime of " + m_name + " by " + GetPercentIncreaseString(m_cooldownCastTimeMultiplier + 1.0f) + " for " + m_cooldownDuration + " seconds.", Enums.Cooldowns.HealingCooldown);
-
-        PriorityList = new List<Priority> { new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
-                                            new Priority(2, Enums.RaidHealingState.TankMediumDamage),
+        PriorityList = new List<Priority> {
+                                            new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
+                                            new Priority(2, Enums.RaidHealingState.RaidSingleHeavyDamage),
                                             new Priority(3, Enums.RaidHealingState.RaidMultiHeavyDamage),
                                             new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
-                                            new Priority(5, Enums.RaidHealingState.RaidSingleHeavyDamage),
-                                            new Priority(6, Enums.RaidHealingState.RaidSingleMediumDamage),
+                                            new Priority(5, Enums.RaidHealingState.RaidSingleMediumDamage),
+                                            new Priority(6, Enums.RaidHealingState.TankMediumDamage),
                                             new Priority(7, Enums.RaidHealingState.LowestHealthPercent), };
     }
 
-    public override void StartFight(int index, Raider attacker, RaidSceneController rsc, RaiderScript rs)
+    public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        Raid = rsc.GetRaid();
-        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, attacker, rsc, rs));
+        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoHeal(float castTime, int index, Raider caster, RaidSceneController rsc, RaiderScript rs)
+    IEnumerator DoHeal(float castTime, int index, Raider caster, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rsc.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead())
         {
+            HealStruct thisHeal = new HealStruct(m_healStruct);
             List<RaiderScript> targets = new List<RaiderScript>();
             GetBestTargets(ref targets);
             int numTargets = targets.Count;
-            int heal = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) / (numTargets * 1.1f));
-            
+            thisHeal.m_healMultiplier *= (1.0f / numTargets);
+
             for (int i = 0; i < numTargets; i++)
             {
-                int actualHealing = targets[i].TakeHealing(heal);
-                rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
+                rs.DoHealing(index, Name, ref thisHeal, targets[i]);
             }
-            
-            int abilityHealAmount = Mathf.RoundToInt(caster.RaiderStats.GetSpellAmount(m_baseMultiplier) * m_LowestMultiplier);
+
+            thisHeal = new HealStruct(m_healStruct);
             List<RaiderScript> lowest = new List<RaiderScript>(Raid);
             TrimToLowestXFromList(ref lowest, 1);
 
             for (int i = 0; i < lowest.Count; i++)
             {
-                int actualHealing = lowest[i].TakeHealing(abilityHealAmount);
-                rsc.DoHeal(actualHealing, caster.GetName(), Name, index);
+                rs.DoHealing(index, Name, ref thisHeal, lowest[i]);
             }
 
-            rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rsc, rs));
+            rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, caster, rs));
         }
     }
 }

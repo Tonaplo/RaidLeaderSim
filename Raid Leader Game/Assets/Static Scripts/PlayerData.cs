@@ -88,7 +88,6 @@ public static class PlayerData
     {
         for (int i = 0; i < m_roster.Count; i++)
         {
-            //roster[i].RaiderStats.SetTestValue();
             m_roster[i].RecalculateRaider();
         }
     }
@@ -174,12 +173,14 @@ public static class PlayerData
     public static void AddRecruitToRoster(Raider recruit)
     {
         m_roster.Add(recruit);
+        DataController.controller.Save();
     }
 
     public static void AddPlayerToRoster(Raider player)
     {
         m_playerChar = player;
         AddRecruitToRoster(player);
+        DataController.controller.Save();
     }
 
     public static void RemoveMemberFromRoster(Raider r)
@@ -188,6 +189,44 @@ public static class PlayerData
             return;
 
         m_roster.Remove(r);
+        DataController.controller.Save();
+    }
+
+    public static int GetRosterAverageItemLevel()
+    {
+        int average = 0;
+
+        for (int i = 0; i < m_roster.Count; i++)
+        {
+            average += m_roster[i].RaiderStats.Gear.AverageItemLevel;
+        }
+
+        return Mathf.RoundToInt(average/ m_roster.Count);
+    }
+
+    public static int GetRosterAverageSkillLevel()
+    {
+        int average = 0;
+
+        for (int i = 0; i < m_roster.Count; i++)
+        {
+            average += m_roster[i].RaiderStats.Skills.AverageSkillLevel;
+        }
+
+        return Mathf.RoundToInt(average / m_roster.Count);
+    }
+
+    public static int GetRosterAverageSkillAndItemLevel()
+    {
+        int average = 0;
+
+        for (int i = 0; i < m_roster.Count; i++)
+        {
+            average += m_roster[i].RaiderStats.Skills.AverageSkillLevel;
+            average += m_roster[i].RaiderStats.Gear.AverageItemLevel;
+        }
+
+        return Mathf.RoundToInt(average / (m_roster.Count*2));
     }
 
     public static void SetRaidTeamName(string newTeamName)

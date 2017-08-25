@@ -98,20 +98,26 @@
     <Compile Include="Assets\EncounterScripts\EncounterAbility.cs" />
     <Compile Include="Assets\EncounterScripts\EncounterAbilityEffect.cs" />
     <Compile Include="Assets\EncounterScripts\EncounterAttackDescription.cs" />
-    <Compile Include="Assets\EncounterScripts\Encounters\CaveTrollEncounter.cs" />
+    <Compile Include="Assets\EncounterScripts\Encounters\MoAKeeperOfTheMine.cs" />
+    <Compile Include="Assets\EncounterScripts\Encounters\MoAVampiricus.cs" />
     <Compile Include="Assets\LoadGameController.cs" />
     <Compile Include="Assets\MainSceneMainController.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />
     <Compile Include="Assets\RaidMemberItemReward.cs" />
+    <Compile Include="Assets\RaidSceneControlPanel.cs" />
+    <Compile Include="Assets\RaidSceneCooldownPrefabScript.cs" />
+    <Compile Include="Assets\RaidSceneTauntPrefabScript.cs" />
     <Compile Include="Assets\RaidTeamMemberSelectionPrefabScript.cs" />
     <Compile Include="Assets\RosterButtonScript.cs" />
     <Compile Include="Assets\RosterControllerScript.cs" />
+    <Compile Include="Assets\Scenes\MainGameSceneRecruitmentController.cs" />
     <Compile Include="Assets\Scenes\RaidScene\BossCastBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\EncounterVictorySceneController.cs" />
     <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
+    <Compile Include="Assets\Scenes\RecruitScript.cs" />
     <Compile Include="Assets\StartSceneController.cs" />
     <Compile Include="Assets\Static Scripts\DataController.cs" />
     <Compile Include="Assets\Static Scripts\Enums.cs" />
@@ -142,6 +148,8 @@
     <Compile Include="Assets\Units\Characters\Raider.cs" />
     <Compile Include="Assets\Units\Characters\RaiderStats.cs" />
     <Compile Include="Assets\Units\Characters\SkillStats.cs" />
+    <Compile Include="Assets\Units\DamageStruct.cs" />
+    <Compile Include="Assets\Units\HealStruct.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

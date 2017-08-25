@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class CaveTrollEncounter : BaseEncounter
+public class MoAKeeperOfTheMine : BaseEncounter
 {
     /*
      For this encounter, we are expecting the following for Normal Difficulty:
@@ -14,8 +14,6 @@ public class CaveTrollEncounter : BaseEncounter
      */
 
         //This encounter is not at all done
-    int m_ClubSwingNumHits = 6;
-    float m_ClubSwingHitIncrease = 1.1f;
     float m_ClubSwingCastTime = 2.5f;
     
     float m_PebbleThrowCastTime = 1.5f;
@@ -23,27 +21,28 @@ public class CaveTrollEncounter : BaseEncounter
 
     IEnumerator m_currentAbilityCoroutine;
 
-    public CaveTrollEncounter() : base("Cave Troll", 40000) { }
+    public MoAKeeperOfTheMine() : base("Keeper of the Mine", 30000) { }
 
     public override void BeginEncounter()
     {
         List<RaiderScript> pebbletargets = GetRandomRaidTargets(GetPebbleThrowTargetCount());
-        bool hasHitTank = false;
+        m_currentTarget = null;
+        m_counter = 1;
         for (int i = 0; i < m_raid.Count; i++)
         {
             if(pebbletargets.Contains(m_raid[i]))
                 m_rsc.StartCoroutine(DoBasicAttack(Utility.GetFussyCastTime(m_PebbleThrowCastTime), (int)(GetPebbleThrowDamage() * Random.value), m_raid[i]));
 
-            if (m_raid[i].Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && !hasHitTank)
+            if (m_raid[i].Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && m_currentTarget == null)
             {
-                hasHitTank = true;
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, m_raid[i]));
+                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_raid[i]));
+                m_currentTarget = m_raid[i];
             }
         }
 
-        if (!hasHitTank)
+        if (m_currentTarget == null)
         {
-            m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, m_raid[0]));
+            m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_raid[0]));
         }
 
         m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
@@ -51,33 +50,13 @@ public class CaveTrollEncounter : BaseEncounter
 
     public override void SetupLoot()
     {
-        int itemLevel = 15;
-        switch (m_difficulty)
-        {
-            case Enums.Difficulties.Easy:
-                itemLevel = 10;
-                break;
-            case Enums.Difficulties.Normal:
-            default:
-                break;
-            case Enums.Difficulties.Hard:
-                itemLevel = 20;
-                break;
-        }
-
-        m_loot = new List<CharacterItem> {
-            new CharacterItem(itemLevel),
-            new CharacterItem(itemLevel),
-            new CharacterItem(itemLevel),
-            new CharacterItem(itemLevel),
-            new CharacterItem(itemLevel)
-        };
+        GenerateLoot(15, 5);
     }
 
     public override void SetupDescription()
     {
         m_attacks = new List<EncounterAttackDescription> {
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Club Swing", "The cave troll swings his mighty club at his target, dealing " + GetClubSwingDamage() + " damage " + m_ClubSwingNumHits +" times, each hit increasing in damage by " + Utility.GetPercentIncreaseString(m_ClubSwingHitIncrease) +", then switches target."),
+            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Club Swing", "The " + Name + " swings his mighty club at his target, dealing " + GetClubSwingDamage() + ", each hit increasing in damage by " + Utility.GetPercentIncreaseString(GetClubSwingIncrease()) +". Resets on target switch."),
             new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank, Enums.CharacterRole.Healer, Enums.CharacterRole.MeleeDPS, Enums.CharacterRole.RangedDPS}, "Pebble Slide", "Pebbles from the Cave randomly fall down, hitting "+ GetPebbleThrowTargetCount() + " random raid members for up to " + GetPebbleThrowDamage() + " damage."),
         };
     }
@@ -85,7 +64,7 @@ public class CaveTrollEncounter : BaseEncounter
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Avalance", "Every " + GetAvalanceWaitTime() + " seconds, the Troll bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
+            new EncounterAbility("Avalance", "Every " + GetAvalanceWaitTime() + " seconds, the " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
         };
     }
 
@@ -94,7 +73,7 @@ public class CaveTrollEncounter : BaseEncounter
         m_currentAbility = null;
         m_rsc.StopCoroutine(m_currentAbilityCoroutine);
         m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
-        m_rsc.EndCastingAbility();
+        HandleAbilityTypeCountered(m_currentAbility.Ability);
     }
 
     int GetClubSwingDamage()
@@ -108,6 +87,20 @@ public class CaveTrollEncounter : BaseEncounter
                 return 65;
             case Enums.Difficulties.Hard:
                 return 90;
+        }
+    }
+
+    float GetClubSwingIncrease()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 1.05f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 1.15f;
+            case Enums.Difficulties.Hard:
+                return 1.25f;
         }
     }
 
@@ -130,10 +123,10 @@ public class CaveTrollEncounter : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 1;
+                return 2;
             case Enums.Difficulties.Normal:
             default:
-                return 2;
+                return 3;
             case Enums.Difficulties.Hard:
                 return 4;
         }
@@ -144,10 +137,10 @@ public class CaveTrollEncounter : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 30;
+                return 40;
             case Enums.Difficulties.Normal:
             default:
-                return 60;
+                return 70;
             case Enums.Difficulties.Hard:
                 return 2000; // Basically, if you miss an interrupt, your raid dies.
         }
@@ -175,9 +168,9 @@ public class CaveTrollEncounter : BaseEncounter
                 return 5.0f;
             case Enums.Difficulties.Normal:
             default:
-                return 2.5f;
+                return 3.5f;
             case Enums.Difficulties.Hard:
-                return 1.0f;
+                return 2.5f;
         }
     }
 
@@ -196,44 +189,54 @@ public class CaveTrollEncounter : BaseEncounter
         }
     }
 
-    IEnumerator DoTankAttack(float castTime, int damage, int counter, RaiderScript target)
+    IEnumerator DoTankAttack(float castTime, RaiderScript target)
     {
         yield return new WaitForSeconds(castTime);
 
         if (!target.IsDead() && !IsDead())
         {
-            target.TakeDamage(damage);
-            if (counter > 0)
+            if (m_currentTarget == target)
             {
-                counter--;
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), (int)(damage * m_ClubSwingHitIncrease), counter, target));
+                int damage = Mathf.RoundToInt(GetClubSwingDamage() * Mathf.Pow(GetClubSwingIncrease(), m_counter));
+                target.TakeDamage(damage);
+                m_counter++;
             }
             else
             {
-                RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
-                if (otherTank && !otherTank.IsDead())
-                    m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), (int)(GetClubSwingDamage()), m_ClubSwingNumHits, otherTank));
-                else
-                    m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), (int)(damage * m_ClubSwingHitIncrease), m_ClubSwingNumHits, target));
+                m_counter = 1;
+                int damage = Mathf.RoundToInt(GetClubSwingDamage() * Mathf.Pow(GetClubSwingIncrease(), m_counter));
+                target.TakeDamage(damage);
             }
+
         }
         else if (target.IsDead())
         {
-            RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
-            if (otherTank && !otherTank.IsDead())
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, otherTank));
-            else
+            m_currentTarget = null;
+            m_counter = 1;
+            List<RaiderScript> otherTanks = m_rsc.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
+            for (int i = 0; i < otherTanks.Count; i++)
+            {
+                if (!otherTanks[i].IsDead())
+                {
+                    m_currentTarget = otherTanks[i];
+                    break;
+                }
+            }
+            
+            if(m_currentTarget == null)
             {
                 for (int i = 0; i < m_raid.Count; i++)
                 {
                     if (!m_raid[i].IsDead())
                     {
-                        m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, m_raid[i]));
+                        m_currentTarget = m_raid[i];
                         break;
                     }
                 }
             }
         }
+
+        m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_currentTarget));
     }
 
     IEnumerator WaitForAvalance(float waitTime)

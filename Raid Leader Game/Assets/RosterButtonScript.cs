@@ -113,21 +113,21 @@ public class RosterButtonScript : MonoBehaviour {
     {
         m_abilityText.text = "Special Move - " + attackOrHealScript.Name + ":";
         m_abilityText.text += "\nCast Time: " + attackOrHealScript.GetBaseCastTimeAsString();
-        m_abilityText.text += "                       Multiplier: " + attackOrHealScript.GetBaseMultiplierAsString();
+        m_abilityText.text += "                     " + attackOrHealScript.GetBaseMultiplierAsString(m_raider);
         m_abilityText.text += "\n\n" + attackOrHealScript.GetDescription();
     }
 
     void SetupCounter()
     {
-        m_abilityText.text = "Counter Ability - " + m_raider.RaiderStats.GetAbility().Name + ":";
-        m_abilityText.text += "\nCan be used to counter " + m_raider.RaiderStats.GetAbility().Ability;
-        m_abilityText.text += "\n\n" + m_raider.RaiderStats.GetAbility().Description;
+        m_abilityText.text = "Counter Ability - " + m_raider.RaiderStats.Ability.Name + ":";
+        m_abilityText.text += "\nCan be used to counter " + m_raider.RaiderStats.Ability.Ability;
+        m_abilityText.text += "\n\n" + m_raider.RaiderStats.Ability.Description;
     }
 
     void SetupCooldown()
     {
-        m_abilityText.text = "Cooldown - " + attackOrHealScript.Cooldown.Name + ":";
-        m_abilityText.text += "\nCan be used as a " + attackOrHealScript.Cooldown.Cooldown;
-        m_abilityText.text += "\n\n" + attackOrHealScript.Cooldown.Description;
+        m_abilityText.text = "Cooldown - " + m_raider.RaiderStats.Cooldown.Name + ":";
+        m_abilityText.text += "\nCan be used as a " + m_raider.RaiderStats.Cooldown.Cooldown;
+        m_abilityText.text += "\n\n" + m_raider.RaiderStats.Cooldown.Description;
     }
 }

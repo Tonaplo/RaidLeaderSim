@@ -12,6 +12,7 @@ public static class Utility
     {
         Initialize();
         PlayerData.GenerateDebugRoster();
+        SetCurrentEncounter(new MoAKeeperOfTheMine());
     }
 
     public static void Initialize() {
@@ -483,6 +484,13 @@ public static class Utility
     public static string GetPercentIncreaseString(float multiplier)
     {
         int percentIncrease = Mathf.RoundToInt((multiplier - 1.0f) * 100.0f);
+
+        return percentIncrease + "%";
+    }
+
+    public static string GetPercentString(float multiplier)
+    {
+        int percentIncrease = Mathf.RoundToInt((multiplier) * 100.0f);
 
         return percentIncrease + "%";
     }

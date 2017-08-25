@@ -13,12 +13,16 @@ public class MainSceneMainController : MonoBehaviour {
 
 
     RosterControllerScript m_rosterScript;
+    MainGameSceneRecruitmentController m_recruitmentScript;
 
 	// Use this for initialization
 	void Start () {
         m_rosterScript = RosterControllerPrefab.GetComponent<RosterControllerScript>();
+        m_recruitmentScript = RecruitmentControllerPrefab.GetComponent<MainGameSceneRecruitmentController>();
 
-        m_rosterScript.SetActive(false);
+        m_rosterScript.gameObject.SetActive(false);
+        m_recruitmentScript.gameObject.SetActive(false);
+
         OnClickRoster();
     }
 	
@@ -29,12 +33,26 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickRoster()
     {
-        m_rosterScript.SetActive(true);
+        m_rosterScript.Reactivate();
+        m_recruitmentScript.gameObject.SetActive(false);
     }
 
     public void OnClickProgress()
     {
-        m_rosterScript.SetActive(false);
+        m_rosterScript.gameObject.SetActive(false);
+        m_recruitmentScript.gameObject.SetActive(false);
+    }
+
+    public void OnClickRecruitment()
+    {
+        m_rosterScript.gameObject.SetActive(false);
+        m_recruitmentScript.gameObject.SetActive(true);
+    }
+
+    public void OnClickItems()
+    {
+        m_rosterScript.gameObject.SetActive(false);
+        m_recruitmentScript.gameObject.SetActive(false);
     }
 
     public void OnClickRaid()

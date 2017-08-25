@@ -19,6 +19,7 @@ public class HealthBarScript : MonoBehaviour {
     void Start() {
         RaiderButton.interactable = false;
         RaiderButton.GetComponent<Image>().color = new Color(0,0,0,0);
+        
     }
 
     public void SetUseName(string name, bool on) {
@@ -35,6 +36,7 @@ public class HealthBarScript : MonoBehaviour {
     public void SetUsePercent(bool on) { m_usePercent = on; }
 
     public void SetupHealthBar(int xPos, int yPos, int height, int width, int maxHealth) {
+
         HealthBarSlider.transform.SetPositionAndRotation(new Vector3(xPos, yPos, 0), Quaternion.identity);
         HealthBarSlider.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
         HealthBarSlider.maxValue = maxHealth;

@@ -16,6 +16,7 @@ public class Raider : BaseCharacter {
 
     public Raider(string _name, RaiderStats _stats) : base(_name) {
         stats = _stats;
+        RecalculateRaider();
     }
 
     public void RecalculateRaider()

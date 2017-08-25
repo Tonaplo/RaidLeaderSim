@@ -15,14 +15,17 @@ public class RaiderStats {
     Enums.CharacterClass m_charClass;
     Enums.CharacterSpec m_charSpec;
     BaseAbility m_ability;
+    BaseCooldown m_cooldown;
 
     public GearStats Gear { get { return m_gear; } }
     public SkillStats Skills { get { return m_skill; } }
+    public BaseAbility Ability { get { return m_ability; } }
+    public BaseCooldown Cooldown { get { return m_cooldown; } }
 
     //per fight stats
     float m_varianceMultiplierThisAttempt = 0.0f;
     int throughput = 0;
-    
+
     public float GetVarianceMultiplierThisAttempt() { return m_varianceMultiplierThisAttempt; }
     public int GetVariance() { return m_variation; }
     public float GetVarianceMultiplier() { return 1.0f + (UnityEngine.Random.Range(-GetVariance(), GetVariance()))/100.0f; }
@@ -33,7 +36,6 @@ public class RaiderStats {
     public Enums.CharacterSpec GetCurrentSpec() { return m_charSpec; }
     public Enums.CharacterSpec GetOffSpec() { return Utility.GetOtherSpec(GetCurrentSpec()); }
     public Enums.CharacterRole GetOffSpecRole() { return Utility.GetRoleFromSpec(GetOffSpec()); }
-    public BaseAbility GetAbility() { return m_ability; }
 
     public RaiderStats(int baseLevel)
     {
@@ -73,9 +75,11 @@ public class RaiderStats {
 
     public void ReCalculateRaiderStats()
     {
+        //SetTestValue();
         Gear.CalculateItemlevels();
         Skills.CalculateAverageSkillLevel();
         SetAbilityFromSpec();
+        SetCooldownFromSpec();
         ComputeAverageThroughput();
         ComputeSkillThisAttempt();
         ComputeThroughput();
@@ -99,7 +103,7 @@ public class RaiderStats {
         float floatAmount = m_gear.TotalItemLevel / 2;
         
         //Multiply with Gearlevel - increases the base by a percentage
-        floatAmount *= (0.5f + ((float)m_skill.GetSkillLevel(Enums.SkillTypes.Throughput) / 25.0f));
+        floatAmount *= (0.5f + ((float)m_skill.GetSkillLevel(Enums.SkillTypes.Throughput) / 100.0f));
 
         //Adjust so we always contribute 'something'
         floatAmount = StaticValues.MinimumThroughput > floatAmount ? StaticValues.MinimumThroughput : floatAmount;
@@ -114,8 +118,8 @@ public class RaiderStats {
         ComputeThroughput();
     }
     
-    public int GetSpellAmount(float multiplier) {
-        float value = multiplier * (GetThroughput() * GetVarianceMultiplier());
+    public int GetAttackOrHealAmount() {
+        float value = (GetThroughput() * GetVarianceMultiplier());
         return (int)(value > 1.0f ? value : 1);
     }
 
@@ -240,9 +244,9 @@ public class RaiderStats {
             case Enums.CharacterSpec.Elementalist:
             case Enums.CharacterSpec.Necromancer:
             default:
-                Debug.Assert(false);
-                script = new NaturalistHealScript();
-                break;
+                Debug.LogAssertion("Tried to find heal script for non-healer");
+                script = null;
+                return;
         }
 
         script.Setup();
@@ -309,16 +313,24 @@ public class RaiderStats {
     static void FinishRaiderStatGeneration(ref RaiderStats rs)
     {
         rs.m_charSpec = Utility.GetSpecFromRoleAndClass(rs.m_charClass, rs.m_charRole);
+        rs.Gear.CalculateItemlevels();
+        rs.Skills.CalculateAverageSkillLevel();
         rs.SetAbilityFromSpec();
+        rs.SetCooldownFromSpec();
         rs.ComputeAverageThroughput();
+        rs.ComputeSkillThisAttempt();
         rs.ComputeThroughput();
     }
     
     void FinishRaiderStatGeneration()
     {
         m_charSpec = Utility.GetSpecFromRoleAndClass(m_charClass, m_charRole);
+        Gear.CalculateItemlevels();
+        Skills.CalculateAverageSkillLevel();
         SetAbilityFromSpec();
+        SetCooldownFromSpec();
         ComputeAverageThroughput();
+        ComputeSkillThisAttempt();
         ComputeThroughput();
     }
     
@@ -349,19 +361,86 @@ public class RaiderStats {
                 m_ability = new BaseAbility("InterruptAssassin", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
                 break;
             case Enums.CharacterSpec.Ranger:
-                m_ability = new BaseAbility("RangerSlow", "Provides the m_ability to slow", Enums.Ability.Slow);
+                m_ability = new BaseAbility("RangerImmune", "Provides the m_ability to slow", Enums.Ability.Immune);
                 break;
             case Enums.CharacterSpec.Wizard:
                 m_ability = new BaseAbility("InterruptWizard", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
                 break;
             case Enums.CharacterSpec.Elementalist:
-                m_ability = new BaseAbility("ElementalistSlow", "Provides the m_ability to slow", Enums.Ability.Slow);
+                m_ability = new BaseAbility("ElementalistImmune", "Provides the m_ability to slow", Enums.Ability.Immune);
                 break;
             case Enums.CharacterSpec.Necromancer:
-                m_ability = new BaseAbility("NecromancerSlow", "Provides the m_ability to slow", Enums.Ability.Slow);
+                m_ability = new BaseAbility("NecromancerImmune", "Provides the m_ability to slow", Enums.Ability.Immune);
                 break;
             case Enums.CharacterSpec.Scourge:
                 m_ability = new BaseAbility("ScourgeStun", "Provides the m_ability to stun", Enums.Ability.Stun);
+                break;
+            default:
+                Debug.LogAssertion("Spec Not Found!");
+                break;
+        }
+    }
+
+    void SetCooldownFromSpec()
+    {
+        BaseCooldown.CooldownEffects effects = new BaseCooldown.CooldownEffects();
+        //Code to give them correct Cooldowns
+        switch (m_charSpec)
+        {
+            case Enums.CharacterSpec.Guardian:
+                effects.m_damageReductionMultiplier = 0.3f;
+                effects.m_targets = Enums.CooldownTargets.Raid;
+                m_cooldown = new BaseCooldown("Protection", "The Guardian and the rest of the raid takes <dr> less damage for the next <dur>.", Enums.Cooldowns.TankCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Knight:
+                effects.m_leechMultiplier = 0.1f;
+                effects.m_targets = Enums.CooldownTargets.Raid;
+                m_cooldown = new BaseCooldown("Light Infusion", "The Knight and the rest of the raid now heals for <leech> of damage dealt for the next <dur>.", Enums.Cooldowns.TankCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Cleric:
+                effects.m_deepHealingMultiplier = 1.5f;
+                m_cooldown = new BaseCooldown("Deep Healing", "Targets are healed up to an additional <deep> more for <dur>.", Enums.Cooldowns.HealingCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Diviner:
+                effects.m_castTimeMultiplier = 0.6f;
+                m_cooldown = new BaseCooldown("Quickening", "Reduces cast time of Arcane Mending by <ct> for <dur>.", Enums.Cooldowns.HealingCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Naturalist:
+                effects.m_HoTMultiplier = 0.9f;
+                m_cooldown = new BaseCooldown("Lingering Touch", "The next <dur>, healed targets are healed again for an additional <hot> of the initial heal", Enums.Cooldowns.HealingCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Berserker:
+                effects.m_leechMultiplier = 0.05f;
+                effects.m_damageMultiplier = 1.2f;
+                m_cooldown = new BaseCooldown("Berserk", "The Berserker heals for <leech> of damage dealt and increases damage by <damage> for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Assassin:
+                effects.m_damageMultiplier = 1.50f;
+                m_cooldown = new BaseCooldown("Deadly Poison", "Increases damage dealt by <damage> for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 8.0f);
+                break;
+            case Enums.CharacterSpec.Ranger:
+                effects.m_castTimeMultiplier = 0.75f;
+                m_cooldown = new BaseCooldown("Rapid Fire", "Reduces cast time by <ct> for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Wizard:
+                effects.m_damageMultiplier = 1.20f;
+                effects.m_castTimeMultiplier = 0.80f;
+                m_cooldown = new BaseCooldown("Arcane Power", "Increases damage dealt by <damage> and reduces cast time by <ct> for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 15.0f);
+                break;
+            case Enums.CharacterSpec.Elementalist:
+                effects.m_critChanceIncrease = 35;
+                effects.m_critEffectIncrease = 0.50f;
+                m_cooldown = new BaseCooldown("Arcane Power", "Increases crit chance by <critchance> and crit effect by <criteffect> for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 10.0f);
+                break;
+            case Enums.CharacterSpec.Necromancer:
+                effects.m_castTimeMultiplier = 0.9f;
+                effects.m_targets = Enums.CooldownTargets.Raid;
+                m_cooldown = new BaseCooldown("Unholy Power", "Provides <ct> reduced cast time for the whole raid for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 15.0f); 
+                break;
+            case Enums.CharacterSpec.Scourge:
+                effects.m_damageMultiplier = 1.1f;
+                effects.m_targets = Enums.CooldownTargets.Raid;
+                m_cooldown = new BaseCooldown("Bloodthirst", "Provides <damage> increased damage for the whole raid for <dur>.", Enums.Cooldowns.DPSCooldown, effects, 15.0f);
                 break;
             default:
                 Debug.LogAssertion("Spec Not Found!");

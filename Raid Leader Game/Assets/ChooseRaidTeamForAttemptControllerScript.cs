@@ -65,8 +65,6 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
 
         newChoices.RemoveAll(x => PlayerData.RaidTeam.Contains(x));
 
-        RectTransform rowRectTransform = RosterMemberPrefab.GetComponent<RectTransform>();
-
         //calculate the width and height of each child item.
         int columnCount = 1;
         float width = 285;

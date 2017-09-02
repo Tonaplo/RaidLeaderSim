@@ -30,6 +30,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
     void Start () {
         m_encounters = new List<BaseEncounter> {
             new MoAKeeperOfTheMine(),
+            new MoAVampiricus(),
         };
 
         for (int i = 0; i < m_encounters.Count; i++)

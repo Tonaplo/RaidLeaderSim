@@ -21,40 +21,31 @@ public class MoAVampiricus : BaseEncounter
      */
 
     //This encounter is not at all done
-    int m_ClubSwingNumHits = 6;
-    float m_ClubSwingHitIncrease = 1.1f;
-    float m_ClubSwingCastTime = 2.5f;
-
-    float m_PebbleThrowCastTime = 1.5f;
 
     IEnumerator m_currentAbilityCoroutine;
 
     public MoAVampiricus() : base("Vampiricus", 30000) { }
 
-    //Will work more on this encounter as soon as I have the taunting set up.
-
-    /*public override void BeginEncounter()
+    public override void BeginEncounter()
     {
-        List<RaiderScript> pebbletargets = GetRandomRaidTargets(GetPebbleThrowTargetCount());
         bool hasHitTank = false;
         for (int i = 0; i < m_raid.Count; i++)
         {
-            if (pebbletargets.Contains(m_raid[i]))
-                m_rsc.StartCoroutine(DoBasicAttack(Utility.GetFussyCastTime(m_PebbleThrowCastTime), (int)(GetPebbleThrowDamage() * Random.value), m_raid[i]));
-
             if (m_raid[i].Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && !hasHitTank)
             {
                 hasHitTank = true;
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, m_raid[i]));
+                m_currentTarget = m_raid[i];
+                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(GetBleedingBiteCastTime()), m_raid[i]));
             }
         }
 
         if (!hasHitTank)
         {
-            m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, m_raid[0]));
+            m_currentTarget = m_raid[0];
+            m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(GetBleedingBiteCastTime()), m_raid[0]));
         }
 
-        m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
+        m_rsc.StartCoroutine(WaitForVampiricBite(GetVampiricBiteWaitTime()));
     }
 
     public override void SetupLoot()
@@ -64,28 +55,24 @@ public class MoAVampiricus : BaseEncounter
 
     public override void SetupDescription()
     {
-        What you wanna do now is the make a taunt menu in the same place where there's a cooldown menu.
-        I am also thinking this would be a good place to make a dispel menu there and have that light up or flash when something needs to be dispelled.
-        
         m_attacks = new List<EncounterAttackDescription> {
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Bleeding Bite", Name + " sinks his teeth into his target, dealing " + GetBleedingBiteDamage() + " damage and causing the target to bleed for " + GetBleedingBiteDoTDamage() + " every second until a new target is found."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank, Enums.CharacterRole.Healer, Enums.CharacterRole.MeleeDPS, Enums.CharacterRole.RangedDPS}, "Pebble Slide", "Pebbles from the Cave randomly fall down, hitting "+ GetPebbleThrowTargetCount() + " random raid members for up to " + GetPebbleThrowDamage() + " damage."),
+            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Bleeding Bite", Name + " sinks his teeth into his target, dealing " + GetBleedingBiteDamage() + " damage and causing the target to bleed for " + GetBleedingBiteDoTDamage() + " every second. Every bite on the same target increases the bleed damage."),
         };
     }
 
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Vampiric Bite", "Every " + GetVampiricBiteWaitTime() + " seconds, the " + Name + " rears up for a bite of his current target, dealing " + GetVampiricBiteDamage() + " healing for " + Utility.GetPercentIncreaseString(GetVampiricBiteHealAmount()) +"% of his maximum health if successful.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
+            new EncounterAbility("Vampiric Bite", "Every " + GetVampiricBiteWaitTime() + " seconds, " + Name + " rears up for a bite of his current target, dealing " + GetVampiricBiteDamage() + " and healing for " + Utility.GetPercentString(GetVampiricBiteHealAmount()) +" of his maximum health if successful.", GetVampiricBiteCastTime(),Enums.Ability.Interrupt, null ),
         };
     }
 
     public override void CurrentAbilityCountered()
     {
-        m_currentAbility = null;
         m_rsc.StopCoroutine(m_currentAbilityCoroutine);
-        m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
+        m_rsc.StartCoroutine(WaitForVampiricBite(GetVampiricBiteWaitTime()));
         HandleAbilityTypeCountered(m_currentAbility.Ability);
+        m_currentAbility = null;
     }
 
     float GetVampiricBiteCastTime()
@@ -149,12 +136,12 @@ public class MoAVampiricus : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 50;
+                return 50 * m_counter;
             case Enums.Difficulties.Normal:
             default:
-                return 75;
+                return 75 * m_counter;
             case Enums.Difficulties.Hard:
-                return 100;
+                return 100 * m_counter;
         }
     }
 
@@ -163,67 +150,97 @@ public class MoAVampiricus : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 10;
+                return 10 * m_counter;
             case Enums.Difficulties.Normal:
             default:
-                return 25;
+                return 25 * m_counter;
             case Enums.Difficulties.Hard:
-                return 40;
+                return 40 * m_counter;
         }
     }
 
-    IEnumerator DoBasicAttack(float castTime, int damage, RaiderScript target)
+    float GetBleedingBiteCastTime()
     {
-        yield return new WaitForSeconds(castTime);
-
-        if (!IsDead())
+        switch (m_difficulty)
         {
-            if (!target.IsDead())
-                target.TakeDamage(damage);
-
-            List<RaiderScript> newTarget = GetRandomRaidTargets(1);
-            if (newTarget.Count > 0)
-                m_rsc.StartCoroutine(DoBasicAttack(Utility.GetFussyCastTime(m_PebbleThrowCastTime), (int)(GetPebbleThrowDamage() * Random.value), newTarget[0]));
+            case Enums.Difficulties.Easy:
+                return 5.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 4.0f;
+            case Enums.Difficulties.Hard:
+                return 3.0f;
         }
     }
 
-    IEnumerator DoTankAttack(float castTime, int damage, int counter, RaiderScript target)
+    float GetBleedingBiteTickLength()
+    {
+        return GetBleedingBiteCastTime() / GetNumBleedingBiteTicks();
+    }
+
+    int GetNumBleedingBiteTicks()
+    {
+        return 5;
+    }
+
+    IEnumerator DoTankAttack(float castTime, RaiderScript target)
     {
         yield return new WaitForSeconds(castTime);
 
         if (!target.IsDead() && !IsDead())
         {
-            target.TakeDamage(damage);
-            if (counter > 0)
+            if (m_currentTarget == target)
             {
-                counter--;
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), (int)(damage * m_ClubSwingHitIncrease), counter, target));
+                target.TakeDamage(GetBleedingBiteDamage());
+                m_counter++;
             }
             else
             {
-                RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
-                if (otherTank && !otherTank.IsDead())
-                    m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), (int)(GetClubSwingDamage()), m_ClubSwingNumHits, otherTank));
-                else
-                    m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), (int)(damage * m_ClubSwingHitIncrease), m_ClubSwingNumHits, target));
+                m_counter = 1;
+                target.TakeDamage(GetBleedingBiteDamage());
             }
+
         }
         else if (target.IsDead())
         {
-            RaiderScript otherTank = m_rsc.GetRaid().Find(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
-            if (otherTank && !otherTank.IsDead())
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, otherTank));
-            else
+            m_currentTarget = null;
+            m_counter = 1;
+            List<RaiderScript> otherTanks = m_rsc.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
+            for (int i = 0; i < otherTanks.Count; i++)
+            {
+                if (!otherTanks[i].IsDead())
+                {
+                    m_currentTarget = otherTanks[i];
+                    break;
+                }
+            }
+
+            if (m_currentTarget == null)
             {
                 for (int i = 0; i < m_raid.Count; i++)
                 {
                     if (!m_raid[i].IsDead())
                     {
-                        m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), GetClubSwingDamage(), m_ClubSwingNumHits, m_raid[i]));
+                        m_currentTarget = m_raid[i];
                         break;
                     }
                 }
             }
+        }
+
+        m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(GetBleedingBiteCastTime()), m_currentTarget));
+        m_rsc.StartCoroutine(BleedingBiteDoTDamage(Utility.GetFussyCastTime(GetBleedingBiteTickLength()), GetBleedingBiteDoTDamage(), GetNumBleedingBiteTicks(), m_currentTarget));
+    }
+
+    IEnumerator BleedingBiteDoTDamage(float castTime, int damage, int ticks, RaiderScript target)
+    {
+        yield return new WaitForSeconds(castTime);
+
+        target.TakeDamage(damage);
+        if (!IsDead() && !target.IsDead() && ticks > 0)
+        {
+            ticks--;
+            m_rsc.StartCoroutine(BleedingBiteDoTDamage(castTime, damage, ticks, target));
         }
     }
 
@@ -259,8 +276,7 @@ public class MoAVampiricus : BaseEncounter
             
 
             m_rsc.StartCoroutine(WaitForVampiricBite(GetVampiricBiteWaitTime()));
-            m_rsc.EndCastingAbility();
+            m_rsc.EndCastingAbility(m_currentAbility);
         }
     }
-    */
 }

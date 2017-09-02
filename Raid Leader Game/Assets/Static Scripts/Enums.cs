@@ -42,6 +42,8 @@ public static class Enums{
         Stun,
         Immune,
         Dispel,
+        PreMovePositional,
+        PostMovePositional,
     }
 
     public enum Cooldowns {

@@ -12,6 +12,8 @@ public class RaidSceneController : MonoBehaviour {
     public Text raidText;
     public Canvas canvas;
     public Text SetupText;
+    public Button PositionalButton;
+    public Text PositionalButtonText;
     public GameObject ControlPanel;
     public GameObject SetupPanel;
     public BossCastBarScript BossCastScript;
@@ -44,6 +46,7 @@ public class RaidSceneController : MonoBehaviour {
         SetupUI();
         ControlPanel.SetActive(false);
         SetupPanel.SetActive(true);
+        PositionalButton.gameObject.SetActive(false);
     }
 
     void SetupUI()
@@ -73,10 +76,13 @@ public class RaidSceneController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if ((currentStep == Enums.EncounterSteps.FightInProgress && IsBossDead()) || (m_numDeadRaidMembers == StaticValues.RaidTeamSize))
+        if (currentStep == Enums.EncounterSteps.FightInProgress && (IsBossDead() || (m_numDeadRaidMembers == StaticValues.RaidTeamSize)))
         {
             BossCastScript.StopCasting();
-            EndCastingAbility();
+
+            if(encounter.CurrentAbility != null)
+                EndCastingAbility(encounter.CurrentAbility);
+
             currentStep++;
             AdvanceNextStep();
         }
@@ -131,15 +137,13 @@ public class RaidSceneController : MonoBehaviour {
                     currentStep++;
                 break;
             case Enums.EncounterSteps.FightWon:
+            case Enums.EncounterSteps.FightLost:
+            case Enums.EncounterSteps.GoToMainScreen:
+                DataController.controller.Save();
                 if (encounter.IsDead())
                 {
                     SceneManager.LoadScene("EncounterVictoryScene");
                 }
-                currentStep++;
-                break;
-            case Enums.EncounterSteps.FightLost:
-            case Enums.EncounterSteps.GoToMainScreen:
-                DataController.controller.Save();
                 SceneManager.LoadScene("MainGameScene");
                 break;
             default:
@@ -189,14 +193,27 @@ public class RaidSceneController : MonoBehaviour {
                 }
             }
         }
+        else if (ab.Ability == Enums.Ability.PostMovePositional || ab.Ability == Enums.Ability.PreMovePositional)
+        {
+            PositionalButton.gameObject.SetActive(true);
+            PositionalButtonText.text = "Move out of " + ab.Name + ", raiders!";
+            encounter.InitiatePreMovePositionalAbility();
+        }
     }
 
-    public void EndCastingAbility()
+    public void EndCastingAbility(EncounterAbility ab)
     {
-        for (int i = 0; i < m_raiderScripts.Count; i++)
+        if (ab.Ability == Enums.Ability.Immune || ab.Ability == Enums.Ability.Interrupt)
         {
-            m_raiderScripts[i].HealthBarButton.interactable = false;
-            m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+            for (int i = 0; i < m_raiderScripts.Count; i++)
+            {
+                m_raiderScripts[i].HealthBarButton.interactable = false;
+                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+            }
+        }
+        else if (ab.Ability == Enums.Ability.PostMovePositional || ab.Ability == Enums.Ability.PreMovePositional)
+        {
+            PositionalButton.gameObject.SetActive(false);
         }
     }
 
@@ -217,7 +234,7 @@ public class RaidSceneController : MonoBehaviour {
         raidText.text = counter.GetName() + " tried to counter "+ encounter.CurrentAbility.Name + " and" + (success ? " succeeded!\n" : " failed!\n") + raidText.text;
         if (success)
         {
-            EndCastingAbility();
+            EndCastingAbility(encounter.CurrentAbility);
             BossCastScript.StopCasting();
             encounter.CurrentAbilityCountered();
         }
@@ -257,6 +274,14 @@ public class RaidSceneController : MonoBehaviour {
             KillOffConsumableButtons();
             currentStep++;
             AdvanceNextStep();
+        }
+    }
+
+    public void OnPositionalButtonClick()
+    {
+        if (encounter.AttemptToMove())
+        {
+            PositionalButton.gameObject.SetActive(false);
         }
     }
 

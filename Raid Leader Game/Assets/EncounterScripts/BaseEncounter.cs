@@ -8,7 +8,7 @@ public class BaseEncounter
     #region variables and getters and setters
 
     protected string m_name;
-    protected int m_counter;
+    protected int m_counter = 1;
     protected RaiderScript m_currentTarget;
     protected HealthBarScript m_healthBar;
     protected EncounterAbility m_currentAbility;
@@ -30,6 +30,7 @@ public class BaseEncounter
     protected int m_baseHealth;
     protected RaidSceneController m_rsc;
     protected List<RaiderScript> m_raid;
+    protected List<RaiderScript> m_positionalTargets;
 
     #endregion
 
@@ -116,8 +117,7 @@ public class BaseEncounter
         {
             case Enums.Ability.Interrupt:
             case Enums.Ability.Stun:
-                m_rsc.EndCastingAbility();
-                m_rsc.EndCastingAbility();
+                m_rsc.EndCastingAbility(m_currentAbility);
                 break;
             case Enums.Ability.Immune:
                 break;
@@ -167,20 +167,47 @@ public class BaseEncounter
         return targets;
     }
 
+    public void InitiatePreMovePositionalAbility()
+    {
+        m_positionalTargets = new List<RaiderScript>(m_raid);
+    }
+    
+    public bool AttemptToMove()
+    {
+        List<RaiderScript> toBeRemoved = new List<RaiderScript>();
+        for (int i = 0; i < m_positionalTargets.Count; i++)
+        {
+            int chance = m_raid[i].Raider.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Positional);
+            int roll = Random.Range(0, StaticValues.MaxSkill + 1);
+            if (roll < chance)
+            {
+                toBeRemoved.Add(m_positionalTargets[i]);
+            }
+        }
+
+        for (int i = 0; i < toBeRemoved.Count; i++)
+        {
+            m_positionalTargets.Remove(toBeRemoved[i]);
+        }
+
+        return m_positionalTargets.Count == 0;
+    }
+
+
     protected void GenerateLoot(int normalItemLevel, int numNormalLootPieces)
     {
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                normalItemLevel = 10;
-                numNormalLootPieces = 4;
+                normalItemLevel -= 5;
+                numNormalLootPieces -= 1;
                 break;
             case Enums.Difficulties.Normal:
             default:
                 break;
             case Enums.Difficulties.Hard:
-                normalItemLevel = 20;
-                numNormalLootPieces = 6;
+                normalItemLevel += 5;
+                numNormalLootPieces += 1;
                 break;
         }
 

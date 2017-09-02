@@ -46,6 +46,9 @@ public class MoAKeeperOfTheMine : BaseEncounter
         }
 
         m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
+        
+        if(m_difficulty == Enums.Difficulties.Hard)
+            m_rsc.StartCoroutine(WaitForGroundPound(GetGroundPoundWaitTime() * 1.25f));
     }
 
     public override void SetupLoot()
@@ -64,8 +67,13 @@ public class MoAKeeperOfTheMine : BaseEncounter
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Avalance", "Every " + GetAvalanceWaitTime() + " seconds, the " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
+            new EncounterAbility("Avalanche", "Every " + GetAvalanceWaitTime() + " seconds, " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
         };
+
+        if (m_difficulty == Enums.Difficulties.Hard)
+        {
+            m_encounterAbilities.Add(new EncounterAbility("Ground Pound", Name + " raises his fists in the air to pound the ground where the raid stands, dealing " + GetGroundPoundDamage() + " to any raid member that does not move in time.", GetGroundPoundCastTime(), Enums.Ability.PreMovePositional, null));
+        }
     }
 
     public override void CurrentAbilityCountered()
@@ -151,10 +159,10 @@ public class MoAKeeperOfTheMine : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 20.0f;
+                return 15.0f;
             case Enums.Difficulties.Normal:
             default:
-                return 12.0f;
+                return 10.0f;
             case Enums.Difficulties.Hard:
                 return 5.0f;
         }
@@ -171,6 +179,45 @@ public class MoAKeeperOfTheMine : BaseEncounter
                 return 3.5f;
             case Enums.Difficulties.Hard:
                 return 2.5f;
+        }
+    }
+
+    int GetGroundPoundDamage()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+            case Enums.Difficulties.Normal:
+            default:
+                return 0; //This shouldnt work on anything other than Hard
+            case Enums.Difficulties.Hard:
+                return 125; 
+        }
+    }
+
+    float GetGroundPoundWaitTime()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+            case Enums.Difficulties.Normal:
+            default:
+                return 0.0f; //This shouldnt work on anything other than Hard
+            case Enums.Difficulties.Hard:
+                return 10.0f;
+        }
+    }
+
+    float GetGroundPoundCastTime()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+            case Enums.Difficulties.Normal:
+            default:
+                return 0.0f; //This shouldnt work on anything other than Hard
+            case Enums.Difficulties.Hard:
+                return GetAvalanceCastTime();
         }
     }
 
@@ -242,13 +289,20 @@ public class MoAKeeperOfTheMine : BaseEncounter
     IEnumerator WaitForAvalance(float waitTime)
     {
         yield return new WaitForSeconds(waitTime);
-
+        
         if (!IsDead())
         {
-            m_currentAbility = m_encounterAbilities[0];
-            m_rsc.BeginCastingAbility(m_currentAbility);
-            m_currentAbilityCoroutine = CastAvalance(GetAvalanceCastTime());
-            m_rsc.StartCoroutine(m_currentAbilityCoroutine);
+            if (m_currentAbility == null)
+            {
+                m_currentAbility = m_encounterAbilities.Find(x => x.Name == "Avalanche");
+                m_rsc.BeginCastingAbility(m_currentAbility);
+                m_currentAbilityCoroutine = CastAvalance(GetAvalanceCastTime());
+                m_rsc.StartCoroutine(m_currentAbilityCoroutine);
+            }
+            else
+            {
+                m_rsc.StartCoroutine(WaitForAvalance(0.5f));
+            }
         }
     }
 
@@ -265,7 +319,45 @@ public class MoAKeeperOfTheMine : BaseEncounter
             }
 
             m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
-            m_rsc.EndCastingAbility();
+            m_rsc.EndCastingAbility(m_currentAbility);
+            m_currentAbility = null;
+        }
+    }
+
+    IEnumerator WaitForGroundPound(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        if (!IsDead())
+        {
+            if (m_currentAbility == null)
+            {
+                m_currentAbility = m_encounterAbilities.Find(x => x.Name == "Ground Pound");
+                m_rsc.BeginCastingAbility(m_currentAbility);
+                m_rsc.StartCoroutine(CastGroundPound(GetGroundPoundCastTime()));
+            }
+            else
+            {
+                m_rsc.StartCoroutine(WaitForGroundPound(0.5f));
+            }
+        }
+    }
+
+    IEnumerator CastGroundPound(float castTime)
+    {
+        yield return new WaitForSeconds(castTime);
+
+        if (!IsDead())
+        {
+            for (int i = 0; i < m_positionalTargets.Count; i++)
+            {
+                if (!m_positionalTargets[i].IsDead())
+                    m_positionalTargets[i].TakeDamage(GetGroundPoundDamage());
+            }
+
+            m_rsc.StartCoroutine(WaitForGroundPound(GetGroundPoundWaitTime()));
+            m_rsc.EndCastingAbility(m_currentAbility);
+            m_currentAbility = null;
         }
     }
 }

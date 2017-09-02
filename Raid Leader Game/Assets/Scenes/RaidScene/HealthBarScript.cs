@@ -45,6 +45,13 @@ public class HealthBarScript : MonoBehaviour {
         SetText();
     }
 
+    public void SetNewMaxHealth(int maxHealth)
+    {
+        HealthBarSlider.maxValue = maxHealth;
+        HealthBarSlider.value = maxHealth;
+        SetText();
+    }
+
     public bool IsDead()
     {
         return HealthBarSlider.value <= 0;

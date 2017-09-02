@@ -8,22 +8,24 @@ public class RaidSceneController : MonoBehaviour {
 
     public GameObject HealthBarPrefab;
     public GameObject MeterPrefab;
+    public GameObject ConsumablePrefab;
     public Text raidText;
-    public Text encounterText;
     public Canvas canvas;
+    public Text SetupText;
+    public GameObject ControlPanel;
+    public GameObject SetupPanel;
     public BossCastBarScript BossCastScript;
     public RaidSceneControlPanel CooldownController;
 
     Enums.EncounterSteps currentStep = Enums.EncounterSteps.EncounterStart;
-    int currentSubStep = -1;
     BaseEncounter encounter;
     List<Raider> all = new List<Raider>();
-    int[] totalDamage = new int[10];
     List<RaiderScript> m_raiderScripts;
     MeterControllerScript m_damageMcs;
     MeterControllerScript m_healingMcs;
     float m_fightStartTime;
     int m_numDeadRaidMembers = 0;
+    List<GameObject> m_consumableButtons = new List<GameObject>();
 
     public BaseEncounter Encounter {get  { return encounter; } }
 
@@ -40,19 +42,15 @@ public class RaidSceneController : MonoBehaviour {
         CreateRaidHealthBars();
         CreateEncounter();
         SetupUI();
-
-        totalDamage = new int[all.Count];
-        for (int i = 0; i < all.Count; i++)
-        {
-            totalDamage[i] = 0;
-        }
+        ControlPanel.SetActive(false);
+        SetupPanel.SetActive(true);
     }
 
     void SetupUI()
     {
         raidText.text = "";
-        encounterText.text = "Current step is " + (int)currentStep;
-        
+        SetupText.text = PlayerData.RaidTeamName + " taking on\n" + encounter.Name + "\non\n" + encounter.Difficulty.ToString() + " difficulty.";
+
         GameObject temp = GameObject.Instantiate(MeterPrefab);
         temp.transform.SetParent(canvas.transform);
         m_damageMcs = temp.GetComponent<MeterControllerScript>();
@@ -86,34 +84,27 @@ public class RaidSceneController : MonoBehaviour {
 
     public void AdvanceNextStep() {
         
-        encounterText.text = "Current step is " + (int)currentStep;
+        SetupText.text = "Current step is " + currentStep;
         switch (currentStep)
         {
             case Enums.EncounterSteps.EncounterStart:
-                currentStep = Enums.EncounterSteps.CalculateRaiderPerformanceForAttempt;
-                currentSubStep = all.Count - 1;
-                while (currentSubStep >= 0)
-                {
-                    AdvanceNextStep();
-                }
+                currentStep++;
+                break;
+            case Enums.EncounterSteps.ApplyConsumables:
+                SetupConsumableButtons();
+                currentStep++;
                 break;
             case Enums.EncounterSteps.CalculateRaiderPerformanceForAttempt:
+                KillOffConsumableButtons();
                 CalculateEncounterSkill();
-                break;
-            case Enums.EncounterSteps.AssignCountersToEncounterAbilities:
-                currentSubStep = encounter.EncounterAbilities.Count-1;
-                AssignCountersToEncounterAbilities();
-                break;
-            case Enums.EncounterSteps.AssignCounterToEncounterCooldowns:
                 currentStep++;
                 break;
-            case Enums.EncounterSteps.ResolveAbilitiesCounters:
-                currentStep++;
-                break;
-            case Enums.EncounterSteps.ResolveCooldownCounters:
+            case Enums.EncounterSteps.ReadyToPull:
+                ControlPanel.SetActive(true);
                 currentStep++;
                 break;
             case Enums.EncounterSteps.FightStart:
+                SetupPanel.SetActive(false);
                 for (int i = 0; i < all.Count; i++)
                 {
                     StartCoroutine(m_raiderScripts[i].StartFight(i*0.1f, i, all[i], this));
@@ -164,7 +155,6 @@ public class RaidSceneController : MonoBehaviour {
     public void DealDamage(int damage, string attacker, string attack, int index) {
         //string newText = attacker + " deals " + damage + " damage with " + attack + "!\n";
         //raidText.text = newText + raidText.text;
-        totalDamage[index] += damage;
         encounter.HealthBar.ModifyHealth(-damage);
         m_damageMcs.AddAmountToEntry(attacker, index, damage);
     }
@@ -184,15 +174,19 @@ public class RaidSceneController : MonoBehaviour {
         raidText.text = encounter.Name + " begins casting " + ab.Name + "!\n" + raidText.text;
         BossCastScript.InitiateCast(ab.CastTime, ab.Name);
 
-        for (int i = 0; i < m_raiderScripts.Count; i++)
+        if (ab.Ability == Enums.Ability.Immune || ab.Ability == Enums.Ability.Interrupt)
         {
-            if (m_raiderScripts[i].Raider.RaiderStats.Ability.Ability == ab.Ability && !m_raiderScripts[i].IsDead())
+            for (int i = 0; i < m_raiderScripts.Count; i++)
             {
-                m_raiderScripts[i].HealthBarButton.interactable = true;
-                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.98f);
-            }
-            else {
-                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.grey.r , Color.grey.g , Color.grey.b, 0.98f);
+                if (m_raiderScripts[i].Raider.RaiderStats.Ability.Ability == ab.Ability && !m_raiderScripts[i].IsDead())
+                {
+                    m_raiderScripts[i].HealthBarButton.interactable = true;
+                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.98f);
+                }
+                else
+                {
+                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.grey.r, Color.grey.g, Color.grey.b, 0.98f);
+                }
             }
         }
     }
@@ -253,6 +247,19 @@ public class RaidSceneController : MonoBehaviour {
         encounter.SetCurrentTarget(taunter);
     }
 
+    public void UseConsumable(ConsumableItem item)
+    {
+        if (PlayerData.UseConsumable(item)) {
+            for (int i = 0; i < m_raiderScripts.Count; i++)
+            {
+                m_raiderScripts[i].AddConsumable(item);
+            }
+            KillOffConsumableButtons();
+            currentStep++;
+            AdvanceNextStep();
+        }
+    }
+
     void GrantSkillIncreasesFromEncounterVictory()
     {
         int maxAmountOfSkillUps = 2;
@@ -286,7 +293,7 @@ public class RaidSceneController : MonoBehaviour {
             if (indices.Count >= maxAmountOfSkillUps)
                 break;
 
-            int cutOff = (int)(m_raiderScripts[i].Raider.RaiderStats.Gear.AverageItemLevel * encounterDifficultyInfluence);
+            int cutOff = (int)(m_raiderScripts[i].Raider.RaiderStats.Skills.AverageSkillLevel * encounterDifficultyInfluence);
             int roll = Random.Range(0, 100);
             if (cutOff < roll)
                 indices.Add(i);
@@ -295,7 +302,8 @@ public class RaidSceneController : MonoBehaviour {
         for (int i = 0; i < indices.Count; i++)
         {
             Enums.SkillTypes type = (Enums.SkillTypes)Random.Range(0, (int)Enums.SkillTypes.NumSkillTypes);
-            int newSkillLevel = m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.GetSkillLevel(type) + 1;
+            int maxRoll = ((StaticValues.MaxSkill - m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.AverageSkillLevel) % 20) + 1;
+            int newSkillLevel = m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.GetSkillLevel(type) + Random.Range(1, maxRoll);
             m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.ModifySkill(newSkillLevel, type);
             raidText.text = m_raiderScripts[indices[i]].Raider.GetName() + " had " + type.ToString() + " skill increased to " + newSkillLevel + "!\n" + raidText.text;
         }
@@ -303,39 +311,45 @@ public class RaidSceneController : MonoBehaviour {
     }
 
     void CalculateEncounterSkill() {
-        if (currentSubStep >= 0 || currentSubStep <= (all.Count - 1))
+        for (int i = 0; i < all.Count; i++)
         {
-            all[currentSubStep].RaiderStats.ComputeSkillThisAttempt();
-            string newText = all[currentSubStep].GetName() + ": " + all[currentSubStep].RaiderStats.GetThroughput().ToString() + " throughput this try ( " + all[currentSubStep].RaiderStats.GetAverageThroughput().ToString() + " average throughout)\n";
+            all[i].RaiderStats.ComputeSkillThisAttempt();
+            string newText = all[i].GetName() + ": " + all[i].RaiderStats.GetThroughput().ToString() + " throughput this try ( " + all[i].RaiderStats.GetAverageThroughput().ToString() + " average throughout)\n";
 
             raidText.text = newText + raidText.text;
-
-            currentSubStep--;
-            if (currentSubStep < 0)
-                currentStep = Enums.EncounterSteps.AssignCountersToEncounterAbilities;
-        }
-        else
-        {
-            print("Error! Incorrect amount of substeps for characters!");
-            return;
         }
     }
 
-    void AssignCountersToEncounterAbilities() {
-        if (currentSubStep >= 0)
-        {
-            //Need to figure out some UI elements here
-            //I think using props and instantiating them correctly would be the best here.
+    void SetupConsumableButtons() {
 
-            //Skipping this step for now
-            currentSubStep = 0;
-            currentStep++;
-        }
-        else
+        SetupText.text = "Apply Consumable to Raid:";
+        List<ConsumableItem> types = new List<ConsumableItem>();
+        for (int i = 0; i < PlayerData.Consumables.Count; i++)
         {
-            currentSubStep = 0;
-            currentStep++;
+            if (types.FindAll(x => x.Name == PlayerData.Consumables[i].Name).Count == 0)
+                types.Add(new ConsumableItem( PlayerData.Consumables[i]));
         }
+
+        for (int i = 0; i < types.Count; i++)
+        {
+            GameObject temp = GameObject.Instantiate(ConsumablePrefab);
+            temp.name = types[i].Name;
+            temp.SetActive(true);
+            temp.transform.SetParent(canvas.transform);
+            temp.transform.SetPositionAndRotation(new Vector3(15 + (i % 3)*130, 275 - (i / 3) * 38, 0), Quaternion.identity);
+            temp.AddComponent<RaidSceneConsumablePrefab>();
+            temp.GetComponent<RaidSceneConsumablePrefab>().Initialize(this, types[i]);
+            m_consumableButtons.Add(temp);
+        }
+    }
+
+    void KillOffConsumableButtons()
+    {
+        for (int i = 0; i < m_consumableButtons.Count; i++)
+        {
+            Destroy(m_consumableButtons[i]);
+        }
+        m_consumableButtons.Clear();
     }
 
     void CreateRaidHealthBars()
@@ -347,7 +361,7 @@ public class RaidSceneController : MonoBehaviour {
             tempTwo.name = all[i].GetName();
             tempTwo.transform.SetParent(canvas.transform);
             tempTwo.AddComponent<RaiderScript>();
-            m_raiderScripts.Add(tempTwo.AddComponent<RaiderScript>());
+            m_raiderScripts.Add(tempTwo.GetComponent<RaiderScript>());
             m_raiderScripts[i].Initialize(all[i], tempTwo.GetComponent<HealthBarScript>(), canvas, i);
         }
     }

@@ -112,10 +112,13 @@
     <Compile Include="Assets\RosterButtonScript.cs" />
     <Compile Include="Assets\RosterControllerScript.cs" />
     <Compile Include="Assets\Scenes\MainGameSceneRecruitmentController.cs" />
+    <Compile Include="Assets\Scenes\MainSceneItemCategoryController.cs" />
+    <Compile Include="Assets\Scenes\MainSceneItemsController.cs" />
     <Compile Include="Assets\Scenes\RaidScene\BossCastBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\EncounterVictorySceneController.cs" />
     <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
+    <Compile Include="Assets\Scenes\RaidScene\RaidSceneConsumablePrefab.cs" />
     <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
     <Compile Include="Assets\Scenes\RecruitScript.cs" />
     <Compile Include="Assets\StartSceneController.cs" />
@@ -148,6 +151,7 @@
     <Compile Include="Assets\Units\Characters\Raider.cs" />
     <Compile Include="Assets\Units\Characters\RaiderStats.cs" />
     <Compile Include="Assets\Units\Characters\SkillStats.cs" />
+    <Compile Include="Assets\Units\ConsumableItem.cs" />
     <Compile Include="Assets\Units\DamageStruct.cs" />
     <Compile Include="Assets\Units\HealStruct.cs" />
   </ItemGroup>

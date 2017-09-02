@@ -40,7 +40,6 @@ public class RaidSceneControlPanel : MonoBehaviour {
     List<GameObject> m_Cooldownbuttons;
     List<GameObject> m_Tauntbuttons;
     List<GameObject> m_Dispelbuttons;
-    int currentCounter = 0;
 
     // Use this for initialization
     void Start () {
@@ -50,8 +49,7 @@ public class RaidSceneControlPanel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (currentCounter != RSC.Encounter.Stacks)
-            HandleStackUI();
+        HandleStackUI();
 	}
 
     public void Initialize()
@@ -225,11 +223,10 @@ public class RaidSceneControlPanel : MonoBehaviour {
 
     void HandleStackUI()
     {
-        currentCounter = RSC.Encounter.Stacks;
-        if (RSC.Encounter.CurrentTarget != null)
-            CurrentTargetText.text = "Current target:\n\n" + RSC.Encounter.CurrentTarget.Raider.GetName() + "\n\n" + RSC.Encounter.Stacks + ((RSC.Encounter.Stacks == 1) ? " Stack" : " Stacks");
-        else
+        int currentCounter = RSC.Encounter.Stacks;
+        if (RSC.Encounter.CurrentTarget == null || RSC.Encounter.CurrentTarget.IsDead())
             CurrentTargetText.text = "No\ncurrent\ntarget!";
-        ;
+        else
+            CurrentTargetText.text = "Current target:\n\n" + RSC.Encounter.CurrentTarget.Raider.GetName() + "\n\n" + RSC.Encounter.Stacks + ((RSC.Encounter.Stacks == 1) ? " Stack" : " Stacks");
     }
 }

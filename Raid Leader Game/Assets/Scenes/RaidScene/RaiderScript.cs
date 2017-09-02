@@ -27,6 +27,7 @@ public class RaiderScript : MonoBehaviour {
 
     List<ActiveCooldowns> m_activeCooldowns;
     BaseCooldown.CooldownEffects m_currentEffects;
+    ConsumableItem m_activeConsumable = null;
 
     bool m_cooldownUsed = false;
     public bool CooldownUsed { get { return m_cooldownUsed; } }
@@ -65,7 +66,12 @@ public class RaiderScript : MonoBehaviour {
     }
 
     public int GetHealth() { return (int)HealthBar.HealthBarSlider.value; }
-    public int GetMaxHealth() { return m_raider.GetMaxHealth(); }
+    public int GetMaxHealth() {
+        if(m_activeConsumable != null && m_activeConsumable.ConsumableType == Enums.ConsumableType.HealthIncrease)
+            return Mathf.RoundToInt(m_raider.GetMaxHealth() * m_activeConsumable.GetMultiplier());
+        else
+            return m_raider.GetMaxHealth();
+    }
     public float GetHealthPercent() { return (HealthBar.HealthBarSlider.value / m_raider.GetMaxHealth()) * 100.0f;  }
 
     public void Initialize(Raider raider, HealthBarScript hbs, Canvas parent, int index) {
@@ -100,6 +106,10 @@ public class RaiderScript : MonoBehaviour {
     public int DealDamage(int index, string attackName, DamageStruct ds)
     {
         int baseDamage = Raider.RaiderStats.GetAttackOrHealAmount();
+
+        if (m_activeConsumable != null && m_activeConsumable.ConsumableType == Enums.ConsumableType.ThroughputIncrease)
+            baseDamage = Mathf.RoundToInt(baseDamage * m_activeConsumable.GetMultiplier());
+
         float baseMultiplier = ds.m_baseMultiplier;
 
         int roll = UnityEngine.Random.Range(0, 100);
@@ -130,6 +140,9 @@ public class RaiderScript : MonoBehaviour {
         hs.m_HoTMultiplier = ApplyHoTMultiplier(hs.m_HoTMultiplier);
 
         int baseHealing = Raider.RaiderStats.GetAttackOrHealAmount();
+
+        if (m_activeConsumable != null && m_activeConsumable.ConsumableType == Enums.ConsumableType.ThroughputIncrease)
+            baseHealing = Mathf.RoundToInt(baseHealing * m_activeConsumable.GetMultiplier());
 
         if (!Mathf.Approximately(hs.m_deepHealingMultiplier, 0.0f))
         {
@@ -219,8 +232,20 @@ public class RaiderScript : MonoBehaviour {
         m_currentEffects.m_leechMultiplier -= cd.m_cooldown.Cooldowneffects.m_leechMultiplier;
     }
 
+    public void AddConsumable(ConsumableItem item)
+    {
+        m_activeConsumable = item;
+        if (item.ConsumableType == Enums.ConsumableType.HealthIncrease)
+        {
+            HealthBar.SetNewMaxHealth(GetMaxHealth());
+        }
+    }
+
     public float ApplyCooldownCastTimeMultiplier(float multiplier)
     {
+        if (m_activeConsumable != null && m_activeConsumable.ConsumableType == Enums.ConsumableType.CastTimeDecrease)
+            multiplier *= m_activeConsumable.GetMultiplier();
+
         return multiplier * m_currentEffects.m_castTimeMultiplier;
     }
 

@@ -70,10 +70,10 @@ public class MoAKeeperOfTheMine : BaseEncounter
 
     public override void CurrentAbilityCountered()
     {
-        m_currentAbility = null;
         m_rsc.StopCoroutine(m_currentAbilityCoroutine);
         m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
         HandleAbilityTypeCountered(m_currentAbility.Ability);
+        m_currentAbility = null;
     }
 
     int GetClubSwingDamage()

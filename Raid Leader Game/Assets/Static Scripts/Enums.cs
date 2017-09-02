@@ -66,17 +66,15 @@ public static class Enums{
 
     public enum EncounterSteps { 
         EncounterStart = 0,
-        CalculateRaiderPerformanceForAttempt = 1,
-        AssignCountersToEncounterAbilities = 2,
-        AssignCounterToEncounterCooldowns = 3,
-        ResolveAbilitiesCounters = 4,
-        ResolveCooldownCounters = 5,
-        FightStart = 6,
-        FightInProgress = 7,
-        FightDone = 8,
-        FightWon = 9,
-        FightLost = 10,
-        GoToMainScreen = 11,
+        ApplyConsumables = 1,
+        CalculateRaiderPerformanceForAttempt = 2,
+        ReadyToPull = 3,
+        FightStart = 4,
+        FightInProgress = 5,
+        FightDone = 6,
+        FightWon = 7,
+        FightLost = 8,
+        GoToMainScreen = 9,
 
     }
 
@@ -118,6 +116,21 @@ public static class Enums{
         Weapon = 3,
         Jewel = 4,
         NumGearTypes = 5,
+    }
+
+    public enum ConsumableType
+    {
+        ThroughputIncrease,
+        CastTimeDecrease,
+        HealthIncrease,
+        NumTypes = 3,
+    }
+
+    public enum ConsumableRarity
+    {
+        Normal,
+        Rare,
+        Epic,
     }
 
     public enum SkillTypes

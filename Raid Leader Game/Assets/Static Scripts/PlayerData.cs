@@ -6,12 +6,14 @@ public static class PlayerData
 {
     static List<Raider> m_roster;
     static List<Raider> m_raidTeam;
+    static List<ConsumableItem> m_consumables;
     static Raider m_playerChar;
     static string m_raidTeamName;
     static int m_raidTeamGold = 0;
     
     public static List<Raider> Roster { get { return m_roster; } }
     public static List<Raider> RaidTeam { get { return m_raidTeam; } }
+    public static List<ConsumableItem> Consumables { get { return m_consumables; } }
     public static Raider PlayerCharacter { get { return m_playerChar; } }
     public static string RaidTeamName { get { return m_raidTeamName; } }
     public static int RaidTeamGold { get { return m_raidTeamGold; } }
@@ -21,14 +23,24 @@ public static class PlayerData
     {
         m_roster = new List<Raider>();
         m_raidTeam = new List<Raider>();
+        m_consumables = new List<ConsumableItem>();
     }
 
-    public static void InitializeDataFromSaveData(Raider player, List<Raider> r, string n, int g)
+    public static void InitializeDataFromSaveData(Raider player, List<Raider> r, List<ConsumableItem> c, string n, int g)
     {
-        m_roster = r;
+        if (r != null)
+            m_roster = r;
+        else
+            m_roster = new List<Raider>();
+
+        if (c != null)
+            m_consumables = c;
+        else
+            m_consumables = new List<ConsumableItem>();
+        
         m_playerChar = player;
         SetRaidTeamName(n);
-        AwardGold(g);
+        m_raidTeamGold = g;
     }
 
     public static void GenerateNewGameRoster(Raider player, int baseLevel)
@@ -192,6 +204,29 @@ public static class PlayerData
         DataController.controller.Save();
     }
 
+    public static void PurchaseConsumable(ConsumableItem item)
+    {
+        if (item.Cost > m_raidTeamGold)
+            return;
+
+        m_raidTeamGold -= item.Cost;
+        m_consumables.Add(item);
+        DataController.controller.Save();
+    }
+
+    public static bool UseConsumable(ConsumableItem item)
+    {
+
+        if (m_consumables.FindAll(x => x.Name == item.Name).Count != 0)
+        {
+            m_consumables.Remove(m_consumables.Find(x => x.Name == item.Name));
+            DataController.controller.Save();
+            return true;
+        }
+        
+        return false;
+    }
+
     public static int GetRosterAverageItemLevel()
     {
         int average = 0;
@@ -238,7 +273,7 @@ public static class PlayerData
     {
         if (gold < 0)
             return;
-
+        
         m_raidTeamGold += gold;
         DataController.controller.Save();
     }

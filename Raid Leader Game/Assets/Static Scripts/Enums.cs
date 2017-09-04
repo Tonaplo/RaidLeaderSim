@@ -38,6 +38,7 @@ public static class Enums{
 
     public enum Ability
     {
+        Uncounterable,
         Interrupt,
         Stun,
         Immune,

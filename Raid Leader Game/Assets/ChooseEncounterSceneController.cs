@@ -103,8 +103,6 @@ public class ChooseEncounterSceneController : MonoBehaviour {
 
         List<EncounterAttackDescription> attacks = m_currentlySelectedEncounter.EncounterAttacks;
 
-        RectTransform rowRectTransform = AttackPrefab.GetComponent<RectTransform>();
-
         //calculate the width and height of each child item.
         int columnCount = attacks.Count;
         float width = 200;

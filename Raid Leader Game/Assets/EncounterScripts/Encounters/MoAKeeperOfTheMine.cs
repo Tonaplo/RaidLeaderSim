@@ -67,12 +67,12 @@ public class MoAKeeperOfTheMine : BaseEncounter
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Avalanche", "Every " + GetAvalanceWaitTime() + " seconds, " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, null ),
+            new EncounterAbility("Avalanche", "Every " + GetAvalanceWaitTime() + " seconds, " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt),
         };
 
         if (m_difficulty == Enums.Difficulties.Hard)
         {
-            m_encounterAbilities.Add(new EncounterAbility("Ground Pound", Name + " raises his fists in the air to pound the ground where the raid stands, dealing " + GetGroundPoundDamage() + " to any raid member that does not move in time.", GetGroundPoundCastTime(), Enums.Ability.PreMovePositional, null));
+            m_encounterAbilities.Add(new EncounterAbility("Ground Pound", Name + " raises his fists in the air to pound the ground where the raid stands, dealing " + GetGroundPoundDamage() + " to any raid member that does not move in time.", GetGroundPoundCastTime(), Enums.Ability.PreMovePositional));
         }
     }
 

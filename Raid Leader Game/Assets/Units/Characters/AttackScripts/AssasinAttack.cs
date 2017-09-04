@@ -6,10 +6,10 @@ using System;
 public class AssasinAttack : BaseHealOrAttackScript
 {
     
-    float m_multiplier = 0.15f;
+    float m_DoTMultiplier = 0.15f;
     int m_poisonDuration = 5;
 
-    public override string GetDescription() { return "Leaves a poison, dealing " + Utility.GetPercentString(m_multiplier) + " damage to enemies every second for  " + m_poisonDuration + " seconds."; }
+    public override string GetDescription() { return "Leaves a poison, dealing " + Utility.GetPercentString(m_DoTMultiplier) + " damage to enemies every second for  " + m_poisonDuration + " seconds."; }
 
     public override void Setup()
     {
@@ -32,7 +32,7 @@ public class AssasinAttack : BaseHealOrAttackScript
         {
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
 
-            int damageDealt = rs.DealDamage(index, Name, thisAttack);
+            rs.DealDamage(index, Name, thisAttack);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
 
             rs.StartCoroutine(DoPoisonDoT(1.0f, m_poisonDuration, index, attacker, rs));
@@ -47,7 +47,7 @@ public class AssasinAttack : BaseHealOrAttackScript
         {
             counter--;
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
-            thisAttack.m_baseMultiplier *= m_multiplier;
+            thisAttack.m_baseMultiplier *= m_DoTMultiplier;
             rs.DealDamage(index, Name, thisAttack);
             rs.StartCoroutine(DoPoisonDoT(1.0f, counter, index, attacker, rs));
         }

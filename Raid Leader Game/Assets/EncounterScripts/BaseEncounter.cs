@@ -28,9 +28,11 @@ public class BaseEncounter
     public List<CharacterItem> Loot { get { return m_loot; } }
     
     protected int m_baseHealth;
+    protected GameObject m_healthBarPrefab;
     protected RaidSceneController m_rsc;
     protected List<RaiderScript> m_raid;
     protected List<RaiderScript> m_positionalTargets;
+    protected List<EncounterAdds> m_adds;
 
     #endregion
 
@@ -42,15 +44,17 @@ public class BaseEncounter
         m_encounterAbilities = new List<EncounterAbility>();
     }
 
-    public void InitializeForRaid(List<RaiderScript> raiders, RaidSceneController rsc, HealthBarScript healthBar)
+    public void InitializeForRaid(List<RaiderScript> raiders, RaidSceneController rsc, GameObject healthBar)
     {
         InitializeForChoice(m_difficulty);
+        m_healthBarPrefab = healthBar;
         m_raid = raiders;
         m_rsc = rsc;
-        m_healthBar = healthBar;
+        m_healthBar = healthBar.GetComponent<HealthBarScript>();
         m_healthBar.SetupHealthBar(350, 390, 100, 600, Mathf.RoundToInt(m_baseHealth * GetDifficultyMultiplier()));
         m_healthBar.SetUseName(m_name, true);
         m_healthBar.SetUsePercent(true);
+        m_adds = new List<EncounterAdds>();
     }
 
     public void InitializeForChoice(Enums.Difficulties diff)
@@ -103,6 +107,13 @@ public class BaseEncounter
     public virtual void CurrentAbilityCountered()
     {
         Debug.LogAssertion("Calling CurrentAbilityCountered on the BaseEncounter - this should always be overridden!");
+    }
+
+    public virtual int TakeDamage(int damage)
+    {
+        int previousHealth = (int)HealthBar.HealthBarSlider.value;
+        HealthBar.ModifyHealth(-damage);
+        return previousHealth - (int)HealthBar.HealthBarSlider.value;
     }
 
     protected void HandleAbilityTypeCountered(Enums.Ability abilityType)

@@ -7,13 +7,12 @@ public class EncounterAbility : BaseAbility
     float m_castTime;
 
     public float CastTime { get { return m_castTime; } }
-    public EncounterAbility(string _name, string _description, float _castTime, Enums.Ability _ability, EncounterAbilityEffect _effect) : base(_name, _description,_ability) 
+    public EncounterAbility(string _name, string _description, float _castTime, Enums.Ability _ability) : base(_name, _description,_ability) 
     {
         m_castTime = _castTime;
     }
 
     Raider m_counter;
-    EncounterAbilityEffect m_effect;
 
 
     public void AssignCounter(Raider character)

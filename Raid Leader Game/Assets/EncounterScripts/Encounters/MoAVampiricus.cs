@@ -24,7 +24,7 @@ public class MoAVampiricus : BaseEncounter
 
     IEnumerator m_currentAbilityCoroutine;
 
-    public MoAVampiricus() : base("Vampiricus", 30000) { }
+    public MoAVampiricus() : base("Vampiricus", 50000) { }
 
     public override void BeginEncounter()
     {
@@ -46,6 +46,7 @@ public class MoAVampiricus : BaseEncounter
         }
 
         m_rsc.StartCoroutine(WaitForVampiricBite(GetVampiricBiteWaitTime()));
+        m_rsc.StartCoroutine(SummonBats(GetBatlingSummonTime()));
     }
 
     public override void SetupLoot()
@@ -57,13 +58,15 @@ public class MoAVampiricus : BaseEncounter
     {
         m_attacks = new List<EncounterAttackDescription> {
             new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Bleeding Bite", Name + " sinks his teeth into his target, dealing " + GetBleedingBiteDamage() + " damage and causing the target to bleed for " + GetBleedingBiteDoTDamage() + " every second. Every bite on the same target increases the bleed damage."),
+            new EncounterAttackDescription(new List<Enums.CharacterRole>{ }, "Summon Batling", "Every " + GetBatlingSummonTime() + " seconds, "  + Name + " summons Batlings with " + GetBatlingHealth() + " health. The Batlings use the Screech ability."),
         };
     }
 
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Vampiric Bite", "Every " + GetVampiricBiteWaitTime() + " seconds, " + Name + " rears up for a bite of his current target, dealing " + GetVampiricBiteDamage() + " and healing for " + Utility.GetPercentString(GetVampiricBiteHealAmount()) +" of his maximum health if successful.", GetVampiricBiteCastTime(),Enums.Ability.Interrupt, null ),
+            new EncounterAbility("Vampiric Bite", "Every " + GetVampiricBiteWaitTime() + " seconds, " + Name + " rears up for a bite of a random target, dealing " + GetVampiricBiteDamage() + " and healing for " + Utility.GetPercentString(GetVampiricBiteHealAmount()) +" of his maximum health if successful.", GetVampiricBiteCastTime(),Enums.Ability.Immune ),
+            new EncounterAbility("Screech", "The Batlings summon by " + Name + " will constantly screech, dealing " + GetScreechDamage() + " to the raid until defeated.", GetScreechCastTime(),Enums.Ability.Uncounterable),
         };
     }
 
@@ -73,6 +76,31 @@ public class MoAVampiricus : BaseEncounter
         m_rsc.StartCoroutine(WaitForVampiricBite(GetVampiricBiteWaitTime()));
         HandleAbilityTypeCountered(m_currentAbility.Ability);
         m_currentAbility = null;
+    }
+
+    public override int TakeDamage(int damage)
+    {
+        if (m_adds.Count > 0) {
+            int previousHealth = (int)m_adds[0].Healthbar.HealthBarSlider.value;
+            m_adds[0].Healthbar.ModifyHealth(-damage);
+            int actualdamage = previousHealth - (int)m_adds[0].Healthbar.HealthBarSlider.value;
+
+            if (m_adds[0].Healthbar.HealthBarSlider.value <= 0)
+            {
+                m_adds[0].DestroyHealthBar();
+                m_adds.RemoveAt(0);
+                m_rsc.EndCastingAbility(m_currentAbility);
+                m_currentAbility = null;
+            }
+
+            return actualdamage;
+        }
+        else
+        {
+            int previousHealth = (int)HealthBar.HealthBarSlider.value;
+            HealthBar.ModifyHealth(-damage);
+            return previousHealth - (int)HealthBar.HealthBarSlider.value;
+        }
     }
 
     float GetVampiricBiteCastTime()
@@ -94,12 +122,12 @@ public class MoAVampiricus : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 20.0f;
+                return 15.0f;
             case Enums.Difficulties.Normal:
             default:
-                return 17.0f;
-            case Enums.Difficulties.Hard:
                 return 12.0f;
+            case Enums.Difficulties.Hard:
+                return 9.0f;
         }
     }
 
@@ -153,9 +181,9 @@ public class MoAVampiricus : BaseEncounter
                 return 10 * m_counter;
             case Enums.Difficulties.Normal:
             default:
-                return 25 * m_counter;
+                return 15 * m_counter;
             case Enums.Difficulties.Hard:
-                return 40 * m_counter;
+                return 25 * m_counter;
         }
     }
 
@@ -183,11 +211,67 @@ public class MoAVampiricus : BaseEncounter
         return 5;
     }
 
+    int GetBatlingHealth()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 2000;
+            case Enums.Difficulties.Normal:
+            default:
+                return 3500;
+            case Enums.Difficulties.Hard:
+                return 5000;
+        }
+    }
+
+    float GetBatlingSummonTime()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 20.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 18f;
+            case Enums.Difficulties.Hard:
+                return 15f;
+        }
+    }
+
+    float GetScreechCastTime()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 3.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 2.5f;
+            case Enums.Difficulties.Hard:
+                return 2.0f;
+        }
+    }
+
+    int GetScreechDamage()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 50;
+            case Enums.Difficulties.Normal:
+            default:
+                return 75;
+            case Enums.Difficulties.Hard:
+                return 90;
+        }
+    }
+    
     IEnumerator DoTankAttack(float castTime, RaiderScript target)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!target.IsDead() && !IsDead())
+        if (!m_rsc.IsRaidDead() && !target.IsDead() && !IsDead())
         {
             if (m_currentTarget == target)
             {
@@ -201,7 +285,7 @@ public class MoAVampiricus : BaseEncounter
             }
 
         }
-        else if (target.IsDead())
+        else if (!m_rsc.IsRaidDead() && target.IsDead())
         {
             m_currentTarget = null;
             m_counter = 1;
@@ -237,7 +321,7 @@ public class MoAVampiricus : BaseEncounter
         yield return new WaitForSeconds(castTime);
 
         target.TakeDamage(damage);
-        if (!IsDead() && !target.IsDead() && ticks > 0)
+        if (!m_rsc.IsRaidDead() && !IsDead() && !target.IsDead() && ticks > 0)
         {
             ticks--;
             m_rsc.StartCoroutine(BleedingBiteDoTDamage(castTime, damage, ticks, target));
@@ -248,7 +332,7 @@ public class MoAVampiricus : BaseEncounter
     {
         yield return new WaitForSeconds(waitTime);
 
-        if (!IsDead())
+        if (!m_rsc.IsRaidDead() && !IsDead())
         {
             if (m_currentAbility == null)
             {
@@ -268,15 +352,77 @@ public class MoAVampiricus : BaseEncounter
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!IsDead())
+        if (!IsDead() && !m_rsc.IsRaidDead())
         {
             HealthBar.ModifyHealth(HealthBar.HealthBarSlider.maxValue * GetVampiricBiteHealAmount());
 
-            m_currentTarget.TakeDamage(GetVampiricBiteDamage());
-            
+            List<RaiderScript> randomTarget = GetRandomRaidTargets(1);
 
+            if(randomTarget.Count > 0)
+                randomTarget[0].TakeDamage(GetVampiricBiteDamage());
+            
             m_rsc.StartCoroutine(WaitForVampiricBite(GetVampiricBiteWaitTime()));
             m_rsc.EndCastingAbility(m_currentAbility);
+            m_currentAbility = null;
+        }
+    }
+    
+    IEnumerator SummonBats(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        if (!m_rsc.IsRaidDead() && !IsDead())
+        {
+            int index = -1;
+            for (int i = 0; i < StaticValues.MaxNumberOfAliveAdds; i++)
+            {
+                if (m_adds.FindAll(x => x.Index == i).Count == 0)
+                {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (m_currentAbility == null && index != -1)
+            {
+                GameObject batlingGO = GameObject.Instantiate(m_healthBarPrefab);
+                batlingGO.name = "Batling " + index;
+                batlingGO.transform.SetParent(m_healthBarPrefab.transform);
+                m_adds.Add(new EncounterAdds("Batling", batlingGO.GetComponent<HealthBarScript>(), GetBatlingHealth(), index, Enums.EncounterAdds.SingleAdd));
+
+                m_currentAbility = m_encounterAbilities.Find(x => x.Name == "Screech");
+                m_currentAbilityCoroutine = CastScreech(GetScreechCastTime());
+                m_rsc.StartCoroutine(m_currentAbilityCoroutine);
+                m_rsc.BeginCastingAbility(m_currentAbility);
+                m_rsc.StartCoroutine(SummonBats(GetBatlingSummonTime()));
+            }
+            else
+            {
+                m_rsc.StartCoroutine(SummonBats(0.5f));
+            }
+        }
+    }
+    
+    IEnumerator CastScreech(float castTime)
+    {
+        yield return new WaitForSeconds(castTime);
+
+        if (!m_rsc.IsRaidDead() && !IsDead() && m_adds.Count > 0)
+        {
+            for (int i = 0; i < m_raid.Count; i++)
+            {
+                m_raid[i].TakeDamage(GetScreechDamage());
+            }
+
+            m_rsc.EndCastingAbility(m_currentAbility);
+            m_currentAbilityCoroutine = CastScreech(GetScreechCastTime());
+            m_rsc.StartCoroutine(m_currentAbilityCoroutine);
+            m_currentAbility = m_encounterAbilities.Find(x => x.Name == "Screech");
+            m_rsc.BeginCastingAbility(m_currentAbility);
+        }
+        else
+        {
+            m_currentAbility = null;
         }
     }
 }

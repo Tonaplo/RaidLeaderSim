@@ -144,7 +144,10 @@ public class RaidSceneController : MonoBehaviour {
                 {
                     SceneManager.LoadScene("EncounterVictoryScene");
                 }
-                SceneManager.LoadScene("MainGameScene");
+                else
+                {
+                    SceneManager.LoadScene("MainGameScene");
+                }
                 break;
             default:
                 break;
@@ -156,11 +159,16 @@ public class RaidSceneController : MonoBehaviour {
         return encounter.IsDead();
     }
 
+    public bool IsRaidDead()
+    {
+        return m_numDeadRaidMembers == StaticValues.RaidTeamSize;
+    }
+
     public void DealDamage(int damage, string attacker, string attack, int index) {
         //string newText = attacker + " deals " + damage + " damage with " + attack + "!\n";
         //raidText.text = newText + raidText.text;
-        encounter.HealthBar.ModifyHealth(-damage);
-        m_damageMcs.AddAmountToEntry(attacker, index, damage);
+        int actualdamage = encounter.TakeDamage(damage);
+        m_damageMcs.AddAmountToEntry(attacker, index, actualdamage);
     }
 
     public void DoHeal(int healAmount, string healer, string heal, int index)
@@ -215,6 +223,8 @@ public class RaidSceneController : MonoBehaviour {
         {
             PositionalButton.gameObject.SetActive(false);
         }
+
+        BossCastScript.StopCasting();
     }
 
     public void AttemptToCounterCurrentEncounterAbility(Raider counter)
@@ -399,7 +409,7 @@ public class RaidSceneController : MonoBehaviour {
         temp.name = encounter.Name;
         temp.transform.SetParent(canvas.transform);
 
-        encounter.InitializeForRaid(m_raiderScripts, this, temp.GetComponent<HealthBarScript>());
+        encounter.InitializeForRaid(m_raiderScripts, this, temp);
         Utility.SetCurrentEncounter(encounter);
     }
 }

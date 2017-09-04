@@ -24,6 +24,15 @@ public class ChooseEncounterAbilityPrefabScript : MonoBehaviour {
     {
         Name.text = n;
         Description.text = desc;
-        Counter.text = "Countered by: " + counter.ToString();
+
+        string counterText = counter.ToString();
+
+        if (counter == Enums.Ability.PostMovePositional || counter == Enums.Ability.PreMovePositional)
+            counterText = " Moving";
+
+        Counter.text = "Countered by: " + counterText + ".";
+
+        if (counter == Enums.Ability.Uncounterable)
+            Counter.text = "Cannot be countered!";
     }
 }

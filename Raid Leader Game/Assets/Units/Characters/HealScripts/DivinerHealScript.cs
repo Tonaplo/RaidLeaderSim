@@ -9,7 +9,6 @@ public class DivinerHealScript : BaseHealScript
 
 
     float m_LowestMultiplier = 0.7f;
-    float m_cooldownCastTimeMultiplier = 0.5f;
 
     public override string GetDescription() { return "Also heals the lowest health target for " + Utility.GetPercentString(m_LowestMultiplier) + " of throughput"; }
 

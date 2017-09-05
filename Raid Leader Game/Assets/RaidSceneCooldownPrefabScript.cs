@@ -24,6 +24,11 @@ public class RaidSceneCooldownPrefabScript : MonoBehaviour {
             m_text.text = m_raiderScript.Raider.GetName() + "\n\nDied!";
             m_button.interactable = false;
         }
+        else if (m_raiderScript.CooldownUsed)
+        {
+            m_text.text = m_raiderScript.Raider.GetName() + "\n\nUsed!";
+            m_button.interactable = !m_raiderScript.CooldownUsed;
+        }
         else
         {
             m_text.text = m_raiderScript.Raider.GetName() + "\n\n";

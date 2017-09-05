@@ -20,12 +20,19 @@ public class EncounterAdds {
         m_name = n;
         m_addType = t;
         m_healthbar = hbs;
-        m_healthbar.SetupHealthBar((m_index % 5) * 195 + 140, 310 - (m_index / 5) * 45, 80, 190, maxHealth);
+        m_healthbar.SetupHealthBar((m_index % 5) * 195 + 140, 310 - (m_index / 5) * 45, 40, 190, maxHealth);
         m_healthbar.SetUseName(m_name, true);
+        m_healthbar.SetUseSingleLine(true);
     }
 
     public void DestroyHealthBar()
     {
+        m_healthbar.StartCoroutine(DestroyHealthBarInternal(2.0f));
+    }
+
+    IEnumerator DestroyHealthBarInternal(float castTime)
+    {
+        yield return new WaitForSeconds(castTime);
         Object.Destroy(m_healthbar.gameObject);
     }
 }

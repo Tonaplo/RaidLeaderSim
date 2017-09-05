@@ -9,12 +9,10 @@ public class RaidSceneTauntPrefabScript : MonoBehaviour {
     Image m_background;
     Button m_button;
     RaiderScript m_raiderScript;
-    RaidSceneControlPanel m_rscp;
     RaidSceneController m_rsc;
 
-    public void Initialize(RaiderScript r, RaidSceneController rsc, RaidSceneControlPanel rscp)
+    public void Initialize(RaiderScript r, RaidSceneController rsc)
     {
-        m_rscp = rscp;
         m_rsc = rsc;
         m_raiderScript = r;
 
@@ -52,7 +50,7 @@ public class RaidSceneTauntPrefabScript : MonoBehaviour {
     public void Taunt()
     {
         m_rsc.RaiderTaunt(m_raiderScript);
-        m_rscp.OnClickTaunts();
-        m_rscp.OnClickTaunts();
+        m_text.text = m_raiderScript.Raider.GetName() + "\nTaunted!";
+        m_button.interactable = false;
     }
 }

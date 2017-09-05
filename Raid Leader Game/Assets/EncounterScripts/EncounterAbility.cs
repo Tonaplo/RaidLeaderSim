@@ -5,11 +5,15 @@ using System.Collections.Generic;
 public class EncounterAbility : BaseAbility
 {
     float m_castTime;
+    string m_casterName;
+
+    public string Caster { get { return m_casterName; } }
 
     public float CastTime { get { return m_castTime; } }
-    public EncounterAbility(string _name, string _description, float _castTime, Enums.Ability _ability) : base(_name, _description,_ability) 
+    public EncounterAbility(string _name, string _caster, string _description, float _castTime, Enums.Ability _ability) : base(_name, _description,_ability) 
     {
         m_castTime = _castTime;
+        m_casterName = _caster;
     }
 
     Raider m_counter;

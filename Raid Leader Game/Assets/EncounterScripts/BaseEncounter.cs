@@ -51,7 +51,7 @@ public class BaseEncounter
         m_raid = raiders;
         m_rsc = rsc;
         m_healthBar = healthBar.GetComponent<HealthBarScript>();
-        m_healthBar.SetupHealthBar(350, 390, 100, 600, Mathf.RoundToInt(m_baseHealth * GetDifficultyMultiplier()));
+        m_healthBar.SetupHealthBar(350, 390, 60, 600, Mathf.RoundToInt(m_baseHealth * GetDifficultyMultiplier()));
         m_healthBar.SetUseName(m_name, true);
         m_healthBar.SetUsePercent(true);
         m_adds = new List<EncounterAdds>();
@@ -72,8 +72,12 @@ public class BaseEncounter
 
     public bool AttemptToCounterCurrentAbility(Raider counter)
     {
-        m_currentAbility.AssignCounter(counter);
-        return m_currentAbility.AttemptToCounter();
+        if (m_currentAbility != null)
+        {
+            m_currentAbility.AssignCounter(counter);
+            return m_currentAbility.AttemptToCounter();
+        }
+        return false;
     }
 
     public void SetCurrentTarget(RaiderScript raider)
@@ -111,9 +115,9 @@ public class BaseEncounter
 
     public virtual int TakeDamage(int damage)
     {
-        int previousHealth = (int)HealthBar.HealthBarSlider.value;
+        int previousHealth = (int)HealthBar.CurrentHealth;
         HealthBar.ModifyHealth(-damage);
-        return previousHealth - (int)HealthBar.HealthBarSlider.value;
+        return previousHealth - (int)HealthBar.CurrentHealth;
     }
 
     protected void HandleAbilityTypeCountered(Enums.Ability abilityType)

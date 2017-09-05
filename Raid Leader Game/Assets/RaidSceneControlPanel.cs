@@ -21,6 +21,10 @@ public class RaidSceneControlPanel : MonoBehaviour {
     public GameObject CurrentTargetBackground;
     public Text CurrentTargetText;
 
+    public GameObject DispelPrefab;
+    public GameObject DispelCooldownPrefab;
+    public GameObject DispellerBackground;
+
     public RaidSceneController RSC;
 
     enum ButtonState
@@ -39,7 +43,8 @@ public class RaidSceneControlPanel : MonoBehaviour {
 
     List<GameObject> m_Cooldownbuttons;
     List<GameObject> m_Tauntbuttons;
-    List<GameObject> m_Dispelbuttons;
+    List<GameObject> m_DispelButtons;
+    List<GameObject> m_DispelCooldownButtons;
 
     // Use this for initialization
     void Start () {
@@ -49,7 +54,6 @@ public class RaidSceneControlPanel : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        HandleStackUI();
 	}
 
     public void Initialize()
@@ -58,8 +62,10 @@ public class RaidSceneControlPanel : MonoBehaviour {
         shownHeight = (int)Background.GetComponent<RectTransform>().sizeDelta.y;
         m_Cooldownbuttons = new List<GameObject>();
         m_Tauntbuttons = new List<GameObject>();
-        m_Dispelbuttons = new List<GameObject>();
+        m_DispelButtons = new List<GameObject>();
+        m_DispelCooldownButtons = new List<GameObject>();
         gameObject.SetActive(true);
+        SetupDispellers();
         OnClickDamage();
         OnClickCooldown();
     }
@@ -142,7 +148,6 @@ public class RaidSceneControlPanel : MonoBehaviour {
     public void OnClickTaunts()
     {
         bool shouldShow = m_state != ButtonState.Taunt;
-        HandleTauntsUI(shouldShow);
 
         if (m_state == ButtonState.Taunt)
         {
@@ -151,6 +156,7 @@ public class RaidSceneControlPanel : MonoBehaviour {
             CooldownButton.gameObject.SetActive(true);
             DispelButton.gameObject.SetActive(true);
             Background.GetComponent<RectTransform>().sizeDelta = new Vector2(hiddenWidth, hiddenHeight);
+
         }
         else
         {
@@ -160,13 +166,19 @@ public class RaidSceneControlPanel : MonoBehaviour {
             DispelButton.gameObject.SetActive(false);
             Background.GetComponent<RectTransform>().sizeDelta = new Vector2(shownWidth, shownHeight);
         }
+
+        HandleTauntsUI(shouldShow);
     }
 
     void HandleTauntsUI(bool shouldShow)
     {
-        CurrentTargetBackground.gameObject.SetActive(shouldShow);
+        ReDrawTauntUI(shouldShow);
         HandleStackUI();
-        
+    }
+
+    void ReDrawTauntUI(bool shouldShow)
+    {
+        CurrentTargetBackground.gameObject.SetActive(shouldShow);
         if (shouldShow)
         {
             List<RaiderScript> tanks = RSC.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank);
@@ -179,7 +191,7 @@ public class RaidSceneControlPanel : MonoBehaviour {
                 temp.SetActive(true);
                 temp.transform.SetParent(Background.transform);
                 temp.transform.SetPositionAndRotation(new Vector3(195 + (75 * (i % 3)), 110 - ((i / 3)) * 65, 0), Quaternion.identity);
-                temp.GetComponent<RaidSceneTauntPrefabScript>().Initialize(tanks[i], RSC, this);
+                temp.GetComponent<RaidSceneTauntPrefabScript>().Initialize(tanks[i], RSC);
                 m_Tauntbuttons.Add(temp);
             }
         }
@@ -219,14 +231,97 @@ public class RaidSceneControlPanel : MonoBehaviour {
 
     void HandleDispelsUI(bool shouldShow)
     {
+        ReDrawDispelUI(shouldShow);
     }
 
-    void HandleStackUI()
+    public void TryToUpdateDispellUI()
     {
-        int currentCounter = RSC.Encounter.Stacks;
+        if (m_state == ButtonState.Dispel)
+        {
+            OnClickDispels();
+            OnClickDispels();
+        }
+    }
+
+    public void ReDrawDispelUI(bool shouldShow)
+    {
+        DispellerBackground.SetActive(shouldShow);
+        for (int i = 0; i < m_DispelCooldownButtons.Count; i++)
+        {
+            if (shouldShow)
+                m_DispelCooldownButtons[i].GetComponent<RaidSceneDispellerCooldownPrefab>().UnPause();
+            else
+                m_DispelCooldownButtons[i].GetComponent<RaidSceneDispellerCooldownPrefab>().Pause();
+
+            m_DispelCooldownButtons[i].SetActive(shouldShow);
+        }
+
+        if (shouldShow)
+        {
+            List<RaiderScript> debuffedRaiders = RSC.GetRaid().FindAll(x => x.HasDebuffs());
+
+            for (int i = 0; i < debuffedRaiders.Count; i++)
+            {
+                GameObject temp = GameObject.Instantiate(DispelPrefab);
+                temp.SetActive(true);
+                temp.transform.SetParent(Background.transform);
+                temp.GetComponent<RaidSceneDispelPrefab>().Initialize(debuffedRaiders[i], i, RSC, this);
+                m_DispelButtons.Add(temp);
+            }
+        }
+        else
+        {
+
+            for (int i = 0; i < m_DispelButtons.Count; i++)
+            {
+                Destroy(m_DispelButtons[i]);
+            }
+            m_DispelButtons.Clear();
+        }
+    }
+
+    void SetupDispellers()
+    {
+        int dispellerCount = 0;
+        for (int i = 0; i < RSC.GetRaid().Count; i++)
+        {
+            if (RSC.GetRaid()[i].Raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer) {
+                GameObject temp = GameObject.Instantiate(DispelCooldownPrefab);
+                temp.transform.SetParent(Background.transform);
+                temp.transform.SetPositionAndRotation(new Vector3(195 + (75 * (i % 3)), 110 - ((i / 3)) * 65, 0), Quaternion.identity);
+                temp.GetComponent<RaidSceneDispellerCooldownPrefab>().Initialize(RSC.GetRaid()[i],dispellerCount, this);
+                m_DispelCooldownButtons.Add(temp);
+                dispellerCount++;
+            }
+        }
+    }
+
+    public RaiderScript GetDispeller()
+    {
+        for (int i = 0; i < m_DispelCooldownButtons.Count; i++)
+        {
+            if (!m_DispelCooldownButtons[i].GetComponent<RaidSceneDispellerCooldownPrefab>().OnCooldown)
+            {
+                m_DispelCooldownButtons[i].GetComponent<RaidSceneDispellerCooldownPrefab>().PutOnCooldown();
+                return m_DispelCooldownButtons[i].GetComponent<RaidSceneDispellerCooldownPrefab>().Dispeller;
+            }
+        }
+
+        return null;
+    }
+
+    public void HandleStackUI()
+    {
         if (RSC.Encounter.CurrentTarget == null || RSC.Encounter.CurrentTarget.IsDead())
             CurrentTargetText.text = "No\ncurrent\ntarget!";
         else
             CurrentTargetText.text = "Current target:\n\n" + RSC.Encounter.CurrentTarget.Raider.GetName() + "\n\n" + RSC.Encounter.Stacks + ((RSC.Encounter.Stacks == 1) ? " Stack" : " Stacks");
+
+
+        if (m_state == ButtonState.Taunt)
+        {
+            ReDrawTauntUI(false);
+            ReDrawTauntUI(true);
+        }
     }
 }

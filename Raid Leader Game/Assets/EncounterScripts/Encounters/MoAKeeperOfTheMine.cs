@@ -27,7 +27,7 @@ public class MoAKeeperOfTheMine : BaseEncounter
     {
         List<RaiderScript> pebbletargets = GetRandomRaidTargets(GetPebbleThrowTargetCount());
         m_currentTarget = null;
-        m_counter = 1;
+        m_counter = 0;
         for (int i = 0; i < m_raid.Count; i++)
         {
             if(pebbletargets.Contains(m_raid[i]))
@@ -35,16 +35,16 @@ public class MoAKeeperOfTheMine : BaseEncounter
 
             if (m_raid[i].Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && m_currentTarget == null)
             {
-                m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_raid[i]));
                 m_currentTarget = m_raid[i];
             }
         }
 
         if (m_currentTarget == null)
         {
-            m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_raid[0]));
+            m_currentTarget = m_raid[0];
         }
 
+        m_rsc.StartCoroutine(DoTankAttack(0.0f, m_currentTarget));
         m_rsc.StartCoroutine(WaitForAvalance(GetAvalanceWaitTime()));
         
         if(m_difficulty == Enums.Difficulties.Hard)
@@ -67,12 +67,12 @@ public class MoAKeeperOfTheMine : BaseEncounter
     public override void SetupAbilities()
     {
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Avalanche", "Every " + GetAvalanceWaitTime() + " seconds, " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt),
+            new EncounterAbility("Avalanche", Name, "Every " + GetAvalanceWaitTime() + " seconds, " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt),
         };
 
         if (m_difficulty == Enums.Difficulties.Hard)
         {
-            m_encounterAbilities.Add(new EncounterAbility("Ground Pound", Name + " raises his fists in the air to pound the ground where the raid stands, dealing " + GetGroundPoundDamage() + " to any raid member that does not move in time.", GetGroundPoundCastTime(), Enums.Ability.PreMovePositional));
+            m_encounterAbilities.Add(new EncounterAbility("Ground Pound", Name, Name + " raises his fists in the air to pound the ground where the raid stands, dealing " + GetGroundPoundDamage() + " to any raid member that does not move in time.", GetGroundPoundCastTime(), Enums.Ability.PreMovePositional));
         }
     }
 
@@ -103,12 +103,12 @@ public class MoAKeeperOfTheMine : BaseEncounter
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 1.05f;
+                return 1.10f;
             case Enums.Difficulties.Normal:
             default:
-                return 1.15f;
+                return 1.20f;
             case Enums.Difficulties.Hard:
-                return 1.25f;
+                return 1.30f;
         }
     }
 
@@ -250,7 +250,7 @@ public class MoAKeeperOfTheMine : BaseEncounter
             }
             else
             {
-                m_counter = 1;
+                m_counter = 0;
                 int damage = Mathf.RoundToInt(GetClubSwingDamage() * Mathf.Pow(GetClubSwingIncrease(), m_counter));
                 target.TakeDamage(damage);
             }
@@ -259,7 +259,7 @@ public class MoAKeeperOfTheMine : BaseEncounter
         else if (target.IsDead())
         {
             m_currentTarget = null;
-            m_counter = 1;
+            m_counter = 0;
             List<RaiderScript> otherTanks = m_rsc.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
             for (int i = 0; i < otherTanks.Count; i++)
             {
@@ -282,8 +282,11 @@ public class MoAKeeperOfTheMine : BaseEncounter
                 }
             }
         }
-
-        m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_currentTarget));
+        if (!m_rsc.IsRaidDead() && !IsDead())
+        {
+            m_rsc.TankAbilityUsed();
+            m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_currentTarget));
+        }
     }
 
     IEnumerator WaitForAvalance(float waitTime)

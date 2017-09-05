@@ -21,8 +21,8 @@ public class ClericHealScript : BaseHealScript
 
         PriorityList = new List<Priority> {
                                             new Priority(1, Enums.RaidHealingState.TankHeavyDamage),
-                                            new Priority(2, Enums.RaidHealingState.RaidSingleHeavyDamage),
-                                            new Priority(3, Enums.RaidHealingState.RaidMultiHeavyDamage),
+                                            new Priority(2, Enums.RaidHealingState.RaidMultiHeavyDamage),
+                                            new Priority(3, Enums.RaidHealingState.RaidSingleHeavyDamage),
                                             new Priority(4, Enums.RaidHealingState.RaidMultiMediumDamage),
                                             new Priority(5, Enums.RaidHealingState.RaidSingleMediumDamage),
                                             new Priority(6, Enums.RaidHealingState.TankMediumDamage),

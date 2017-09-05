@@ -39,12 +39,12 @@ public class EncounterVictorySceneController : MonoBehaviour {
         {
             m_lootButtons[i].GetComponent<UnityEngine.UI.Button>().interactable = true;
         }
-        m_SellButtonText.text = "Sell " + m_currentItem.GearSlot + " for " + m_currentItem.ItemLevel + " gold.";
+        m_SellButtonText.text = "Sell " + m_currentItem.GearSlot + " for " + StaticValues.LootSellValue + " gold.";
     }
 
     public void SellCurrentItem()
     {
-        PlayerData.AwardGold(m_currentItem.ItemLevel);
+        PlayerData.AwardGold(StaticValues.LootSellValue);
         ItemAwarded();
     }
 

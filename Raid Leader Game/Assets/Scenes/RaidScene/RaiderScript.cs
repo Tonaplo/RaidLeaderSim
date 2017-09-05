@@ -29,6 +29,8 @@ public class RaiderScript : MonoBehaviour {
     BaseCooldown.CooldownEffects m_currentEffects;
     ConsumableItem m_activeConsumable = null;
 
+    List<GameObject> m_activeDebuffs = new List<GameObject>();
+
     bool m_cooldownUsed = false;
     public bool CooldownUsed { get { return m_cooldownUsed; } }
 
@@ -65,19 +67,19 @@ public class RaiderScript : MonoBehaviour {
         return m_rsc.IsBossDead();
     }
 
-    public int GetHealth() { return (int)HealthBar.HealthBarSlider.value; }
+    public int GetHealth() { return (int)HealthBar.CurrentHealth; }
     public int GetMaxHealth() {
         if(m_activeConsumable != null && m_activeConsumable.ConsumableType == Enums.ConsumableType.HealthIncrease)
             return Mathf.RoundToInt(m_raider.GetMaxHealth() * m_activeConsumable.GetMultiplier());
         else
             return m_raider.GetMaxHealth();
     }
-    public float GetHealthPercent() { return (HealthBar.HealthBarSlider.value / m_raider.GetMaxHealth()) * 100.0f;  }
+    public float GetHealthPercent() { return ((float)HealthBar.CurrentHealth / (float)m_raider.GetMaxHealth()) * 100.0f;  }
 
     public void Initialize(Raider raider, HealthBarScript hbs, Canvas parent, int index) {
         m_raider = raider;
         HealthBar = hbs;
-        HealthBar.SetupHealthBar((index % 3) * 90 + 465, 310 - (index / 3) * 45, 90, 90, m_raider.GetMaxHealth());
+        HealthBar.SetupHealthBar((index % 3) * 95 + 460, 310 - (index / 3) * 45, 45, 95, m_raider.GetMaxHealth());
         HealthBar.SetUseName(m_raider.GetName(), true);
         HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats.GetClass());
         HealthBarButton = HealthBar.RaiderButton;
@@ -157,6 +159,9 @@ public class RaiderScript : MonoBehaviour {
 
     public void TakeDamage(int damage) {
 
+        if (IsDead())
+            return;
+
         float reduction = 0.0f;
 
         //Tanks take up for 50% reduced damage, depending on their skill.
@@ -179,10 +184,13 @@ public class RaiderScript : MonoBehaviour {
     }
 
     public void TakeHealing(string healName, string healerName, int index, int healing) {
-        float priorValue = HealthBar.HealthBarSlider.value;
+        if (IsDead())
+            return;
+
+        float priorValue = HealthBar.CurrentHealth;
         HealthBar.ModifyHealth(healing);
 
-        int actualHealing = Mathf.RoundToInt(HealthBar.HealthBarSlider.value - priorValue);
+        int actualHealing = Mathf.RoundToInt(HealthBar.CurrentHealth - priorValue);
         m_rsc.DoHeal(actualHealing, healerName, healName, index);
     }
 
@@ -196,6 +204,25 @@ public class RaiderScript : MonoBehaviour {
     void AttemptToCounterAbility()
     {
         m_rsc.AttemptToCounterCurrentEncounterAbility(m_raider);
+    }
+
+    public void AddDebuff(GameObject debuff)
+    {
+        m_activeDebuffs.Add(debuff);
+    }
+
+    public void RemoveDebuff()
+    {
+        if (m_activeDebuffs.Count > 0)
+        {
+            Destroy(m_activeDebuffs[0]);
+            m_activeDebuffs.RemoveAt(0);
+        }
+    }
+
+    public bool HasDebuffs()
+    {
+        return m_activeDebuffs.Count > 0;
     }
 
     public void UseCooldown()

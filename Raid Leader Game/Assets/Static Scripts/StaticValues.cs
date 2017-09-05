@@ -10,4 +10,6 @@ public static class StaticValues {
     public static int TrainingDuration        = (60*60*8);
     public static int ItemLevelTitanforge     = 2;
     public static int MaxNumberOfAliveAdds    = 10;
+    public static int LootSellValue           = 10;
+    public static float DispellCooldown       = 15.0f;
 }

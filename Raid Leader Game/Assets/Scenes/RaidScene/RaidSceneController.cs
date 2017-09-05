@@ -17,7 +17,7 @@ public class RaidSceneController : MonoBehaviour {
     public GameObject ControlPanel;
     public GameObject SetupPanel;
     public BossCastBarScript BossCastScript;
-    public RaidSceneControlPanel CooldownController;
+    public RaidSceneControlPanel ControlPanelController;
 
     Enums.EncounterSteps currentStep = Enums.EncounterSteps.EncounterStart;
     BaseEncounter encounter;
@@ -39,10 +39,24 @@ public class RaidSceneController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        //Utility.DebugInitalize();
+        /*Utility.DebugInitalize();
+        int whatever = 9;
+        whatever *= 9;
+        bool thisIsStupid = whatever == 54;
+        thisIsStupid = !thisIsStupid;*/
         all = PlayerData.RaidTeam;
         CreateRaidHealthBars();
         CreateEncounter();
+
+        //This random sequence of arithmetics makes Unity slow down enough to execute the previous functions fully,
+        //before it continues. If this is not here, the previous functions will not have setup the things necessary
+        //for the below function to actually work - Thanks Obama (I mean "fuck you, Unity").
+
+        int whatever = 9;
+        whatever *= 9;
+        bool thisIsStupid = whatever == 54;
+        thisIsStupid = !thisIsStupid;
+
         SetupUI();
         ControlPanel.SetActive(false);
         SetupPanel.SetActive(true);
@@ -70,7 +84,7 @@ public class RaidSceneController : MonoBehaviour {
         m_healingMcs.Initialize("Healing:", 625, 120, 40, 130, healerBarsCount);
         m_healingMcs.CreateEntriesFromRaid(all);
 
-        CooldownController.Initialize();
+        ControlPanelController.Initialize();
     }
 
 	
@@ -83,6 +97,9 @@ public class RaidSceneController : MonoBehaviour {
             if(encounter.CurrentAbility != null)
                 EndCastingAbility(encounter.CurrentAbility);
 
+            if(m_numDeadRaidMembers == StaticValues.RaidTeamSize)
+                raidText.text = PlayerData.RaidTeamName + " was defeated by " + encounter.Name + "!\n" + raidText.text;
+            
             currentStep++;
             AdvanceNextStep();
         }
@@ -179,11 +196,12 @@ public class RaidSceneController : MonoBehaviour {
     public void RaiderDied()
     {
         m_numDeadRaidMembers++;
+        ControlPanelController.HandleStackUI();
     }
 
     public void BeginCastingAbility(EncounterAbility ab)
     {
-        raidText.text = encounter.Name + " begins casting " + ab.Name + "!\n" + raidText.text;
+        raidText.text = ab.Caster + " begins casting " + ab.Name + "!\n" + raidText.text;
         BossCastScript.InitiateCast(ab.CastTime, ab.Name);
 
         if (ab.Ability == Enums.Ability.Immune || ab.Ability == Enums.Ability.Interrupt)
@@ -193,11 +211,11 @@ public class RaidSceneController : MonoBehaviour {
                 if (m_raiderScripts[i].Raider.RaiderStats.Ability.Ability == ab.Ability && !m_raiderScripts[i].IsDead())
                 {
                     m_raiderScripts[i].HealthBarButton.interactable = true;
-                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.green.r, Color.green.g, Color.green.b, 0.98f);
+                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = Color.green;
                 }
                 else
                 {
-                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.grey.r, Color.grey.g, Color.grey.b, 0.98f);
+                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = Color.grey;
                 }
             }
         }
@@ -224,7 +242,8 @@ public class RaidSceneController : MonoBehaviour {
             PositionalButton.gameObject.SetActive(false);
         }
 
-        BossCastScript.StopCasting();
+        if(ab.Ability != Enums.Ability.Immune)
+            BossCastScript.StopCasting();
     }
 
     public void AttemptToCounterCurrentEncounterAbility(Raider counter)
@@ -234,7 +253,7 @@ public class RaidSceneController : MonoBehaviour {
             if (m_raiderScripts[i].Raider == counter)
             {
                 m_raiderScripts[i].HealthBarButton.interactable = false;
-                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(Color.grey.r, Color.grey.g, Color.grey.b, 0.98f);
+                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = Color.grey;
                 break;
             }
         }
@@ -245,9 +264,13 @@ public class RaidSceneController : MonoBehaviour {
         if (success)
         {
             EndCastingAbility(encounter.CurrentAbility);
-            BossCastScript.StopCasting();
             encounter.CurrentAbilityCountered();
         }
+    }
+
+    public void DebuffsAdded()
+    {
+        ControlPanelController.TryToUpdateDispellUI();
     }
 
     public void UseRaiderCooldown(RaiderScript raider)
@@ -272,6 +295,11 @@ public class RaidSceneController : MonoBehaviour {
     public void RaiderTaunt(RaiderScript taunter)
     {
         encounter.SetCurrentTarget(taunter);
+    }
+
+    public void TankAbilityUsed()
+    {
+        ControlPanelController.HandleStackUI();
     }
 
     public void UseConsumable(ConsumableItem item)

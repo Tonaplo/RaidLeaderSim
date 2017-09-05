@@ -176,26 +176,29 @@ public class BaseHealScript : BaseHealOrAttackScript
         List<RaiderScript> restOfRaid = new List<RaiderScript>();
         GetDPS(ref restOfRaid);
         GetHealers(ref restOfRaid);
-
-        int raidHealthPercent = 0;
-
+        
+        int numHeavy = 0;
+        int nummedium = 0;
         for (int i = 0; i < restOfRaid.Count; i++)
         {
             int percent = Mathf.RoundToInt(restOfRaid[i].GetHealthPercent());
             if (percent < heavyDamageCutoff)
+            {
                 stateMask |= (int)Enums.RaidHealingState.RaidSingleHeavyDamage;
+                numHeavy++;
+            }
 
-            if (percent < mediumDamageCutoff)
+            if (percent < mediumDamageCutoff && percent > heavyDamageCutoff)
+            {
                 stateMask |= (int)Enums.RaidHealingState.RaidSingleMediumDamage;
-
-            raidHealthPercent += percent;
+                nummedium++;
+            }
         }
-
-        raidHealthPercent /= restOfRaid.Count;
-        if (raidHealthPercent < heavyDamageCutoff)
+        
+        if (numHeavy > 1)
             stateMask |= (int)Enums.RaidHealingState.RaidSingleHeavyDamage;
 
-        if (raidHealthPercent < mediumDamageCutoff)
+        if (nummedium > 1)
             stateMask |= (int)Enums.RaidHealingState.RaidSingleMediumDamage;
     }
 

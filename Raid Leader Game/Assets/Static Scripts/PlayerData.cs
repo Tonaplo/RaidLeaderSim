@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
+using UnityEngine.Timeline;
+using System.Globalization;
+using System;
 using System.Collections.Generic;
 
 public static class PlayerData
@@ -7,13 +9,30 @@ public static class PlayerData
     static List<Raider> m_roster;
     static List<Raider> m_raidTeam;
     static List<ConsumableItem> m_consumables;
+    static List<RaidData> m_progress;
+    static List<RaidData> m_weeklyLockOut;
+    static DateTime m_thisLockout;
+    static int m_attemptsLeft;
     static Raider m_playerChar;
     static string m_raidTeamName;
     static int m_raidTeamGold = 0;
-    
+
+    /*
+        What we want to do now is to use m_weeklyReset and m_thisWeek (should be renamed),
+        to control what bosses you can attempt now. These are the criteria:
+            -   You should only be able to kill a boss once per week
+            -   Once you kill the last boss of a difficulty, you can begin with the first boss of the next, regardless of weekly reset
+            -   On Monday at 8 AM, the week resets and all bosses are "Alive" again, so you can farm loot.
+        we also want to use m_attemptsLeft to gate how many attempts you can use per week. If you want more attempts, you will have to purchase them
+        I also have an idea about granting more "attempts per week", by killing at least a last boss of each difficulty
+    */
+
     public static List<Raider> Roster { get { return m_roster; } }
     public static List<Raider> RaidTeam { get { return m_raidTeam; } }
     public static List<ConsumableItem> Consumables { get { return m_consumables; } }
+    public static List<RaidData> Progress { get { return m_progress; } }
+    public static List<RaidData> WeeklyLockOut { get { return m_weeklyLockOut; } }
+    public static DateTime ThisWeek { get { return m_thisLockout; } }
     public static Raider PlayerCharacter { get { return m_playerChar; } }
     public static string RaidTeamName { get { return m_raidTeamName; } }
     public static int RaidTeamGold { get { return m_raidTeamGold; } }
@@ -24,23 +43,73 @@ public static class PlayerData
         m_roster = new List<Raider>();
         m_raidTeam = new List<Raider>();
         m_consumables = new List<ConsumableItem>();
+        m_progress = RaidData.CreateNewRaidData();
+        m_weeklyLockOut = RaidData.CreateNewRaidData();
+        m_thisLockout = DateTime.Now;
+        
     }
 
-    public static void InitializeDataFromSaveData(Raider player, List<Raider> r, List<ConsumableItem> c, string n, int g)
+    public static void InitializeDataFromSaveData(DataController.SaveData data)
     {
-        if (r != null)
-            m_roster = r;
+        if (data.Roster != null)
+            m_roster = data.Roster;
         else
             m_roster = new List<Raider>();
 
-        if (c != null)
-            m_consumables = c;
+        if (data.Consumables != null)
+            m_consumables = data.Consumables;
         else
             m_consumables = new List<ConsumableItem>();
-        
-        m_playerChar = player;
-        SetRaidTeamName(n);
-        m_raidTeamGold = g;
+
+        if (data.ProgressData != null)
+        {
+            List<RaidData> FullNewData = RaidData.CreateNewRaidData();
+            m_progress = data.ProgressData;
+
+            //We need to add any new raids that where added in this update
+            foreach (var newRaid in FullNewData)
+            {
+                bool found = false;
+                foreach (var existingRaid in m_progress)
+                {
+                    if (existingRaid.m_raid == newRaid.m_raid)
+                        found = true;
+                }
+
+                if (!found)
+                    m_progress.Add(RaidData.CreateDataFromRaidEnum(newRaid.m_raid));
+            }
+        }
+        else
+            m_progress = RaidData.CreateNewRaidData();
+
+        if (data.LockOutData != null)
+        {
+            List<RaidData> FullNewData = RaidData.CreateNewRaidData();
+            m_weeklyLockOut = data.LockOutData;
+
+            //We need to add any new raids that where added in this update
+            foreach (var newRaid in FullNewData)
+            {
+                bool found = false;
+                foreach (var existingRaid in m_weeklyLockOut)
+                {
+                    if (existingRaid.m_raid == newRaid.m_raid)
+                        found = true;
+                }
+
+                if (!found)
+                    m_weeklyLockOut.Add(RaidData.CreateDataFromRaidEnum(newRaid.m_raid));
+            }
+        }
+        else
+            m_weeklyLockOut = RaidData.CreateNewRaidData();
+
+        m_playerChar = data.Player;
+        SetRaidTeamName(data.TeamName);
+        m_raidTeamGold = data.TeamGold;
+        m_thisLockout = data.LockOutDate;
+        CheckWeeklyReset();
     }
 
     public static void GenerateNewGameRoster(Raider player, int baseLevel)
@@ -50,8 +119,8 @@ public static class PlayerData
         List<Enums.CharacterSpec> healerSpecs = new List<Enums.CharacterSpec> { Enums.CharacterSpec.Cleric, Enums.CharacterSpec.Diviner, Enums.CharacterSpec.Naturalist };
         List<Enums.CharacterSpec> DPSSpecs = new List<Enums.CharacterSpec> { Enums.CharacterSpec.Assassin, Enums.CharacterSpec.Berserker, Enums.CharacterSpec.Elementalist, Enums.CharacterSpec.Necromancer, Enums.CharacterSpec.Ranger, Enums.CharacterSpec.Scourge, Enums.CharacterSpec.Wizard };
         int numTanks = 2;
-        int numHealers = 3;
-        int numDPS = 7;
+        int numHealers = 1;
+        int numDPS = 9;
 
         switch (player.RaiderStats.GetRole())
         {
@@ -82,15 +151,15 @@ public static class PlayerData
         int namecounter = 0;
         for (int i = 0; i < numTanks; i++)
         {
-            m_roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(tankSpecs[i % tankSpecs.Count], baseLevel)));
+            m_roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(tankSpecs[i % tankSpecs.Count], baseLevel, baseLevel)));
         }
         for (int i = 0; i < numHealers; i++)
         {
-            m_roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(healerSpecs[i % healerSpecs.Count], baseLevel)));
+            m_roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(healerSpecs[i % healerSpecs.Count], baseLevel, baseLevel)));
         }
         for (int i = 0; i < numDPS; i++)
         {
-            m_roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(DPSSpecs[i % DPSSpecs.Count], baseLevel)));
+            m_roster.Add(new Raider(names[namecounter++], RaiderStats.GenerateRaiderStatsFromSpec(DPSSpecs[i % DPSSpecs.Count], baseLevel, baseLevel)));
         }
         
         RecalculateRoster();
@@ -164,19 +233,7 @@ public static class PlayerData
     {
         m_raidTeam.Clear();
     }
-
-    public static bool CanRaidWithRoster()
-    {
-        int count = 0;
-        for (int i = 0; i < Roster.Count; i++)
-        {
-            if (Roster[i].IsEligibleForActivity())
-                count++;
-        }
-
-        return (count >= StaticValues.RaidTeamSize);
-    }
-
+    
     public static void AddRaiderToRaidTeam(Raider r)
     {
         m_raidTeam.Add(r);
@@ -278,6 +335,11 @@ public static class PlayerData
         DataController.controller.Save();
     }
 
+    public static void CheckWeeklyReset()
+    {
+        CheckWeeklyReset(DateTime.Now);
+    }
+
     public static bool IsNameDuplicateOfRosterNames(string name)
     {
         for (int i = 0; i < Roster.Count; i++)
@@ -288,13 +350,110 @@ public static class PlayerData
         return false;
     }
 
+    public static void EncounterBeaten(Enums.EncounterEnum e, Enums.Difficulties d)
+    {
+        foreach (var raid in m_progress)
+        {
+            foreach (var encounter in raid.m_encounters)
+            {
+                if (encounter.Encounter == e)
+                {
+                    switch (d)
+                    {
+                        case Enums.Difficulties.Easy:
+                            encounter.BeatenOnEasy = true;
+                            break;
+                        case Enums.Difficulties.Normal:
+                            encounter.BeatenOnNormal = true;
+                            break;
+                        case Enums.Difficulties.Hard:
+                            encounter.BeatenOnHard = true;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        foreach (var raid in m_weeklyLockOut)
+        {
+            foreach (var encounter in raid.m_encounters)
+            {
+                if (encounter.Encounter == e)
+                {
+                    switch (d)
+                    {
+                        case Enums.Difficulties.Easy:
+                            encounter.BeatenOnEasy = true;
+                            break;
+                        case Enums.Difficulties.Normal:
+                            encounter.BeatenOnNormal = true;
+                            break;
+                        case Enums.Difficulties.Hard:
+                            encounter.BeatenOnHard = true;
+                            break;
+                        default:
+                            break;
+                    }
+                    DataController.controller.Save();
+                    return;
+                }
+            }
+        }
+
+        Debug.LogAssertion("Encounter was not found in preexisting data! This is a huge error!");
+    }
+
+    //=======================================
+    //           Internal Functions
+    //=======================================
+
+    static void CheckWeeklyReset(DateTime now)
+    {
+        Calendar cal = DateTimeFormatInfo.CurrentInfo.Calendar;
+        if (cal.GetWeekOfYear(now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) != cal.GetWeekOfYear(m_thisLockout, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday))
+        {
+            m_weeklyLockOut = RaidData.CreateNewRaidData();
+        }
+
+        m_thisLockout = now;
+    }
+
     //=======================================
     //           Debug Functions
     //=======================================
     public static void GenerateDebugRoster()
     {
-        Raider player = new Raider("Mallusof", RaiderStats.GenerateRaiderStatsFromSpec(Enums.CharacterSpec.Naturalist, 10));
+        Raider player = new Raider("Mallusof", RaiderStats.GenerateRaiderStatsFromSpec(Enums.CharacterSpec.Naturalist, 10, 10));
         GenerateNewGameRoster(player, 10);
         m_raidTeam = new List<Raider>(m_roster);
+    }
+
+    //=======================================
+    //           Cheat Functions
+    //=======================================
+
+    public static void SetSkillOfRaid(int value)
+    {
+        foreach (var raider in m_roster)
+        {
+            for (int i = 0; i < (int)Enums.SkillTypes.NumSkillTypes; i++)
+            {
+                raider.RaiderStats.Skills.ModifySkill(value, (Enums.SkillTypes)i);
+            }
+        }
+    }
+
+    public static void SetGearOfRaid(int value)
+    {
+        foreach (var raider in m_roster)
+        {
+            for (int i = 0; i < (int)Enums.GearTypes.NumGearTypes; i++)
+            {
+                CharacterItem item = new CharacterItem((Enums.GearTypes)i, value);
+                raider.RaiderStats.Gear.AddGearPieceToSlot(item);
+            }
+        }
     }
 }

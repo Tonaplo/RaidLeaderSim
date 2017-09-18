@@ -34,7 +34,7 @@ public class BerserkerAttack : BaseHealOrAttackScript
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
             
             if (rs.GetHealthPercent() > m_healthPercent) {
-                rs.TakeDamage((int)(rs.GetMaxHealth() * m_damageTakenPercent));
+                rs.TakeDamage((int)(rs.GetMaxHealth() * m_damageTakenPercent), Name);
                 thisAttack.m_baseMultiplier *= m_multiplier;
             }
             

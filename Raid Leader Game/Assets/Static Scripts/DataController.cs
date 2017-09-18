@@ -11,10 +11,12 @@ public class DataController : MonoBehaviour
     [Serializable]
     public class SaveData
     {
-
         public Raider Player;
         public List<Raider> Roster;
         public List<ConsumableItem> Consumables;
+        public List<RaidData> ProgressData;
+        public List<RaidData> LockOutData;
+        public DateTime LockOutDate;
         public string TeamName;
         public int TeamGold;
 
@@ -36,15 +38,22 @@ public class DataController : MonoBehaviour
 
     public void Save()
     {
+        PlayerData.CheckWeeklyReset();
+
         FileStream file = File.Open(Application.persistentDataPath + "/" + PlayerData.PlayerCharacter.GetName() + ".dat", FileMode.OpenOrCreate);
         BinaryFormatter bf = new BinaryFormatter();
 
-        SaveData data = new SaveData();
-        data.Player = PlayerData.PlayerCharacter;
-        data.Roster = PlayerData.Roster;
-        data.TeamName = PlayerData.RaidTeamName;
-        data.TeamGold = PlayerData.RaidTeamGold;
-        data.Consumables = PlayerData.Consumables;
+        SaveData data = new SaveData()
+        {
+            Player = PlayerData.PlayerCharacter,
+            Roster = PlayerData.Roster,
+            TeamName = PlayerData.RaidTeamName,
+            TeamGold = PlayerData.RaidTeamGold,
+            Consumables = PlayerData.Consumables,
+            ProgressData = PlayerData.Progress,
+            LockOutData = PlayerData.WeeklyLockOut,
+            LockOutDate = PlayerData.ThisWeek,
+        };
 
         bf.Serialize(file, data);
         file.Close();
@@ -59,7 +68,7 @@ public class DataController : MonoBehaviour
             SaveData data = (SaveData)bf.Deserialize(file);
             file.Close();
 
-            PlayerData.InitializeDataFromSaveData(data.Player, data.Roster, data.Consumables, data.TeamName, data.TeamGold);
+            PlayerData.InitializeDataFromSaveData(data);
 
             return true;
         }

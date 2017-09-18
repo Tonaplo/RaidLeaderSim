@@ -105,8 +105,8 @@ public class RosterButtonScript : MonoBehaviour {
         {
             m_rightBodyText.text += ((Enums.GearTypes)i).ToString() + ": " + m_raider.RaiderStats.Gear.GetItemLevelOfSlot((Enums.GearTypes)i) + " \\ 100\n";
         }
-        m_rightBodyText.text += "Average Itemlevel: " + m_raider.RaiderStats.Gear.AverageItemLevel + "\n";
-        m_rightBodyText.text += "Total Itemlevel: " + m_raider.RaiderStats.Gear.TotalItemLevel;
+        m_rightBodyText.text += "\nAverage Itemlevel: " + m_raider.RaiderStats.Gear.AverageItemLevel;// + "\n";
+        //m_rightBodyText.text += "Total Itemlevel: " + m_raider.RaiderStats.Gear.TotalItemLevel;
     }
 
     void SetupMove()

@@ -103,6 +103,7 @@ public class RosterControllerScript : MonoBehaviour {
     {
         m_currentRaider.ChangeSpec();
         m_currentButton.GetComponent<RosterButtonScript>().OnClick();
+        Reactivate();
     }
 
     public void OnBeginTrainingClicked()

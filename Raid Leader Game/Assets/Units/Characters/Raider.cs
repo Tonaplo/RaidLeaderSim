@@ -37,7 +37,7 @@ public class Raider : BaseCharacter {
     {
         float value = StaticValues.BaseRaiderHealth;
         SetBaseHealth((int)value);
-        float pointsPerGearlevel = 1.0f;
+        float pointsPerGearlevel = 1.2f;
         switch (stats.GetRole())
         {
             case Enums.CharacterRole.Tank:
@@ -47,17 +47,16 @@ public class Raider : BaseCharacter {
                 else
                     value *= 2.0f;
 
-                pointsPerGearlevel = 2.0f;
+                pointsPerGearlevel = 1.7f;
 
                 break;
             case Enums.CharacterRole.Healer:
-                value *= 0.8f;
+                value *= 1.0f;
                 break;
             case Enums.CharacterRole.RangedDPS:
                 value *= 0.9f;
                 break;
             case Enums.CharacterRole.MeleeDPS:
-                pointsPerGearlevel = 1.5f;
                 value *= 1.1f;
                 break;
             default:

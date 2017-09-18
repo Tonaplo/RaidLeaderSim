@@ -37,19 +37,19 @@ public class RaiderStats {
     public Enums.CharacterSpec GetOffSpec() { return Utility.GetOtherSpec(GetCurrentSpec()); }
     public Enums.CharacterRole GetOffSpecRole() { return Utility.GetRoleFromSpec(GetOffSpec()); }
 
-    public RaiderStats(int baseLevel)
+    public RaiderStats(int baseSkill, int baseGear)
     {
         int[] starterValues = new int[(int)Enums.SkillTypes.NumSkillTypes];
         for (int i = 0; i < (int)Enums.SkillTypes.NumSkillTypes; i++)
         {
-            starterValues[i] = GenerateRandomLevelFromBase(baseLevel);
+            starterValues[i] = GenerateRandomLevelFromBase(baseSkill);
         }
         m_skill = new SkillStats(starterValues);
 
         starterValues = new int[(int)Enums.GearTypes.NumGearTypes];
         for (int i = 0; i < (int)Enums.GearTypes.NumGearTypes; i++)
         {
-            starterValues[i] = GenerateRandomLevelFromBase(baseLevel);
+            starterValues[i] = GenerateRandomLevelFromBase(baseGear);
         }
         m_gear = new GearStats(starterValues);
         
@@ -100,9 +100,9 @@ public class RaiderStats {
     int ComputeThroughputInternal()
     {
         //Cast to float for precision
-        float floatAmount = m_gear.TotalItemLevel / 2;
+        float floatAmount = m_gear.AverageItemLevel;
         
-        //Multiply with Gearlevel - increases the base by a percentage
+        //Multiply with SkillLevel - increases the base by a percentage
         floatAmount *= (0.5f + ((float)m_skill.GetSkillLevel(Enums.SkillTypes.Throughput) / 100.0f));
 
         //Adjust so we always contribute 'something'
@@ -252,35 +252,37 @@ public class RaiderStats {
         script.Setup();
     }
 
-    public static RaiderStats GenerateRaiderStatsFromClass(Enums.CharacterClass Class, int baseLevel)
+    public static RaiderStats GenerateRaiderStatsFromClass(Enums.CharacterClass Class, int baseskill, int baseGear)
     {
-        RaiderStats returnValue = new RaiderStats(baseLevel);
-
-        returnValue.m_charRole = Utility.GenerateRoleFromClass(Class);
-        returnValue.m_charClass = Class;
+        RaiderStats returnValue = new RaiderStats(baseskill, baseGear)
+        {
+            m_charRole = Utility.GenerateRoleFromClass(Class),
+            m_charClass = Class
+        };
 
         FinishRaiderStatGeneration(ref returnValue);
         return returnValue;
     }
 
-    public static RaiderStats GenerateRaiderStatsFromRole(Enums.CharacterRole role, int baseLevel)
+    public static RaiderStats GenerateRaiderStatsFromRole(Enums.CharacterRole role, int baseskill, int baseGear)
     {
-        RaiderStats returnValue = new RaiderStats(baseLevel);
-        returnValue.m_charClass = Utility.GenerateClassFromRole(role);
-        returnValue.m_charRole = role;
-
+        RaiderStats returnValue = new RaiderStats(baseskill, baseGear)
+        {
+            m_charClass = Utility.GenerateClassFromRole(role),
+            m_charRole = role
+        };
         FinishRaiderStatGeneration(ref returnValue);
         
         return returnValue;
     }
 
-    public static RaiderStats GenerateRaiderStatsFromSpec(Enums.CharacterSpec spec, int baseLevel)
+    public static RaiderStats GenerateRaiderStatsFromSpec(Enums.CharacterSpec spec, int baseskill, int baseGear)
     {
-        RaiderStats returnValue = new RaiderStats(baseLevel);
-
-        returnValue.m_charRole = Utility.GetRoleFromSpec(spec);
-        returnValue.m_charClass = Utility.GetClassFromSpec(spec);
-
+        RaiderStats returnValue = new RaiderStats(baseskill, baseGear)
+        {
+            m_charRole = Utility.GetRoleFromSpec(spec),
+            m_charClass = Utility.GetClassFromSpec(spec)
+        };
         FinishRaiderStatGeneration(ref returnValue);
         return returnValue;
     }

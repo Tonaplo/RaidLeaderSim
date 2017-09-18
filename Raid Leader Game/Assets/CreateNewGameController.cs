@@ -49,7 +49,9 @@ public class CreateNewGameController : MonoBehaviour {
     int m_tanksNeeded = 2;
     int m_healersNeeded = 3;
     int m_dpsNeeded = 7;
-    int m_recruitBaseLevel = 10;
+    int m_recruitBaseItemLevel = 40;
+    int m_recruitBaseSkillLevel = 20;
+    float m_playerAdvantage = 1.05f;
     Enums.CharacterSpec m_recruitSpec;
     string m_recruitName;
     List<string> m_AllRecruitNames = new List<string>();
@@ -225,7 +227,7 @@ public class CreateNewGameController : MonoBehaviour {
     public void OnAddRecruitClicked()
     {
         m_AllRecruitNames.Add(m_recruitName);
-        Raider recruit = new Raider(m_recruitName, RaiderStats.GenerateRaiderStatsFromSpec(m_recruitSpec, m_recruitBaseLevel));
+        Raider recruit = new Raider(m_recruitName, RaiderStats.GenerateRaiderStatsFromSpec(m_recruitSpec, m_recruitBaseSkillLevel, m_recruitBaseItemLevel));
         PlayerData.AddRecruitToRoster(recruit);
 
         Enums.CharacterRole newGuyRole = Utility.GetRoleFromSpec(m_recruitSpec);
@@ -381,9 +383,7 @@ public class CreateNewGameController : MonoBehaviour {
     {
 
         m_playerName = namefield.text;
-        int baseLevel = 10;
-        int playerAdvantage = 3;
-        Raider player = new Raider(m_playerName, new RaiderStats(baseLevel, baseLevel + playerAdvantage, 10, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
+        Raider player = new Raider(m_playerName, new RaiderStats(m_recruitBaseItemLevel, Mathf.RoundToInt(m_recruitBaseSkillLevel * m_playerAdvantage), 10, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
         PlayerData.AddPlayerToRoster(player);
         m_AllRecruitNames.Add(m_playerName);
 

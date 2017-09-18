@@ -21,17 +21,17 @@ public class RaidSceneCooldownPrefabScript : MonoBehaviour {
 
         if (m_raiderScript.IsDead())
         {
-            m_text.text = m_raiderScript.Raider.GetName() + "\n\nDied!";
+            m_text.text = m_raiderScript.Raider.GetName() + "\nDied!";
             m_button.interactable = false;
         }
         else if (m_raiderScript.CooldownUsed)
         {
-            m_text.text = m_raiderScript.Raider.GetName() + "\n\nUsed!";
+            m_text.text = m_raiderScript.Raider.GetName() + "\nUsed!";
             m_button.interactable = !m_raiderScript.CooldownUsed;
         }
         else
         {
-            m_text.text = m_raiderScript.Raider.GetName() + "\n\n";
+            m_text.text = m_raiderScript.Raider.GetName() + "\n";
             m_text.text += "\"" + m_raiderScript.Raider.RaiderStats.Cooldown.Name + "\"";
             m_button.interactable = !m_raiderScript.CooldownUsed;
         }
@@ -45,15 +45,17 @@ public class RaidSceneCooldownPrefabScript : MonoBehaviour {
 	void Update () {
         if (!m_raiderScript.CooldownUsed && m_raiderScript.IsDead())
         {
-            m_text.text = m_raiderScript.Raider.GetName() + "\n\nDied!";
+            m_text.text = m_raiderScript.Raider.GetName() + "\nDied!";
             m_button.interactable = !m_raiderScript.CooldownUsed;
         }
 	}
 
     public void UseCooldown()
     {
-        m_raiderScript.UseCooldown();
-        m_text.text = m_raiderScript.Raider.GetName() + "\n\nUsed!";
-        m_button.interactable = !m_raiderScript.CooldownUsed;
+        if (m_raiderScript.UseCooldown())
+        {
+            m_text.text = m_raiderScript.Raider.GetName() + "\nUsed!";
+            m_button.interactable = !m_raiderScript.CooldownUsed;
+        }
     }
 }

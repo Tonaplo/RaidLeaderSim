@@ -6,7 +6,9 @@ using UnityEngine.SceneManagement;
 
 public class ChooseEncounterSceneController : MonoBehaviour {
 
+    public Button FightButton;
     public Text FightButtonText;
+    public Text DescriptionText;
 
     public Dropdown EncounterSelectorDropdown;
     public Dropdown EncounterDifficultyDropdown;
@@ -31,6 +33,8 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         m_encounters = new List<BaseEncounter> {
             new MoAKeeperOfTheMine(),
             new MoAVampiricus(),
+            new MoACouncilOfStone(),
+            new MoAMineKingAtrea(),
         };
 
         for (int i = 0; i < m_encounters.Count; i++)
@@ -91,6 +95,18 @@ public class ChooseEncounterSceneController : MonoBehaviour {
     void PopulateLists() {
         ClearAndPopulateAttackList();
         ClearAndPopulateAbilityList();
+
+        string errorText = "";
+        if (Utility.CanAttemptEncounter(m_currentlySelectedEncounter.EncounterEnum, m_currentlySelectedEncounter.Difficulty, out errorText))
+        {
+            DescriptionText.text = m_currentlySelectedEncounter.Description;
+            FightButton.interactable = true;
+        }
+        else
+        {
+            DescriptionText.text = errorText;
+            FightButton.interactable = false;
+        }
     }
 
     void ClearAndPopulateAttackList()

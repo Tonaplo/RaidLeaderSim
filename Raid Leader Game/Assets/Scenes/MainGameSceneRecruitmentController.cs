@@ -26,10 +26,10 @@ public class MainGameSceneRecruitmentController : MonoBehaviour {
         Utility.GetRandomCharacterName(ref newNameList, 4);
         newNameList.RemoveAll(x => previousNames.Contains(x));
 
-        TopLeft.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[0], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageItemLevel())));
-        TopRight.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[1], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillAndItemLevel())));
-        BottomLeft.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[2], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillAndItemLevel())));
-        BottomRight.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[3], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillLevel())));
+        TopLeft.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[0], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillLevel(), PlayerData.GetRosterAverageItemLevel())));
+        TopRight.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[1], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillLevel(), PlayerData.GetRosterAverageItemLevel())));
+        BottomLeft.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[2], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillLevel(), PlayerData.GetRosterAverageItemLevel())));
+        BottomRight.GetComponent<RecruitScript>().Initialize(new Raider(newNameList[3], RaiderStats.GenerateRaiderStatsFromSpec((Enums.CharacterSpec)Random.Range(0, (int)Enums.CharacterSpec.Necromancer + 1), PlayerData.GetRosterAverageSkillLevel(), PlayerData.GetRosterAverageItemLevel())));
     }
 
     // Update is called once per frame

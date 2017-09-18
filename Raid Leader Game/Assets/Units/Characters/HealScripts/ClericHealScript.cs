@@ -31,27 +31,30 @@ public class ClericHealScript : BaseHealScript
 
     public override void StartFight(int index, Raider caster, RaiderScript rs)
     {
-        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, caster, rs));
+        List<RaiderScript> targets = new List<RaiderScript>();
+        GetBestTargets(ref targets);
+        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, targets, rs));
     }
 
-    IEnumerator DoHeal(float castTime, int index, Raider caster, RaiderScript rs)
+    IEnumerator DoHeal(float castTime, int index, List<RaiderScript> targets, RaiderScript caster)
     {
         yield return new WaitForSeconds(castTime);
         
-        if (!rs.IsBossDead() && !rs.IsDead())
+        if (!caster.IsBossDead() && !caster.IsDead())
         {
             HealStruct thisHeal = new HealStruct(m_healStruct);
-            List<RaiderScript> targets = new List<RaiderScript>();
-            GetBestTargets(ref targets);
+            
             int numTargets = targets.Count;
             thisHeal.m_healMultiplier *= (1.0f / numTargets);
 
             for (int i = 0; i < numTargets; i++)
             {
-                rs.DoHealing(index, Name, ref thisHeal, targets[i]);
+                caster.DoHealing(index, Name, ref thisHeal, targets[i]);
             }
 
-            rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, caster, rs));
+            List<RaiderScript> newTargets = new List<RaiderScript>();
+            GetBestTargets(ref newTargets);
+            caster.StartCoroutine(DoHeal(Utility.GetFussyCastTime(caster.ApplyCooldownCastTimeMultiplier(m_castTime)), index, newTargets, caster));
         }
     }
 }

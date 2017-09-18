@@ -79,11 +79,10 @@ public class RaiderScript : MonoBehaviour {
     public void Initialize(Raider raider, HealthBarScript hbs, Canvas parent, int index) {
         m_raider = raider;
         HealthBar = hbs;
-        HealthBar.SetupHealthBar((index % 3) * 95 + 460, 310 - (index / 3) * 45, 45, 95, m_raider.GetMaxHealth());
-        HealthBar.SetUseName(m_raider.GetName(), true);
+        HealthBar.SetupHealthBar(raider.GetName(), index, Enums.HealthBarSetting.Raider, m_raider.GetMaxHealth());
         HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats.GetClass());
-        HealthBarButton = HealthBar.RaiderButton;
-        HealthBar.RaiderButton.onClick.AddListener( delegate () { AttemptToCounterAbility(); });
+        HealthBarButton = HealthBar.BarButton;
+        HealthBar.BarButton.onClick.AddListener( delegate () { AttemptToCounterAbility(); });
     }
 
     public IEnumerator StartFight(float offset, int index, Raider attacker, RaidSceneController rsc)
@@ -132,7 +131,7 @@ public class RaiderScript : MonoBehaviour {
         }*/
 
         HandleLeechCooldownLeech(damage, index, ds.m_baseLeech);
-        m_rsc.DealDamage(damage, m_raider.GetName(), attackName, index);
+        m_rsc.DealDamage(damage, this, index);
         return damage;
     }
 
@@ -157,7 +156,7 @@ public class RaiderScript : MonoBehaviour {
         return actualHealing;
     }
 
-    public void TakeDamage(int damage) {
+    public void TakeDamage(int damage, string attackName) {
 
         if (IsDead())
             return;
@@ -180,7 +179,7 @@ public class RaiderScript : MonoBehaviour {
 
         HealthBar.ModifyHealth(-damage);
         if (IsDead())
-            Die();
+            Die(attackName);
     }
 
     public void TakeHealing(string healName, string healerName, int index, int healing) {
@@ -194,11 +193,11 @@ public class RaiderScript : MonoBehaviour {
         m_rsc.DoHeal(actualHealing, healerName, healName, index);
     }
 
-    void Die()
+    void Die(string killedBy)
     {
         m_cooldownUsed = true;
         enabled = false;
-        m_rsc.RaiderDied();
+        m_rsc.RaiderDied(Raider.GetName(), killedBy);
     }
 
     void AttemptToCounterAbility()
@@ -225,10 +224,15 @@ public class RaiderScript : MonoBehaviour {
         return m_activeDebuffs.Count > 0;
     }
 
-    public void UseCooldown()
+    public bool UseCooldown()
     {
-        m_cooldownUsed = true;
-        m_rsc.UseRaiderCooldown(this);
+        if (m_rsc != null)
+        {
+            m_cooldownUsed = true;
+            m_rsc.UseRaiderCooldown(this);
+            return true;
+        }
+        return false;
     }
 
     public void AddCooldown(BaseCooldown cd)

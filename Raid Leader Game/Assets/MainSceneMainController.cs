@@ -17,16 +17,19 @@ public class MainSceneMainController : MonoBehaviour {
     RosterControllerScript m_rosterScript;
     MainGameSceneRecruitmentController m_recruitmentScript;
     MainSceneItemsController m_itemScript;
+    MainGameSceneProgressController m_progressScript;
 
 	// Use this for initialization
 	void Start () {
         m_rosterScript = RosterControllerPrefab.GetComponent<RosterControllerScript>();
         m_recruitmentScript = RecruitmentControllerPrefab.GetComponent<MainGameSceneRecruitmentController>();
         m_itemScript = BankControllerPrefab.GetComponent<MainSceneItemsController>();
+        m_progressScript = ProgressControllerPrefab.GetComponent<MainGameSceneProgressController>();
 
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.gameObject.SetActive(false);
+        m_progressScript.gameObject.SetActive(false);
 
         OnClickRoster();
     }
@@ -42,6 +45,7 @@ public class MainSceneMainController : MonoBehaviour {
         m_rosterScript.Reactivate();
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.gameObject.SetActive(false);
+        m_progressScript.gameObject.SetActive(false);
     }
 
     public void OnClickProgress()
@@ -49,6 +53,7 @@ public class MainSceneMainController : MonoBehaviour {
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.gameObject.SetActive(false);
+        m_progressScript.Reactivate();
     }
 
     public void OnClickRecruitment()
@@ -56,6 +61,7 @@ public class MainSceneMainController : MonoBehaviour {
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(true);
         m_itemScript.gameObject.SetActive(false);
+        m_progressScript.gameObject.SetActive(false);
     }
 
     public void OnClickItems()
@@ -63,11 +69,12 @@ public class MainSceneMainController : MonoBehaviour {
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.Reactivate();
+        m_progressScript.gameObject.SetActive(false);
     }
 
     public void OnClickRaid()
     {
-        if(PlayerData.CanRaidWithRoster())
+        if(Utility.CanRaidWithRoster())
             SceneManager.LoadScene("ChooseEncounterScene");
     }
 }

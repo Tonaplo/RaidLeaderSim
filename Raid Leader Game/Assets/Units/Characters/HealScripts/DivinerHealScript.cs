@@ -31,24 +31,24 @@ public class DivinerHealScript : BaseHealScript
 
     public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
+        List<RaiderScript> targets = new List<RaiderScript>();
+        GetBestTargets(ref targets);
+        rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(m_castTime), index, targets, rs));
     }
 
-    IEnumerator DoHeal(float castTime, int index, Raider caster, RaiderScript rs)
+    IEnumerator DoHeal(float castTime, int index, List<RaiderScript> targets, RaiderScript caster)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rs.IsBossDead() && !rs.IsDead())
+        if (!caster.IsBossDead() && !caster.IsDead())
         {
             HealStruct thisHeal = new HealStruct(m_healStruct);
-            List<RaiderScript> targets = new List<RaiderScript>();
-            GetBestTargets(ref targets);
             int numTargets = targets.Count;
             thisHeal.m_healMultiplier *= (1.0f / numTargets);
 
             for (int i = 0; i < numTargets; i++)
             {
-                rs.DoHealing(index, Name, ref thisHeal, targets[i]);
+                caster.DoHealing(index, Name, ref thisHeal, targets[i]);
             }
 
             thisHeal = new HealStruct(m_healStruct);
@@ -57,10 +57,13 @@ public class DivinerHealScript : BaseHealScript
 
             for (int i = 0; i < lowest.Count; i++)
             {
-                rs.DoHealing(index, Name, ref thisHeal, lowest[i]);
+                caster.DoHealing(index, Name, ref thisHeal, lowest[i]);
             }
-
-            rs.StartCoroutine(DoHeal(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, caster, rs));
+            
+            //We acquire targets before we cast, so that it's delayed healing, as it would be if a human was doing it.
+            List<RaiderScript> newTargets = new List<RaiderScript>();
+            GetBestTargets(ref newTargets);
+            caster.StartCoroutine(DoHeal(Utility.GetFussyCastTime(caster.ApplyCooldownCastTimeMultiplier(m_castTime)), index, newTargets, caster));
         }
     }
 }

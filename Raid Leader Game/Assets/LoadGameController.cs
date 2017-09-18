@@ -82,11 +82,13 @@ public class LoadGameController : MonoBehaviour {
         averageGearLevel /= 100.0f;
         averageSkillLevel /= 100.0f;
 
+        float progress = Utility.CalculateTotalProgressPercent() * 100.0f;
+
         RaidText.text =  PlayerData.RaidTeamName +
                         "\nTeam Size: " + numMembers +
                         "\nAverage Skill Level: " + averageSkillLevel +
                         "\nAverage Gear Level: " + averageGearLevel +
-                        "\nProgress functionality pending";
+                        "\nProgress: " + System.Math.Round(progress, 2) + "%";
 
         StartButton.interactable = true;
     }

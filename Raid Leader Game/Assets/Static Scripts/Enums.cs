@@ -3,6 +3,10 @@ using System.Collections;
 
 public static class Enums{
 
+    public enum SaveVersion {
+        FirstSaveVersion,
+    }
+
     public enum CharacterRole {
         Tank,
         Healer,
@@ -45,6 +49,13 @@ public static class Enums{
         Dispel,
         PreMovePositional,
         PostMovePositional,
+        Damage,
+    }
+
+    public enum AbilityCastType
+    {
+        Cast,
+        Channel,
     }
 
     public enum Cooldowns {
@@ -58,15 +69,6 @@ public static class Enums{
         Raid,
     }
 
-    public enum EncounterAdds { 
-        MiniBoss,
-        SingleAdd,
-        Pair,
-        Triple,
-        Quad,
-        Many,
-    }
-
     public enum EncounterSteps { 
         EncounterStart = 0,
         ApplyConsumables = 1,
@@ -78,7 +80,12 @@ public static class Enums{
         FightWon = 7,
         FightLost = 8,
         GoToMainScreen = 9,
+    }
 
+    public enum EncounterEnemyType
+    {
+        Boss,
+        Add
     }
 
     public enum Difficulties
@@ -95,9 +102,17 @@ public static class Enums{
         //Add more
     }
 
-    public enum EncounterPhaseType {
-        TimeBased,
-        DPSBased,
+    public enum RaidEnum
+    {
+        MinesOfAtrea,
+    }
+
+    public enum EncounterEnum {
+        None,
+        MoAKeeperOfTheMine,
+        MoAVampiricus,
+        MoACouncilOfStone,
+        MoAMinekingAtrea,
     }
 
     public enum RaidHealingState
@@ -142,5 +157,11 @@ public static class Enums{
         Positional = 1,
         Mechanical = 2,
         NumSkillTypes = 3,
+    }
+
+    public enum HealthBarSetting {
+        CurrentTarget,
+        Enemy,
+        Raider,
     }
 }

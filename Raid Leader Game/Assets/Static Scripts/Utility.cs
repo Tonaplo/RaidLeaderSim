@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public static class Utility
 {
     static BaseEncounter m_currentEncounter;
-    public static BaseEncounter CurrentEncounter{ get { return m_currentEncounter; } }
+    public static BaseEncounter CurrentEncounter { get { return m_currentEncounter; } }
     static List<string> names;
 
     public static void DebugInitalize()
@@ -430,42 +430,42 @@ public static class Utility
                     return Enums.CharacterSpec.Guardian;
                 else
                     return Enums.CharacterSpec.Berserker;
-                
+
 
             case Enums.CharacterClass.Shadow:
                 if (role == Enums.CharacterRole.RangedDPS)
                     return Enums.CharacterSpec.Ranger;
                 else
                     return Enums.CharacterSpec.Assassin;
-                
+
 
             case Enums.CharacterClass.Totemic:
                 if (role == Enums.CharacterRole.Healer)
                     return Enums.CharacterSpec.Naturalist;
                 else
                     return Enums.CharacterSpec.Elementalist;
-                
+
 
             case Enums.CharacterClass.Sorcerer:
                 if (role == Enums.CharacterRole.Healer)
                     return Enums.CharacterSpec.Diviner;
                 else
                     return Enums.CharacterSpec.Wizard;
-                
+
 
             case Enums.CharacterClass.Paladin:
                 if (role == Enums.CharacterRole.Healer)
                     return Enums.CharacterSpec.Cleric;
                 else
                     return Enums.CharacterSpec.Knight;
-                
+
 
             case Enums.CharacterClass.Occultist:
                 if (role == Enums.CharacterRole.MeleeDPS)
                     return Enums.CharacterSpec.Scourge;
                 else
                     return Enums.CharacterSpec.Necromancer;
-                
+
 
             default:
                 return Enums.CharacterSpec.Berserker;
@@ -477,6 +477,191 @@ public static class Utility
     #region Encounter related
 
     public static void SetCurrentEncounter(BaseEncounter e) { m_currentEncounter = e; }
+
+    public static string GetRecommendedSkillLevel(Enums.Difficulties d)
+    {
+        switch (d)
+        {
+            case Enums.Difficulties.Easy:
+                return "Any";
+            case Enums.Difficulties.Normal:
+            default:
+                return "25+";
+            case Enums.Difficulties.Hard:
+                return "50+";
+        }
+    }
+
+    public static bool CanAttemptEncounter(Enums.EncounterEnum e, Enums.Difficulties d, out string errorString)
+    {
+        
+        errorString = "";
+
+        Debug.Log("We are currently allowing you to fight whichever boss at whichever point in time. To disable this, go to Utility.CanAttemptEncounter()");
+        return true;
+
+        //First, we need to check that this boss was not already beaten this week
+        foreach (var raid in PlayerData.WeeklyLockOut)
+        {
+            foreach (var encounter in raid.m_encounters)
+            {
+                errorString = encounter.Name + " has already been defeated on " + d + " difficulty this week!";
+                if (encounter.Encounter == e)
+                {
+                    switch (d)
+                    {
+                        case Enums.Difficulties.Easy:
+                            if (encounter.BeatenOnEasy)
+                                return false;
+                            break;
+                        case Enums.Difficulties.Normal:
+                        default:
+                            if (encounter.BeatenOnNormal)
+                                return false;
+                            break;
+                        case Enums.Difficulties.Hard:
+                            if (encounter.BeatenOnHard)
+                                return false;
+                            break;
+                    }
+
+                    
+                    //if this is not the first boss, check if the prereq was beaten
+                    if(encounter.PreReq != Enums.EncounterEnum.None)
+                    {
+                        foreach (var preReq in raid.m_encounters)
+                        {
+                            if (preReq.Encounter == encounter.PreReq)
+                            {
+                                errorString = "You must beat " + preReq.Name + " on " + d + " before you can attempt " + encounter.Name + " on " + d + " this week!";
+                                switch (d)
+                                {
+                                    case Enums.Difficulties.Easy:
+                                        if (!preReq.BeatenOnEasy)
+                                            return false;
+                                        break;
+                                    case Enums.Difficulties.Normal:
+                                    default:
+                                        if (!preReq.BeatenOnNormal)
+                                            return false;
+                                        break;
+                                    case Enums.Difficulties.Hard:
+                                        if (!preReq.BeatenOnHard)
+                                            return false;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        bool priorDifficultyRequired = false;
+        foreach (var raid in PlayerData.Progress)
+        {
+            foreach (var encounter in raid.m_encounters)
+            {
+                errorString = "Before " + encounter.Name + " can be attempted on " + d + ", " + PlayerData.RaidTeamName + " must first beat ";
+                if (encounter.Encounter == e)
+                {
+                    RaidData.EncounterData encounterToCheck = null;
+                    //We can also attempt the first encounter on Easy
+                    if (encounter.PreReq == Enums.EncounterEnum.None && d == Enums.Difficulties.Easy)
+                        return true;
+                    //If this is the first boss not on easy, we need to make sure the last boss of the previous difficulty was beaten
+                    else if (encounter.PreReq == Enums.EncounterEnum.None)
+                    {
+                        priorDifficultyRequired = true;
+                        //First find the last boss enum
+                        Enums.EncounterEnum currentEnum = e;
+                        bool found = true;
+                        while (found)
+                        {
+                            found = false;
+                            foreach (var preReq in raid.m_encounters)
+                            {
+                                if (currentEnum == preReq.PreReq)
+                                {
+                                    currentEnum = preReq.Encounter;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        //then actually set it
+                        foreach (var lastBoss in raid.m_encounters)
+                        {
+                            if (currentEnum == lastBoss.Encounter)
+                            {
+                                encounterToCheck = lastBoss;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (encounterToCheck != null)
+                    {
+                        Enums.Difficulties prior = d;
+                        prior--;
+                        errorString += encounterToCheck.Name + " on " + (priorDifficultyRequired ? prior : d) + ".";
+                        switch (prior)
+                        {
+                            case Enums.Difficulties.Easy:
+                                return encounterToCheck.BeatenOnEasy;
+                            case Enums.Difficulties.Normal:
+                            default:
+                                return encounterToCheck.BeatenOnNormal;
+                            case Enums.Difficulties.Hard:
+                                return encounterToCheck.BeatenOnHard;
+                        }
+                    }
+
+                    //If nothing else failed, return true
+                    return true;
+                }
+            }
+        }
+        Debug.LogAssertion("Somehow, we didnt find the encounter we were looking for. This is a huge error.");
+        return false;
+    }
+
+    public static bool CanRaidWithRoster()
+    {
+        int count = 0;
+        for (int i = 0; i < PlayerData.Roster.Count; i++)
+        {
+            if (PlayerData.Roster[i].IsEligibleForActivity())
+                count++;
+        }
+
+        return (count >= StaticValues.RaidTeamSize);
+    }
+
+    public static float CalculateTotalProgressPercent()
+    {
+        int total = 0;
+        int completed = 0;
+        foreach (var raid in PlayerData.Progress)
+        {
+            foreach (var encounter in raid.m_encounters)
+            {
+                total += 3;
+
+                if (encounter.BeatenOnEasy)
+                    completed++;
+
+                if (encounter.BeatenOnNormal)
+                    completed++;
+
+                if (encounter.BeatenOnHard)
+                    completed++;
+            }
+        }
+
+        return (float)completed/(float)total;
+    }
 
     #endregion
 

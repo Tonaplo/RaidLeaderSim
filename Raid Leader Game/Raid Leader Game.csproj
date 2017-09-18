@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\AwardLootItemInstanceScript.cs" />
+    <Compile Include="Assets\Cheats.cs" />
     <Compile Include="Assets\ChooseEncounterAbilityPrefabScript.cs" />
     <Compile Include="Assets\ChooseEncounterAttackPrefabScript.cs" />
     <Compile Include="Assets\ChooseEncounterSceneController.cs" />
@@ -96,14 +97,19 @@
     <Compile Include="Assets\EncounterScripts\BaseCooldown.cs" />
     <Compile Include="Assets\EncounterScripts\BaseEncounter.cs" />
     <Compile Include="Assets\EncounterScripts\EncounterAbility.cs" />
-    <Compile Include="Assets\EncounterScripts\EncounterAdds.cs" />
     <Compile Include="Assets\EncounterScripts\EncounterAttackDescription.cs" />
+    <Compile Include="Assets\EncounterScripts\EncounterEnemy.cs" />
+    <Compile Include="Assets\EncounterScripts\Encounters\MoACouncilOfStone.cs" />
     <Compile Include="Assets\EncounterScripts\Encounters\MoAKeeperOfTheMine.cs" />
+    <Compile Include="Assets\EncounterScripts\Encounters\MoAMineKingAtrea.cs" />
     <Compile Include="Assets\EncounterScripts\Encounters\MoAVampiricus.cs" />
+    <Compile Include="Assets\EncounterScripts\RaidData.cs" />
     <Compile Include="Assets\LoadGameController.cs" />
+    <Compile Include="Assets\MainGameSceneProgressController.cs" />
     <Compile Include="Assets\MainSceneMainController.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />
+    <Compile Include="Assets\ProgressBossPrefab.cs" />
     <Compile Include="Assets\RaidMemberItemReward.cs" />
     <Compile Include="Assets\RaidSceneControlPanel.cs" />
     <Compile Include="Assets\RaidSceneCooldownPrefabScript.cs" />

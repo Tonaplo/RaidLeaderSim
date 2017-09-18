@@ -8,38 +8,40 @@ public class BaseEncounter
     #region variables and getters and setters
 
     protected string m_name;
+    protected string m_description;
     protected int m_counter = 1;
-    protected RaiderScript m_currentTarget;
-    protected HealthBarScript m_healthBar;
+    protected Enums.EncounterEnum m_encounterEnum;
+    protected RaiderScript m_currentRaiderTarget;
     protected EncounterAbility m_currentAbility;
     protected Enums.Difficulties m_difficulty = Enums.Difficulties.Normal;
     protected List<EncounterAbility> m_encounterAbilities = new List<EncounterAbility>();
     protected List<EncounterAttackDescription> m_attacks;
     protected List<CharacterItem> m_loot;
-    
+    protected List<EncounterEnemy> m_enemies;
+
     public string Name { get { return m_name; } }
+    public string Description { get { return m_description; } }
     public int Stacks { get { return m_counter; } }
-    public RaiderScript CurrentTarget { get { return m_currentTarget; } }
-    public HealthBarScript HealthBar  {  get { return m_healthBar; }   }
-    public Enums.Difficulties Difficulty  {  get { return m_difficulty; } }
+    public Enums.EncounterEnum EncounterEnum { get { return m_encounterEnum; } }
+    public RaiderScript CurrentRaiderTarget { get { return m_currentRaiderTarget; } }
+    public Enums.Difficulties Difficulty { get { return m_difficulty; } }
     public EncounterAbility CurrentAbility { get { return m_currentAbility; } }
-    public List<EncounterAbility> EncounterAbilities  {  get { return m_encounterAbilities; } }
+    public List<EncounterAbility> EncounterAbilities { get { return m_encounterAbilities; } }
     public List<EncounterAttackDescription> EncounterAttacks { get { return m_attacks; } }
     public List<CharacterItem> Loot { get { return m_loot; } }
-    
-    protected int m_baseHealth;
+    public List<EncounterEnemy> Enemies { get { return m_enemies; } }
+
+
     protected GameObject m_healthBarPrefab;
     protected RaidSceneController m_rsc;
     protected List<RaiderScript> m_raid;
     protected List<RaiderScript> m_positionalTargets;
-    protected List<EncounterAdds> m_adds;
 
     #endregion
 
-    public BaseEncounter(string name, int health)
+    public BaseEncounter(string name)
     {
         m_name = name;
-        m_baseHealth = health;
         m_difficulty = Enums.Difficulties.Normal;
         m_encounterAbilities = new List<EncounterAbility>();
     }
@@ -48,13 +50,22 @@ public class BaseEncounter
     {
         InitializeForChoice(m_difficulty);
         m_healthBarPrefab = healthBar;
+        m_healthBarPrefab.SetActive(false);
         m_raid = raiders;
         m_rsc = rsc;
-        m_healthBar = healthBar.GetComponent<HealthBarScript>();
-        m_healthBar.SetupHealthBar(350, 390, 60, 600, Mathf.RoundToInt(m_baseHealth * GetDifficultyMultiplier()));
-        m_healthBar.SetUseName(m_name, true);
-        m_healthBar.SetUsePercent(true);
-        m_adds = new List<EncounterAdds>();
+        m_enemies = new List<EncounterEnemy>();
+        SetupEncounter();
+        TargetEnemy(m_enemies.Find(e => e.EnemyType == Enums.EncounterEnemyType.Boss).Index);
+        for (int i = 0; i < m_enemies.Count; i++)
+        {
+            if (m_enemies[i].IsCurrentTarget())
+                m_enemies[i].Healthbar.gameObject.SetActive(true);
+        }
+    }
+
+    public virtual void SetupEncounter()
+    {
+        Debug.LogAssertion("Calling SetupEncounter on the BaseEncounter - this should always be overridden!");
     }
 
     public void InitializeForChoice(Enums.Difficulties diff)
@@ -67,7 +78,7 @@ public class BaseEncounter
 
     public bool IsDead()
     {
-        return HealthBar.IsDead();
+        return m_enemies.FindAll(x => x.EnemyType == Enums.EncounterEnemyType.Boss).Count == 0;
     }
 
     public bool AttemptToCounterCurrentAbility(Raider counter)
@@ -80,9 +91,9 @@ public class BaseEncounter
         return false;
     }
 
-    public void SetCurrentTarget(RaiderScript raider)
+    public void SetCurrentRaiderTarget(RaiderScript raider)
     {
-        m_currentTarget = raider;
+        m_currentRaiderTarget = raider;
     }
 
     public virtual void SetupLoot()
@@ -100,11 +111,12 @@ public class BaseEncounter
         Debug.LogAssertion("Calling SetupAbilities on the BaseEncounter - this should always be overridden!");
     }
 
-    public virtual void BeginEncounter() {
+    public virtual void BeginEncounter()
+    {
         Debug.LogAssertion("Calling BeginEncounter on the BaseEncounter - this should always be overridden!");
         for (int i = 0; i < m_raid.Count; i++)
         {
-            m_raid[i].TakeDamage(Mathf.RoundToInt(m_raid[i].GetMaxHealth()*2.5f));
+            m_raid[i].TakeDamage(Mathf.RoundToInt(m_raid[i].GetMaxHealth() * 2.5f), "Death by Debug");
         }
     }
 
@@ -113,11 +125,42 @@ public class BaseEncounter
         Debug.LogAssertion("Calling CurrentAbilityCountered on the BaseEncounter - this should always be overridden!");
     }
 
-    public virtual int TakeDamage(int damage)
+    public int TakeDamage(int damage, RaiderScript attacker)
     {
-        int previousHealth = (int)HealthBar.CurrentHealth;
-        HealthBar.ModifyHealth(-damage);
-        return previousHealth - (int)HealthBar.CurrentHealth;
+        EncounterEnemy currentTarget = m_enemies.Find(e => e.IsCurrentTarget());
+        if (currentTarget != null)
+        {
+            int previousHealth = currentTarget.Healthbar.CurrentHealth;
+            currentTarget.Healthbar.ModifyHealth(-damage);
+
+            if (currentTarget.Healthbar.IsDead())
+            {
+                int newIndex = -1;
+                for (int i = 0; i < m_enemies.Count; i++)
+                {
+                    if (m_enemies.FindAll(e => e.Index == i).Count == 0) {
+                        newIndex = i;
+                        break;
+                    }
+                }
+                currentTarget.Index = newIndex;
+                currentTarget.ToggleTargetSetting();
+                currentTarget.DestroyHealthBar();
+                m_enemies.Remove(currentTarget);
+            }
+
+            int actualDamage = previousHealth - (int)currentTarget.Healthbar.CurrentHealth;
+            HandleOnTakeDamageEvent(actualDamage, attacker);
+
+            return actualDamage;
+        }
+
+        return 0;
+    }
+
+    public virtual void HandleOnTakeDamageEvent(int damage, RaiderScript attacker)
+    {
+        ;//This function can be overridden to deal with the event of taking damage by each encounter
     }
 
     protected void HandleAbilityTypeCountered(Enums.Ability abilityType)
@@ -160,8 +203,9 @@ public class BaseEncounter
     protected List<RaiderScript> GetRandomRaidTargets(int numTargets)
     {
         List<int> indices = new List<int>();
-        for (int i = 0; i < m_raid.Count; i++) {
-            if(!m_raid[i].IsDead())
+        for (int i = 0; i < m_raid.Count; i++)
+        {
+            if (!m_raid[i].IsDead())
                 indices.Add(i);
         }
 
@@ -182,11 +226,11 @@ public class BaseEncounter
         return targets;
     }
 
-    public void InitiatePreMovePositionalAbility()
+    public void InitiatePositionalAbility()
     {
         m_positionalTargets = new List<RaiderScript>(m_raid);
     }
-    
+
     public bool AttemptToMove()
     {
         List<RaiderScript> toBeRemoved = new List<RaiderScript>();
@@ -207,7 +251,6 @@ public class BaseEncounter
 
         return m_positionalTargets.Count == 0;
     }
-
 
     protected void GenerateLoot(int normalItemLevel, int numNormalLootPieces)
     {
@@ -231,6 +274,51 @@ public class BaseEncounter
         for (int i = 0; i < numNormalLootPieces; i++)
         {
             m_loot.Add(new CharacterItem(normalItemLevel + Random.Range(0, StaticValues.ItemLevelTitanforge + 1)));
+        }
+    }
+
+    protected bool CreateEnemy(string name, int addHealth, Enums.EncounterEnemyType enemyType)
+    {
+        int index = -1;
+        for (int i = 0; i < StaticValues.MaxNumberOfAliveAdds; i++)
+        {
+            if (m_enemies.FindAll(x => x.Index == i).Count == 0)
+            {
+                index = i;
+                break;
+            }
+        }
+
+        if (index != -1)
+        {
+            GameObject addGO = GameObject.Instantiate(m_healthBarPrefab);
+            addGO.SetActive(true);
+            addGO.name = name + index;
+            addGO.transform.SetParent(m_rsc.canvas.transform);
+            m_enemies.Add(new EncounterEnemy(name, addGO.GetComponent<HealthBarScript>(), addHealth, index, enemyType, this));
+            return true;
+        }
+        return false;
+    }
+
+    public void TargetEnemy(int index)
+    {
+        EncounterEnemy currentTarget = m_enemies.Find(e => e.IsCurrentTarget());
+
+        if (currentTarget != null)
+        {
+            m_enemies.Find(e => e.Index == index).Index = -1;
+            currentTarget.Index = index;
+        }
+        else
+        {
+            EncounterEnemy newTarget = m_enemies.Find(e => e.Index == index);
+            newTarget.Index = -1;
+        }
+
+        for (int i = 0; i < m_enemies.Count; i++)
+        {
+            m_enemies[i].ToggleTargetSetting();
         }
     }
 }

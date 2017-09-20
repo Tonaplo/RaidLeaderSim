@@ -15,7 +15,7 @@ public class DivinerHealScript : BaseHealScript
     public override void Setup()
     {
         m_healStruct = new HealStruct();
-        m_castTime = 1.8f;
+        m_castTime = 1.3f;
         m_healStruct.m_healMultiplier = 2.5f;
         m_name = "Arcane Mending";
 

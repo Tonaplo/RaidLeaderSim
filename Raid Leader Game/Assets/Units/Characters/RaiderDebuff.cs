@@ -5,7 +5,6 @@ using UnityEngine;
 public class RaiderDebuff : MonoBehaviour {
 
     RaiderScript m_raider;
-    bool m_active = false;
     string m_debuffName = "";
 
 	// Use this for initialization

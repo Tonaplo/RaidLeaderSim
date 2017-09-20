@@ -740,10 +740,11 @@ public class MoACouncilOfStone : BaseEncounter
 
                 target.Healthbar.ModifyHealth(target.Healthbar.MaxHealth * GetFETEHealPercent());
             }
-            m_rsc.EndCastingAbility(m_currentAbility);
+            
             m_rsc.StartCoroutine(WaitForFETE(GetFETEWaitTime()));
         }
 
+        m_rsc.EndCastingAbility(m_currentAbility);
         m_currentAbility = null;
     }
 

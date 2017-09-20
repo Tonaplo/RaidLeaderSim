@@ -8,7 +8,6 @@ public class RaidSceneDispelPrefab : MonoBehaviour {
     public Text DispelText;
 
     RaiderScript m_raider;
-    RaidSceneController m_rsc;
     RaidSceneControlPanel m_rscp;
 
 	// Use this for initialization
@@ -21,10 +20,9 @@ public class RaidSceneDispelPrefab : MonoBehaviour {
 		
 	}
 
-    public void Initialize(RaiderScript r, int index, RaidSceneController rsc, RaidSceneControlPanel rscp)
+    public void Initialize(RaiderScript r, int index, RaidSceneControlPanel rscp)
     {
         m_raider = r;
-        m_rsc = rsc;
         m_rscp = rscp;
         DispelText.text = m_raider.Raider.GetName();
 

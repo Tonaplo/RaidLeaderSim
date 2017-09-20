@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +11,7 @@ public class RecruitScript : MonoBehaviour {
     public Button RecruitButton;
     public Button RejectButton;
 
-    Raider m_recruit;
-    bool m_disabled = false;
-    float m_disabledTime = 0.0f;
+    int m_infoIndex;
 
 	// Use this for initialization
 	void Start () {
@@ -20,29 +19,37 @@ public class RecruitScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (m_disabled)
+        
+        if (PlayerData.RecruitLockOut[m_infoIndex].IsDisabled)
         {
-            m_disabledTime += Time.deltaTime;
-            Description.text = "Next recruit available in " + Mathf.RoundToInt(m_disabledTime) + " (actual countdown implementation pending)";
+            UpdateNextRecruitString();
         }
 	}
 
-    public void Initialize(Raider r)
+    public void Initialize(int i)
     {
-        m_recruit = r;
-        Header.text = m_recruit.GetName() + ", " + m_recruit.RaiderStats.GetCurrentSpec().ToString() + " (" + Utility.GetRoleString(m_recruit.RaiderStats.GetRole()) + ")\n";
-        Header.text += "Average Skill/Gear: " + m_recruit.RaiderStats.Skills.AverageSkillLevel + "/" + m_recruit.RaiderStats.Gear.AverageItemLevel;
-        Description.text = Utility.GetDescriptionOfSpec(m_recruit.RaiderStats.GetCurrentSpec());
+        m_infoIndex = i;
+        if (!PlayerData.RecruitLockOut[m_infoIndex].IsDisabled)
+        {
+            Header.text = PlayerData.RecruitLockOut[m_infoIndex].Recruit.GetName() + ", " + PlayerData.RecruitLockOut[m_infoIndex].Recruit.RaiderStats.GetCurrentSpec().ToString() + " (" + Utility.GetRoleString(PlayerData.RecruitLockOut[m_infoIndex].Recruit.RaiderStats.GetRole()) + ")\n";
+            Header.text += "Average Skill/Gear: " + PlayerData.RecruitLockOut[m_infoIndex].Recruit.RaiderStats.Skills.AverageSkillLevel + "/" + PlayerData.RecruitLockOut[m_infoIndex].Recruit.RaiderStats.Gear.AverageItemLevel;
+            Description.text = Utility.GetDescriptionOfSpec(PlayerData.RecruitLockOut[m_infoIndex].Recruit.RaiderStats.GetCurrentSpec());
+        }
+        else
+        {
+            Disable();
+        }
     }
 
     public void OnClickRecruit()
     {
-        PlayerData.AddRecruitToRoster(m_recruit);
+        PlayerData.AddRecruitToRoster(PlayerData.RecruitLockOut[m_infoIndex].Recruit);
         Disable();
     }
 
     public void OnClickReject()
     {
+        PlayerData.RecruitLockOut[m_infoIndex].Disable();
         Disable();
     }
 
@@ -51,8 +58,16 @@ public class RecruitScript : MonoBehaviour {
         RecruitButton.gameObject.SetActive(false);
         RejectButton.gameObject.SetActive(false);
         Header.text = "";
-        Description.text = "Next recruit available in (countdown implementation pending)";
-        m_disabled = true;
-        m_disabledTime = 0.0f;
+        UpdateNextRecruitString();
+    }
+
+    void UpdateNextRecruitString()
+    {
+        int hours = 24 - DateTime.Now.Hour;
+        int minutes = 60 -DateTime.Now.Minute;
+        int seconds = 60 -DateTime.Now.Second;
+        string timeLeftString = (hours > 9 ? hours.ToString() : "0" + hours.ToString()) + ":" + (minutes > 9 ? minutes.ToString() : "0" + minutes.ToString()) + ":" + (seconds > 9 ? seconds.ToString() : "0" + seconds.ToString());
+        Description.text = "Next recruit available in " + timeLeftString;
+        PlayerData.RecruitLockOut[m_infoIndex].CheckForNewRecruit();
     }
 }

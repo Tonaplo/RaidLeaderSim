@@ -65,6 +65,7 @@ public class RaidSceneController : MonoBehaviour {
 
     void SetupUI()
     {
+        AdvanceStepButtonText.text = "Prepare for the attempt";
         raidText.text = "";
         SetupText.text = PlayerData.RaidTeamName + " taking on\n" + encounter.Name + "\non\n" + encounter.Difficulty.ToString() + " difficulty.";
 
@@ -111,6 +112,7 @@ public class RaidSceneController : MonoBehaviour {
                 AdvanceNextStep();
                 break;
             case Enums.EncounterSteps.ApplyConsumables:
+                AdvanceStepButtonText.text = "Continue without using an item";
                 SetupConsumableButtons();
                 currentStep++;
                 break;
@@ -134,7 +136,7 @@ public class RaidSceneController : MonoBehaviour {
                 }
                 encounter.BeginEncounter();
                 m_fightStartTime = Time.time;
-                AddTextToEventLog(encounter.Name + "was pulled!");
+                AddTextToEventLog(encounter.Name + " was pulled!");
 
                 for (int i = 0; i < encounter.Enemies.Count; i++)
                 {
@@ -186,7 +188,7 @@ public class RaidSceneController : MonoBehaviour {
     {
         int minutes = Mathf.RoundToInt(Time.time - m_fightStartTime) / 60;
         int seconds = Mathf.RoundToInt(Time.time - m_fightStartTime) % 60;
-        raidText.text = "[" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "]: " + text + "\n" + raidText.text;
+        raidText.text = " <color=#ffff00ff>[" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "]:</color> " + text + "\n" + raidText.text;
     }
 
     public bool IsBossDead()
@@ -230,7 +232,7 @@ public class RaidSceneController : MonoBehaviour {
             default:
                 break;
         }
-        AddTextToEventLog(ab.Caster + " begins" + castOrChannel + ab.Name + "!");
+        AddTextToEventLog(ab.Caster + " begins" + castOrChannel + "<color=#0000ffff>" + ab.Name + "</color>!");
 
         BossCastScript.InitiateCast(ab);
 
@@ -295,7 +297,7 @@ public class RaidSceneController : MonoBehaviour {
 
         bool success = encounter.AttemptToCounterCurrentAbility(counter);
 
-        AddTextToEventLog(counter.GetName() + " tried to counter "+ encounter.CurrentAbility.Name + " and" + (success ? " succeeded!" : " failed!"));
+        AddTextToEventLog(Utility.GetColoredRaiderName(counter) + " tried to counter <color=#0000ffff>" + encounter.CurrentAbility.Name + "</color> and" + (success ? " succeeded!" : " failed!"));
         if (success)
         {
             EndCastingAbility(encounter.CurrentAbility);
@@ -310,7 +312,7 @@ public class RaidSceneController : MonoBehaviour {
 
     public void UseRaiderCooldown(RaiderScript raider)
     {
-        AddTextToEventLog(raider.Raider.GetName() + " used " + raider.Raider.RaiderStats.Cooldown.Name + "!");
+        AddTextToEventLog(Utility.GetColoredRaiderName(raider.Raider) + " used " + raider.Raider.RaiderStats.Cooldown.Name + "!");
         if (raider.Raider.RaiderStats.Cooldown.Cooldowneffects.m_targets == Enums.CooldownTargets.Self)
         {
             raider.AddCooldown(raider.Raider.RaiderStats.Cooldown);
@@ -404,7 +406,7 @@ public class RaidSceneController : MonoBehaviour {
             int maxRoll = ((StaticValues.MaxSkill - m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.AverageSkillLevel) % 20) + 1;
             int newSkillLevel = m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.GetSkillLevel(type) + UnityEngine.Random.Range(1, maxRoll);
             m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.ModifySkill(newSkillLevel, type);
-            AddTextToEventLog(m_raiderScripts[indices[i]].Raider.GetName() + " had " + type.ToString() + " skill increased to " + newSkillLevel + "!");
+            AddTextToEventLog(Utility.GetColoredRaiderName(m_raiderScripts[indices[i]].Raider) + " had " + type.ToString() + " skill increased to " + newSkillLevel + "!");
         }
 
     }

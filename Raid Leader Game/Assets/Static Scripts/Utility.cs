@@ -126,11 +126,6 @@ public static class Utility
         }
     }
 
-    public static float GetFussyCastTime(float baseCastTime)
-    {
-        return Random.Range(baseCastTime * 0.8f, 1.2f * baseCastTime);
-    }
-
     public static string GetRoleString(Enums.CharacterRole role)
     {
         if (role == Enums.CharacterRole.RangedDPS)
@@ -474,7 +469,83 @@ public static class Utility
     }
     #endregion
 
+    #region Text related
+
+    public static string GetColoredRaiderName(Raider raider)
+    {
+        Color thisClassColor = GetColorFromClass(raider.RaiderStats.GetClass());
+        string colorstring = "<color=#";
+
+        for (int i = 0; i < 3; i++)
+        {
+            int thisColor = 0;
+            if (i == 0)
+                thisColor = Mathf.RoundToInt(255 * thisClassColor.r);
+            else if (i == 1)
+                thisColor = Mathf.RoundToInt(255 * thisClassColor.b);
+            else if (i == 2)
+                thisColor = Mathf.RoundToInt(255 * thisClassColor.g);
+            
+            for (int j = 0; j < 2; j++)
+            {
+                int thisLoop = 0;
+
+                if (i == 0)
+                    thisLoop = thisColor/16;
+                else if (i == 1)
+                    thisLoop = thisColor % 16;
+
+                switch (thisLoop)
+                {
+                    case 10:
+                        colorstring += "a";
+                        break;
+                    case 11:
+                        colorstring += "b";
+                        break;
+                    case 12:
+                        colorstring += "c";
+                        break;
+                    case 13:
+                        colorstring += "d";
+                        break;
+                    case 14:
+                        colorstring += "e";
+                        break;
+                    case 15:
+                        colorstring += "f";
+                        break;
+                    default:
+                        colorstring += thisLoop.ToString();
+                        break;
+                }
+            }
+        }
+        
+        return colorstring + "ff>" + raider.GetName() +  "</color>";
+    }
+
+    public static string GetPercentIncreaseString(float multiplier)
+    {
+        int percentIncrease = Mathf.RoundToInt((multiplier - 1.0f) * 100.0f);
+
+        return percentIncrease + "%";
+    }
+
+    public static string GetPercentString(float multiplier)
+    {
+        int percentIncrease = Mathf.RoundToInt((multiplier) * 100.0f);
+
+        return percentIncrease + "%";
+    }
+    #endregion
+
     #region Encounter related
+
+    public static float GetFussyCastTime(float baseCastTime)
+    {
+        return Random.Range(baseCastTime * 0.8f, 1.2f * baseCastTime);
+    }
 
     public static void SetCurrentEncounter(BaseEncounter e) { m_currentEncounter = e; }
 
@@ -627,8 +698,9 @@ public static class Utility
         return false;
     }
 
-    public static bool CanRaidWithRoster()
+    public static bool IsAbleToRaid(out string errorString)
     {
+        errorString = "";
         int count = 0;
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
@@ -636,7 +708,18 @@ public static class Utility
                 count++;
         }
 
-        return (count >= StaticValues.RaidTeamSize);
+        if (count < StaticValues.RaidTeamSize) {
+            errorString = "You cant make a raid team with your current roster!";
+            Debug.Log(errorString);
+            return false;
+        }
+        else if (PlayerData.AttemptsLeft <= 0)
+        {
+            errorString = "You have no more attempts left!";
+            Debug.Log(errorString);
+            return false;
+        }
+        return true;
     }
 
     public static float CalculateTotalProgressPercent()
@@ -663,21 +746,5 @@ public static class Utility
         return (float)completed/(float)total;
     }
 
-    #endregion
-
-    #region Varios
-    public static string GetPercentIncreaseString(float multiplier)
-    {
-        int percentIncrease = Mathf.RoundToInt((multiplier - 1.0f) * 100.0f);
-
-        return percentIncrease + "%";
-    }
-
-    public static string GetPercentString(float multiplier)
-    {
-        int percentIncrease = Mathf.RoundToInt((multiplier) * 100.0f);
-
-        return percentIncrease + "%";
-    }
     #endregion
 }

@@ -74,7 +74,12 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickRaid()
     {
-        if(Utility.CanRaidWithRoster())
+        string errorString = "";
+        if (Utility.IsAbleToRaid(out errorString))
             SceneManager.LoadScene("ChooseEncounterScene");
+        else
+        {
+
+        }
     }
 }

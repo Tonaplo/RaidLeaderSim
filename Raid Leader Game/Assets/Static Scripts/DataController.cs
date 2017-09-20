@@ -16,6 +16,8 @@ public class DataController : MonoBehaviour
         public List<ConsumableItem> Consumables;
         public List<RaidData> ProgressData;
         public List<RaidData> LockOutData;
+        public List<RecruitInfo> RecruitLockOut;
+        public int AttemptsLeft;
         public DateTime LockOutDate;
         public string TeamName;
         public int TeamGold;
@@ -53,6 +55,8 @@ public class DataController : MonoBehaviour
             ProgressData = PlayerData.Progress,
             LockOutData = PlayerData.WeeklyLockOut,
             LockOutDate = PlayerData.ThisWeek,
+            AttemptsLeft = PlayerData.AttemptsLeft,
+            RecruitLockOut = PlayerData.RecruitLockOut,
         };
 
         bf.Serialize(file, data);

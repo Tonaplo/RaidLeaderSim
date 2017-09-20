@@ -40,9 +40,6 @@ public class StartSceneController : MonoBehaviour {
 
     public void BackButtonClicked()
     {
-        NewGameButton.gameObject.SetActive(true);
-        LoadDataButton.gameObject.SetActive(true);
-        CreateNewPrefab.SetActive(false);
-        LoadGamePrefab.SetActive(false);
+        SceneManager.LoadScene("StartScene");
     }
 }

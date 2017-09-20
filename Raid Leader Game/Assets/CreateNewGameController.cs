@@ -28,6 +28,7 @@ public class CreateNewGameController : MonoBehaviour {
 
     public InputField namefield;
     public Button NextButton;
+    public Button TutorialButton;
     public Button StartGameButton;
     public Text NameSuffixText;
     
@@ -197,9 +198,13 @@ public class CreateNewGameController : MonoBehaviour {
     public void OnNameFieldChanged()
     {
         if (namefield.text.Length == 0)
+        {
             NextButton.interactable = false;
+        }
         else
+        {
             NextButton.interactable = true;
+        }
     }
 
     public void OnRaidTeamNameFieldChanged()
@@ -210,7 +215,7 @@ public class CreateNewGameController : MonoBehaviour {
         SorcererButton.gameObject.SetActive(false);
         PaladinButton.gameObject.SetActive(false);
         OccultistButton.gameObject.SetActive(false);
-        ClassText.text = "And so, " + RaidTeamNameField.text + " came to be. But what is a team without a roster?\nLet fill out your core team.\n\nThere are 12 spots in a raid team.\nYou have one spot, so we need to recruit 11 team mates:";
+        ClassText.text = "And so, " + RaidTeamNameField.text + " came to be. But what is a team without a roster?\nThere are 12 spots in a raid team. You have one spot, so we need to recruit 11 team mates. Your first team consists of 2 tanks, 3 healers and 7 damage dealers. Use \"<color=#ff0000ff>Reject Recruit</color>\" or \"<color=#006000ff>Recruit Raider</color>\" to fill our your team.\n<b>Tip: Having a good variety of classes is usually a good idea!</b>";
         RaidTeamBackground.gameObject.SetActive(true);
         TeamMemberCreationBackground.gameObject.SetActive(true);
 
@@ -267,26 +272,27 @@ public class CreateNewGameController : MonoBehaviour {
     void UpdateRaidRosterText()
     {
         if(m_tanksNeeded != 0)
-            RaidRoster.text = "Recruiting Tanks - 2 total:\n\n";
+            RaidRoster.text = "Start by recruiting Tanks - 2 total are needed:\n\n";
         else if (m_healersNeeded != 0)
-            RaidRoster.text = "Recruiting Healers - 3 total:\n\n";
+            RaidRoster.text = "Next, we want to recruit Healers - 3 total this time:\n\n";
         else
-            RaidRoster.text = "Recruiting DPS - 7 total:\n\n";
+            RaidRoster.text = "Damage Dealers (or DPS for short) is the bulk of a team - Recruit 7 total:\n\n";
         
         PlayerData.SortRoster();
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
+            string youString = (PlayerData.Roster[i].GetName() == PlayerData.PlayerCharacter.GetName() ? " - You!\n" : "\n");
             if (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.Tank && m_tanksNeeded != 0)
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")" + youString;
             }
             else if (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.Healer && m_tanksNeeded == 0 && m_healersNeeded != 0)
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")" + youString;
             }
             else if (m_tanksNeeded == 0 && m_healersNeeded == 0 && m_dpsNeeded != 0 && (PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS || PlayerData.Roster[i].RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS))
             {
-                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")\n";
+                RaidRoster.text += PlayerData.Roster[i].GetName() + " (" + PlayerData.Roster[i].RaiderStats.GetCurrentSpec() + ")" + youString;
             }
         }
     }
@@ -374,6 +380,7 @@ public class CreateNewGameController : MonoBehaviour {
         DescriptionText.fontSize = 20;
         DescriptionText.text = PlayerData.RaidTeamName + "\nManaged by " + m_playerName + ", the " + PlayerData.PlayerCharacter.RaiderStats.GetCurrentSpec() +".";
         StartGameButton.interactable = true;
+        TutorialButton.interactable = true;
         AddMember.gameObject.SetActive(false);
         RejectMember.gameObject.SetActive(false);
         TeamMemberAbilityDescription.gameObject.SetActive(false);
@@ -381,7 +388,7 @@ public class CreateNewGameController : MonoBehaviour {
 
     public void OnNextButtonClicked()
     {
-
+        
         m_playerName = namefield.text;
         Raider player = new Raider(m_playerName, new RaiderStats(m_recruitBaseItemLevel, Mathf.RoundToInt(m_recruitBaseSkillLevel * m_playerAdvantage), 10, Utility.GetRoleFromSpec(m_playerMainSpec), m_playerClass));
         PlayerData.AddPlayerToRoster(player);
@@ -415,13 +422,21 @@ public class CreateNewGameController : MonoBehaviour {
         SpecImage.gameObject.SetActive(false);
         NameImage.gameObject.SetActive(false);
         StartGameButton.gameObject.SetActive(true);
+        TutorialButton.gameObject.SetActive(true);
         NextButton.gameObject.SetActive(false);
         GenerateNewRecruit();
         UpdateRaidRosterText();
     }
 
+    public void OnTutorialButtonClicked()
+    {
+        PlayerData.TutorialEnabled = true;
+        OnStartGameButtonClicked();
+    }
+
     public void OnStartGameButtonClicked()
     {
+        PlayerData.FinalizeNewGameGeneration();
         PlayerData.SortRoster();
         PlayerData.RecalculateRoster();
         SceneManager.LoadScene("MainGameScene");

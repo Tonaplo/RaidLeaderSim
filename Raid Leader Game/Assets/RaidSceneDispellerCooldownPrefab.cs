@@ -7,8 +7,7 @@ public class RaidSceneDispellerCooldownPrefab : MonoBehaviour {
 
     public Image Fill;
     public Text CooldownText;
-
-    RaidSceneControlPanel m_rscp;
+    
     RaiderScript m_raider;
     int m_width = 110;
     int m_height = 25;
@@ -45,10 +44,9 @@ public class RaidSceneDispellerCooldownPrefab : MonoBehaviour {
         }
 	}
 
-    public void Initialize(RaiderScript r, int index, RaidSceneControlPanel rscp)
+    public void Initialize(RaiderScript r, int index)
     {
         m_raider = r;
-        m_rscp = rscp;
         transform.SetPositionAndRotation(new Vector3(340, 140 - (index * 25), 0), Quaternion.identity);
         CooldownText.text = m_raider.Raider.GetName();
     }

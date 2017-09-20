@@ -93,6 +93,7 @@
     <Compile Include="Assets\ChooseTeamForAttemptTeamController.cs" />
     <Compile Include="Assets\ChooseTeamForAttemptTeamMember.cs" />
     <Compile Include="Assets\CreateNewGameController.cs" />
+    <Compile Include="Assets\Data\RecruitInfo.cs" />
     <Compile Include="Assets\EncounterScripts\BaseAbility.cs" />
     <Compile Include="Assets\EncounterScripts\BaseCooldown.cs" />
     <Compile Include="Assets\EncounterScripts\BaseEncounter.cs" />
@@ -107,6 +108,7 @@
     <Compile Include="Assets\LoadGameController.cs" />
     <Compile Include="Assets\MainGameSceneProgressController.cs" />
     <Compile Include="Assets\MainSceneMainController.cs" />
+    <Compile Include="Assets\MainSceneTutorial.cs" />
     <Compile Include="Assets\MeterBarScript.cs" />
     <Compile Include="Assets\MeterControllerScript.cs" />
     <Compile Include="Assets\ProgressBossPrefab.cs" />
@@ -119,15 +121,15 @@
     <Compile Include="Assets\RaidTeamMemberSelectionPrefabScript.cs" />
     <Compile Include="Assets\RosterButtonScript.cs" />
     <Compile Include="Assets\RosterControllerScript.cs" />
+    <Compile Include="Assets\Scenes\BossCastBarScript.cs" />
+    <Compile Include="Assets\Scenes\EncounterVictorySceneController.cs" />
+    <Compile Include="Assets\Scenes\HealthBarScript.cs" />
     <Compile Include="Assets\Scenes\MainGameSceneRecruitmentController.cs" />
     <Compile Include="Assets\Scenes\MainSceneItemCategoryController.cs" />
     <Compile Include="Assets\Scenes\MainSceneItemsController.cs" />
-    <Compile Include="Assets\Scenes\RaidScene\BossCastBarScript.cs" />
-    <Compile Include="Assets\Scenes\RaidScene\EncounterVictorySceneController.cs" />
-    <Compile Include="Assets\Scenes\RaidScene\HealthBarScript.cs" />
-    <Compile Include="Assets\Scenes\RaidScene\RaiderScript.cs" />
-    <Compile Include="Assets\Scenes\RaidScene\RaidSceneConsumablePrefab.cs" />
-    <Compile Include="Assets\Scenes\RaidScene\RaidSceneController.cs" />
+    <Compile Include="Assets\Scenes\RaiderScript.cs" />
+    <Compile Include="Assets\Scenes\RaidSceneConsumablePrefab.cs" />
+    <Compile Include="Assets\Scenes\RaidSceneController.cs" />
     <Compile Include="Assets\Scenes\RecruitScript.cs" />
     <Compile Include="Assets\StartSceneController.cs" />
     <Compile Include="Assets\Static Scripts\DataController.cs" />
@@ -135,6 +137,7 @@
     <Compile Include="Assets\Static Scripts\PlayerData.cs" />
     <Compile Include="Assets\Static Scripts\StaticValues.cs" />
     <Compile Include="Assets\Static Scripts\Utility.cs" />
+    <Compile Include="Assets\TooltipScript.cs" />
     <Compile Include="Assets\Units\CharacterItem.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\AssasinAttack.cs" />
     <Compile Include="Assets\Units\Characters\AttackScripts\BerserkerAttack.cs" />

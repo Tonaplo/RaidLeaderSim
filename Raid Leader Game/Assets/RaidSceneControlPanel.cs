@@ -234,7 +234,7 @@ public class RaidSceneControlPanel : MonoBehaviour {
                 GameObject temp = GameObject.Instantiate(DispelPrefab);
                 temp.SetActive(true);
                 temp.transform.SetParent(Background.transform);
-                temp.GetComponent<RaidSceneDispelPrefab>().Initialize(debuffedRaiders[i], i, RSC, this);
+                temp.GetComponent<RaidSceneDispelPrefab>().Initialize(debuffedRaiders[i], i, this);
                 m_DispelButtons.Add(temp);
             }
         }
@@ -258,7 +258,7 @@ public class RaidSceneControlPanel : MonoBehaviour {
                 GameObject temp = GameObject.Instantiate(DispelCooldownPrefab);
                 temp.transform.SetParent(Background.transform);
                 temp.transform.SetPositionAndRotation(new Vector3(195 + (75 * (i % 3)), 110 - ((i / 3)) * 65, 0), Quaternion.identity);
-                temp.GetComponent<RaidSceneDispellerCooldownPrefab>().Initialize(RSC.GetRaid()[i],dispellerCount, this);
+                temp.GetComponent<RaidSceneDispellerCooldownPrefab>().Initialize(RSC.GetRaid()[i],dispellerCount);
                 m_DispelCooldownButtons.Add(temp);
                 dispellerCount++;
             }

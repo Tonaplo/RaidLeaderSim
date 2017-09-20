@@ -15,7 +15,7 @@ public class NaturalistHealScript : BaseHealScript
     public override void Setup()
     {
         m_healStruct = new HealStruct();
-        m_castTime = 1.7f;
+        m_castTime = 1.2f;
         m_healStruct.m_healMultiplier = 1.6f;
         m_name = "Nature's Touch";
 

@@ -11,46 +11,37 @@ public static class PlayerData
     static List<ConsumableItem> m_consumables;
     static List<RaidData> m_progress;
     static List<RaidData> m_weeklyLockOut;
+    static List<RecruitInfo> m_recruitLockOut;
     static DateTime m_thisLockout;
-    static int m_attemptsLeft;
+    static int m_attemptsLeft = StaticValues.AttemptsPerDay;
     static Raider m_playerChar;
     static string m_raidTeamName;
     static int m_raidTeamGold = 0;
-
-    /*
-        What we want to do now is to use m_weeklyReset and m_thisWeek (should be renamed),
-        to control what bosses you can attempt now. These are the criteria:
-            -   You should only be able to kill a boss once per week
-            -   Once you kill the last boss of a difficulty, you can begin with the first boss of the next, regardless of weekly reset
-            -   On Monday at 8 AM, the week resets and all bosses are "Alive" again, so you can farm loot.
-        we also want to use m_attemptsLeft to gate how many attempts you can use per week. If you want more attempts, you will have to purchase them
-        I also have an idea about granting more "attempts per week", by killing at least a last boss of each difficulty
-    */
+    static bool m_tutorialEnabled = false;
 
     public static List<Raider> Roster { get { return m_roster; } }
     public static List<Raider> RaidTeam { get { return m_raidTeam; } }
     public static List<ConsumableItem> Consumables { get { return m_consumables; } }
     public static List<RaidData> Progress { get { return m_progress; } }
     public static List<RaidData> WeeklyLockOut { get { return m_weeklyLockOut; } }
+    public static List<RecruitInfo> RecruitLockOut { get { return m_recruitLockOut; } }
     public static DateTime ThisWeek { get { return m_thisLockout; } }
+    public static int AttemptsLeft { get { return m_attemptsLeft; } }
     public static Raider PlayerCharacter { get { return m_playerChar; } }
     public static string RaidTeamName { get { return m_raidTeamName; } }
     public static int RaidTeamGold { get { return m_raidTeamGold; } }
-
-
+    public static bool TutorialEnabled { get { return m_tutorialEnabled; } set { m_tutorialEnabled = value; } }
+    
     public static void Initialize()
     {
         m_roster = new List<Raider>();
         m_raidTeam = new List<Raider>();
-        m_consumables = new List<ConsumableItem>();
-        m_progress = RaidData.CreateNewRaidData();
-        m_weeklyLockOut = RaidData.CreateNewRaidData();
-        m_thisLockout = DateTime.Now;
-        
     }
 
     public static void InitializeDataFromSaveData(DataController.SaveData data)
     {
+        m_playerChar = data.Player;
+
         if (data.Roster != null)
             m_roster = data.Roster;
         else
@@ -83,6 +74,17 @@ public static class PlayerData
         else
             m_progress = RaidData.CreateNewRaidData();
 
+        if (data.RecruitLockOut != null)
+            m_recruitLockOut = data.RecruitLockOut;
+        else
+        {
+            m_recruitLockOut = new List<RecruitInfo>() { new RecruitInfo(), new RecruitInfo(), new RecruitInfo(), new RecruitInfo(), };
+            for (int i = 0; i < m_recruitLockOut.Count; i++)
+            {
+                m_recruitLockOut[i].Init(i);
+            }
+        }
+
         if (data.LockOutData != null)
         {
             List<RaidData> FullNewData = RaidData.CreateNewRaidData();
@@ -105,10 +107,10 @@ public static class PlayerData
         else
             m_weeklyLockOut = RaidData.CreateNewRaidData();
 
-        m_playerChar = data.Player;
         SetRaidTeamName(data.TeamName);
         m_raidTeamGold = data.TeamGold;
         m_thisLockout = data.LockOutDate;
+        m_attemptsLeft = data.AttemptsLeft;
         CheckWeeklyReset();
     }
 
@@ -163,6 +165,20 @@ public static class PlayerData
         }
         
         RecalculateRoster();
+    }
+
+    public static void FinalizeNewGameGeneration()
+    {
+        m_consumables = new List<ConsumableItem>();
+        m_progress = RaidData.CreateNewRaidData();
+        m_weeklyLockOut = RaidData.CreateNewRaidData();
+        m_thisLockout = DateTime.Now;
+        m_recruitLockOut = new List<RecruitInfo>() { new RecruitInfo(), new RecruitInfo(), new RecruitInfo(), new RecruitInfo(), };
+        for (int i = 0; i < m_recruitLockOut.Count; i++)
+        {
+            m_recruitLockOut[i].Init(i);
+        }
+        m_attemptsLeft = StaticValues.AttemptsPerDay;
     }
 
     public static void RecalculateRoster()

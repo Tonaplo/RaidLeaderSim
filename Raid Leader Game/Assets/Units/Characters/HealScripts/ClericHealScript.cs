@@ -15,7 +15,7 @@ public class ClericHealScript : BaseHealScript
     public override void Setup()
     {
         m_healStruct = new HealStruct();
-        m_castTime = 1.5f;
+        m_castTime = 1.0f;
         m_healStruct.m_healMultiplier = 1.5f;
         m_name = "Divine Light";
 

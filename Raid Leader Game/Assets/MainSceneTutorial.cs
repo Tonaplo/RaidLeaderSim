@@ -12,7 +12,7 @@ public class MainSceneTutorial : MonoBehaviour {
         {
             string tooltipText = "This is an example tooltip. I'm just trying to figure out how this is supposed to work. I've copied it once more to make it a it longer This is an example tooltip. I'm just trying to figure out how this is supposed to work.";
             GameObject temp = Object.Instantiate(Tooltip);
-            temp.transform.SetParent(transform);
+            temp.transform.SetParent(transform, false);
             temp.GetComponent<TooltipScript>().UpdateTooltip(new Vector2(200, 200), TooltipScript.TooltipArrowDirection.BottomLeft, true, tooltipText);
         }
     }

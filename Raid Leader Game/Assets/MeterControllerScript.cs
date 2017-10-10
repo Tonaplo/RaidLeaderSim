@@ -10,6 +10,7 @@ public class MeterControllerScript : MonoBehaviour {
     
     List<Bar> m_bars;
     List<Entry> m_entries;
+    float m_scale;
 
     public class Entry {
 
@@ -46,21 +47,27 @@ public class MeterControllerScript : MonoBehaviour {
         public int Index { get { return m_index; } }
     }
     
-    public void Initialize(string title, int xPos, int yPos, int height, int width, int numDisplayedBars) {
+    public void Initialize(string title, float xPos, float yPos, int height, int width, int numDisplayedBars) {
+
+        m_scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+
+        float barYOffset = (yPos - 5)*m_scale;
+        xPos *= m_scale;
+        yPos *= m_scale;
 
         GetComponent<Image>().color = new Color(Color.grey.r, Color.grey.g, Color.grey.b, 0.75f);
-        GetComponent<Image>().transform.SetPositionAndRotation(new Vector3(xPos , yPos- 45, 0), Quaternion.identity);
+        GetComponent<Image>().transform.SetPositionAndRotation(new Vector3(xPos , yPos- 45* m_scale, 0), Quaternion.identity);
         GetComponent<RectTransform>().sizeDelta = new Vector2(width *1.05f, 145);
 
-        MeterTitle.transform.SetParent(this.transform);
+        MeterTitle.transform.SetParent(this.transform, false);
         MeterTitle.transform.SetPositionAndRotation(new Vector3(xPos+ (width/2.5f), yPos + height/4, 0), Quaternion.identity);
         MeterTitle.text = title;
         m_bars = new List<Bar>();
         for (int i = 0; i < numDisplayedBars; i++)
         {
             GameObject temp = GameObject.Instantiate(BarPrefab);
-            temp.transform.SetParent(this.transform);
-            temp.transform.SetPositionAndRotation(new Vector3(xPos, yPos - (height*i)/2, 0), Quaternion.identity);
+            temp.transform.SetParent(this.transform, false);
+            temp.transform.SetPositionAndRotation(new Vector3(xPos, barYOffset - (height*i* m_scale) /2, 0), Quaternion.identity);
             temp.GetComponent<RectTransform>().sizeDelta = new Vector2(width, height);
             m_bars.Add(new Bar(temp.GetComponent <MeterBarScript>(), i));
             m_bars[i].BarScript.UpdateEntry(new Entry("None", 0, Enums.CharacterClass.Fighter));
@@ -190,12 +197,7 @@ public class MeterControllerScript : MonoBehaviour {
             m_bars[i].BarScript.UpdateMax(newMax);
         }
     }
-
-
-	// Use this for initialization
-	void Start () {
-        
-    }
+    
 	
 	// Update is called once per frame
 	void Update () {

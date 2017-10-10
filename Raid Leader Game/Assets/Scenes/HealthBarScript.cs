@@ -91,10 +91,11 @@ public class HealthBarScript : MonoBehaviour {
 
     void HandleNewSetting()
     {
-        int xPos = 0;
-        int xPosOffset = 0;
-        int yPos = 0;
-        int yPosOffset = 0;
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+        float xPos = 0;
+        float xPosOffset = 0;
+        float yPos = 0;
+        float yPosOffset = 0;
         int indexMod = 1;
         float buttonHeightMultiplier = 0.0f;
         
@@ -133,6 +134,11 @@ public class HealthBarScript : MonoBehaviour {
             default:
                 break;
         }
+
+        xPos *= scale;
+        xPosOffset *= scale;
+        yPos *= scale;
+        yPosOffset *= scale;
 
         Background.transform.SetPositionAndRotation(new Vector3(xPos + (m_index % indexMod)*xPosOffset, yPos - (m_index / indexMod) * yPosOffset, 0), Quaternion.identity);
         Background.GetComponent<RectTransform>().sizeDelta = new Vector2(m_width, m_height);

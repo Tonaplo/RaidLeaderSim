@@ -72,12 +72,18 @@ public class EncounterVictorySceneController : MonoBehaviour {
         
         PlayerData.SortRaidForLoot(m_currentItem.GearSlot);
 
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+
+        float xPos = 300 * scale;
+        float yPos = 380 * scale;
+        float height = 31.5f * scale;
+
         for (int i = 0; i < PlayerData.RaidTeam.Count; i++)
         {
             GameObject temp = Instantiate(m_RaidMemberPrefab);
             temp.SetActive(true);
-            temp.transform.SetParent(m_RaiderMemberBackground.gameObject.transform);
-            temp.transform.SetPositionAndRotation(new Vector3(180, 380 - (31.5f * i), 0), Quaternion.identity);
+            temp.transform.SetParent(m_RaiderMemberBackground.gameObject.transform, false);
+            temp.transform.SetPositionAndRotation(new Vector3(xPos, yPos - (height * i), 0), Quaternion.identity);
             temp.GetComponent<RaidMemberItemReward>().Initialize(PlayerData.RaidTeam[i], m_currentItem, this);
             m_raiderButtons.Add(temp);
         }
@@ -91,13 +97,19 @@ public class EncounterVictorySceneController : MonoBehaviour {
         }
 
         m_lootButtons.Clear();
-        
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+
+        float xPos = 500 * scale;
+        float yPos = 375 * scale;
+        float height = 41.5f * scale;
+        float width = 95 * scale;
+
         for (int i = 0; i < m_loot.Count; i++)
         {
             GameObject temp = Instantiate(m_LootInstancePrefab);
             temp.SetActive(true);
-            temp.transform.SetParent(m_LootBackground.gameObject.transform);
-            temp.transform.SetPositionAndRotation(new Vector3(430 + ((i % 3) * 95), 375 - (41.5f * (i/3)), 0), Quaternion.identity);
+            temp.transform.SetParent(m_LootBackground.gameObject.transform, false);
+            temp.transform.SetPositionAndRotation(new Vector3(xPos + ((i % 3) * width), yPos - (height * (i/3)), 0), Quaternion.identity);
             temp.GetComponent<AwardLootItemInstanceScript>().Initialize(m_loot[i], this);
             m_lootButtons.Add(temp);
         }

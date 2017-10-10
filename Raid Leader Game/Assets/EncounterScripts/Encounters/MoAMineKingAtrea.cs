@@ -708,7 +708,6 @@ public class MoAMineKingAtrea : BaseEncounter
         {
             if (!m_hasCrushingGripBeenCountered && !target.IsDead())
             {
-                Debug.Log("Crushing Grip deals " + GetCrushingGripTickDamage() + " damage to " + target.Raider.GetName());
                 target.TakeDamage(GetCrushingGripTickDamage(), CrushingGripString);
                 tickCounter--;
                 if (tickCounter != 0)

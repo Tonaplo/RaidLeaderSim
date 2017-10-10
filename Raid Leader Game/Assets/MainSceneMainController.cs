@@ -13,6 +13,13 @@ public class MainSceneMainController : MonoBehaviour {
     public GameObject RecruitmentControllerPrefab;
     public GameObject BankControllerPrefab;
 
+    public Button RosterButton;
+    public Button ProgressButton;
+    public Button RecruitmentButton;
+    public Button ItemsButton;
+
+    public Text AttemptsLeftText;
+
 
     RosterControllerScript m_rosterScript;
     MainGameSceneRecruitmentController m_recruitmentScript;
@@ -30,6 +37,16 @@ public class MainSceneMainController : MonoBehaviour {
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.gameObject.SetActive(false);
         m_progressScript.gameObject.SetActive(false);
+        AttemptsLeftText.text = PlayerData.AttemptsLeft.ToString();
+
+        if (PlayerData.AttemptsLeft > 0)
+        {
+            AttemptsLeftText.color = Color.green;
+        }
+        else
+        {
+            AttemptsLeftText.color = Color.red;
+        }
 
         OnClickRoster();
     }
@@ -42,6 +59,7 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickRoster()
     {
+        HandleButtons(RosterButton);
         m_rosterScript.Reactivate();
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.gameObject.SetActive(false);
@@ -50,6 +68,7 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickProgress()
     {
+        HandleButtons(ProgressButton);
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.gameObject.SetActive(false);
@@ -58,6 +77,7 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickRecruitment()
     {
+        HandleButtons(RecruitmentButton);
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(true);
         m_itemScript.gameObject.SetActive(false);
@@ -66,6 +86,7 @@ public class MainSceneMainController : MonoBehaviour {
 
     public void OnClickItems()
     {
+        HandleButtons(ItemsButton);
         m_rosterScript.gameObject.SetActive(false);
         m_recruitmentScript.gameObject.SetActive(false);
         m_itemScript.Reactivate();
@@ -79,7 +100,16 @@ public class MainSceneMainController : MonoBehaviour {
             SceneManager.LoadScene("ChooseEncounterScene");
         else
         {
-
+            Debug.Log(errorString);
         }
+    }
+
+    void HandleButtons(Button b)
+    {
+        RosterButton.interactable = true;
+        ProgressButton.interactable = true;
+        RecruitmentButton.interactable = true;
+        ItemsButton.interactable = true;
+        b.interactable = false;
     }
 }

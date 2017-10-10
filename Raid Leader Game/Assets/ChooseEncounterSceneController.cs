@@ -141,7 +141,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
             GameObject newItem = Instantiate(AttackPrefab) as GameObject;
             newItem.SetActive(true);
             newItem.name = " item at (" + i + "," + j + ")";
-            newItem.transform.SetParent(AttackContent.transform);
+            newItem.transform.SetParent(AttackContent.transform, false);
 
             //move and size the new item
             RectTransform rectTransform = newItem.GetComponent<RectTransform>();
@@ -194,7 +194,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
             GameObject newItem = Instantiate(AbilityPrefab) as GameObject;
             newItem.SetActive(true);
             newItem.name = " item at (" + i + "," + j + ")";
-            newItem.transform.SetParent(AbilityContent.transform);
+            newItem.transform.SetParent(AbilityContent.transform, false);
 
             //move and size the new item
             RectTransform rectTransform = newItem.GetComponent<RectTransform>();

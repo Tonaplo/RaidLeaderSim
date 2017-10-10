@@ -25,12 +25,14 @@ public class RecruitInfo {
         GenerateNewRecruit();
     }
 
-    public void CheckForNewRecruit()
+    public bool CheckForNewRecruit()
     {
         if (m_isDisabled && m_lockoutDate != DateTime.Now.Date)
         {
             GenerateNewRecruit();
+            return true;
         }
+        return false;
     }
 
     public void Disable()

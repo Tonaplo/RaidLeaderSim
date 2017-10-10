@@ -294,7 +294,7 @@ public class BaseEncounter
             GameObject addGO = GameObject.Instantiate(m_healthBarPrefab);
             addGO.SetActive(true);
             addGO.name = name + index;
-            addGO.transform.SetParent(m_rsc.canvas.transform);
+            addGO.transform.SetParent(m_rsc.canvas.transform, false);
             m_enemies.Add(new EncounterEnemy(name, addGO.GetComponent<HealthBarScript>(), addHealth, index, enemyType, this));
             return true;
         }

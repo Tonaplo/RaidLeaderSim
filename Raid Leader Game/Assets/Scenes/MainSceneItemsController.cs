@@ -34,14 +34,17 @@ public class MainSceneItemsController : MonoBehaviour {
 
     void SetupCategories()
     {
-        int width = 150;
-        int xPosStart = 75;
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+        float width = 200 * scale;
+        float height = 190 * scale;
+        float xPosStart = 125 * scale;
+
         for (int i = 0; i < (int)Enums.ConsumableType.NumTypes; i++)
         {
             GameObject temp = GameObject.Instantiate(CategoryPrefab);
             temp.SetActive(true);
-            temp.transform.SetParent(transform);
-            temp.transform.SetPositionAndRotation(new Vector3(xPosStart + (i * (width + 10)), 190, 0), Quaternion.identity);
+            temp.transform.SetParent(transform, false);
+            temp.transform.SetPositionAndRotation(new Vector3(xPosStart + (i * width), height, 0), Quaternion.identity);
             temp.GetComponent<MainSceneItemCategoryController>().Initialize((Enums.ConsumableType)i, this);
             buttons.Add(temp);
         }

@@ -9,10 +9,17 @@ public class ProgressBossPrefab : MonoBehaviour {
     public Image NormalImage;
     public Image HardImage;
     public Text BossName;
+    
 
     public void Initialize(RaidData.EncounterData e, int index)
     {
-        transform.SetPositionAndRotation(new Vector3(10 + ((index % 3) * (223)), 335 - ((110 * (index / 3))), 0), Quaternion.identity);
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+
+        float width = 223 * scale;
+        float height = 110 * scale;
+        float xPos = 10 * scale;
+        float yPos = 335 * scale;
+        transform.SetPositionAndRotation(new Vector3(xPos + ((index % 3) * (width)), yPos - ((height * (index / 3))), 0), Quaternion.identity);
 
         BossName.text = e.Name;
 

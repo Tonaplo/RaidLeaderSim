@@ -15,16 +15,17 @@ public class MainGameSceneRecruitmentController : MonoBehaviour {
 
     void GenerateRecruits()
     {
-       
-
-        int width = 300;
-        int height = 150;
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+        float width = 300 * scale;
+        float height = 150 * scale;
+        float xPos = 200 * scale;
+        float yPos = 300 * scale;
         for (int i = 0; i < 4; i++)
         {
             GameObject temp = GameObject.Instantiate(RecruitPrefab);
             temp.SetActive(true);
-            temp.transform.SetParent(transform);
-            temp.transform.SetPositionAndRotation(new Vector3(200 + (width * (i % 2)), 300 - ((i / 2)) * height, 0), Quaternion.identity);
+            temp.transform.SetParent(transform, false);
+            temp.transform.SetPositionAndRotation(new Vector3(xPos + (width * (i % 2)), yPos - ((i / 2)) * height, 0), Quaternion.identity);
             temp.GetComponent<RecruitScript>().Initialize(i);
             m_recruitObjects.Add(temp);
         }

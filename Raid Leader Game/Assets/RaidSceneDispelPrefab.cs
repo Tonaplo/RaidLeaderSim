@@ -22,11 +22,16 @@ public class RaidSceneDispelPrefab : MonoBehaviour {
 
     public void Initialize(RaiderScript r, int index, RaidSceneControlPanel rscp)
     {
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
         m_raider = r;
         m_rscp = rscp;
         DispelText.text = m_raider.Raider.GetName();
 
-        transform.SetPositionAndRotation(new Vector3(75f + (100 * (index % 2)), 160 - ((index / 2) * 30), 0), Quaternion.identity);
+        float xPos = 75 * scale;
+        float width = 100 * scale;
+        float yPos = 160 * scale;
+        float height = 30 * scale;
+        transform.SetPositionAndRotation(new Vector3(xPos + (width * (index % 2)), yPos - ((index / 2) * height), 0), Quaternion.identity);
     }
 
     public void AttemptToDispel()

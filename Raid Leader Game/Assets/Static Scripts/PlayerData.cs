@@ -356,6 +356,12 @@ public static class PlayerData
         CheckWeeklyReset(DateTime.Now);
     }
 
+    public static void ConsumeAttempt()
+    {
+        if(m_attemptsLeft > 0)
+            m_attemptsLeft--;
+    }
+
     public static bool IsNameDuplicateOfRosterNames(string name)
     {
         for (int i = 0; i < Roster.Count; i++)

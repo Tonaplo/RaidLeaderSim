@@ -20,6 +20,7 @@ public class TooltipScript : MonoBehaviour {
 
     public void UpdateTooltip(Vector2 tooltipPosition, TooltipArrowDirection arrow, bool includeButton, string text)
     {
+        tooltipPosition *= GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
         NextButton.gameObject.SetActive(includeButton);
         m_position = tooltipPosition;
         TooltipText.text = text + "\n";
@@ -32,7 +33,7 @@ public class TooltipScript : MonoBehaviour {
         yield return new WaitForSeconds(wait);
 
         Vector2 arrowPosition = new Vector2(m_position.x, m_position.y);
-
+         arrowPosition *= GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
         switch (dir)
         {
             case TooltipArrowDirection.TopRight:

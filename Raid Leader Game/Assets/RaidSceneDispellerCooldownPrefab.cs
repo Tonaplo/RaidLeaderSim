@@ -46,8 +46,12 @@ public class RaidSceneDispellerCooldownPrefab : MonoBehaviour {
 
     public void Initialize(RaiderScript r, int index)
     {
+        float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
+        float width = 340 * scale;
+        float yPos = 140 * scale;
+        float height = 25 * scale;
         m_raider = r;
-        transform.SetPositionAndRotation(new Vector3(340, 140 - (index * 25), 0), Quaternion.identity);
+        transform.SetPositionAndRotation(new Vector3(width, yPos - (index * height), 0), Quaternion.identity);
         CooldownText.text = m_raider.Raider.GetName();
     }
 

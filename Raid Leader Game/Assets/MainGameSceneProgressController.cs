@@ -82,7 +82,7 @@ public class MainGameSceneProgressController : MonoBehaviour {
         {
             GameObject temp = GameObject.Instantiate(BossPrefab);
             temp.SetActive(true);
-            temp.transform.SetParent(transform);
+            temp.transform.SetParent(transform, false);
             temp.GetComponent<ProgressBossPrefab>().Initialize(raidData.m_encounters[i], i);
             m_bossObjects.Add(temp);
 

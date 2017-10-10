@@ -70,7 +70,7 @@ public class RaidSceneController : MonoBehaviour {
         SetupText.text = PlayerData.RaidTeamName + " taking on\n" + encounter.Name + "\non\n" + encounter.Difficulty.ToString() + " difficulty.";
 
         GameObject temp = GameObject.Instantiate(MeterPrefab);
-        temp.transform.SetParent(canvas.transform);
+        temp.transform.SetParent(canvas.transform, false);
         m_damageMcs = temp.GetComponent<MeterControllerScript>();
         List<Raider> dps = all.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
         int dpsBarsCount = dps.Count > StaticValues.MaxNumDPSMeterBars ? StaticValues.MaxNumDPSMeterBars : dps.Count;
@@ -78,7 +78,7 @@ public class RaidSceneController : MonoBehaviour {
         m_damageMcs.CreateEntriesFromRaid(all);
 
         GameObject temptwo = GameObject.Instantiate(MeterPrefab);
-        temptwo.transform.SetParent(canvas.transform);
+        temptwo.transform.SetParent(canvas.transform, false);
         m_healingMcs = temptwo.GetComponent<MeterControllerScript>();
         List<Raider> healers = all.FindAll(x => x.RaiderStats.GetRole() == Enums.CharacterRole.Healer|| x.RaiderStats.GetCurrentSpec() == Enums.CharacterSpec.Knight);
         int healerBarsCount = healers.Count > StaticValues.MaxNumHealingMeterBars ? StaticValues.MaxNumHealingMeterBars : healers.Count;
@@ -162,6 +162,7 @@ public class RaidSceneController : MonoBehaviour {
                     AddTextToEventLog(PlayerData.RaidTeamName + " was defeated by " + encounter.Name + "!");
                     AdvanceStepButtonText.text = "Defeat!";
                 }
+                PlayerData.ConsumeAttempt();
 
                 currentStep++;
                 break;
@@ -435,7 +436,7 @@ public class RaidSceneController : MonoBehaviour {
             GameObject temp = GameObject.Instantiate(ConsumablePrefab);
             temp.name = types[i].Name;
             temp.SetActive(true);
-            temp.transform.SetParent(canvas.transform);
+            temp.transform.SetParent(canvas.transform, false);
             temp.transform.SetPositionAndRotation(new Vector3(15 + (i % 3)*130, 275 - (i / 3) * 38, 0), Quaternion.identity);
             temp.AddComponent<RaidSceneConsumablePrefab>();
             temp.GetComponent<RaidSceneConsumablePrefab>().Initialize(this, types[i]);
@@ -459,7 +460,7 @@ public class RaidSceneController : MonoBehaviour {
         {
             GameObject tempTwo = GameObject.Instantiate(HealthBarPrefab);
             tempTwo.name = all[i].GetName();
-            tempTwo.transform.SetParent(canvas.transform);
+            tempTwo.transform.SetParent(canvas.transform, false);
             tempTwo.AddComponent<RaiderScript>();
             m_raiderScripts.Add(tempTwo.GetComponent<RaiderScript>());
             m_raiderScripts[i].Initialize(all[i], tempTwo.GetComponent<HealthBarScript>(), canvas, i);
@@ -472,7 +473,7 @@ public class RaidSceneController : MonoBehaviour {
 
         GameObject temp = GameObject.Instantiate(HealthBarPrefab);
         temp.name = encounter.Name;
-        temp.transform.SetParent(canvas.transform);
+        temp.transform.SetParent(canvas.transform, false);
 
         encounter.InitializeForRaid(m_raiderScripts, this, temp);
         Utility.SetCurrentEncounter(encounter);

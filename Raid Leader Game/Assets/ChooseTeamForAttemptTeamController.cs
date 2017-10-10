@@ -8,10 +8,11 @@ public class ChooseTeamForAttemptTeamController : MonoBehaviour {
 
     int m_numMembers = 0;
 
+    GameObject m_canvas;
 	// Use this for initialization
 	void Start () {
         teamMemberPrefab.SetActive(false);
-
+        m_canvas = GameObject.FindGameObjectWithTag("Canvas");
     }
 	
 	// Update is called once per frame
@@ -23,8 +24,8 @@ public class ChooseTeamForAttemptTeamController : MonoBehaviour {
     {
         GameObject temp = GameObject.Instantiate(teamMemberPrefab);
         temp.SetActive(true);
-        temp.transform.SetParent(this.transform);
-        Vector3 position = teamMemberPrefab.transform.position + new Vector3(0, -(30 * m_numMembers), 0);
+        temp.transform.SetParent(this.transform, false);
+        Vector3 position = teamMemberPrefab.transform.position + new Vector3(0, -((30* m_canvas.transform.localScale.y) * m_numMembers), 0);
         temp.transform.SetPositionAndRotation(position, Quaternion.identity);
         temp.GetComponent<ChooseTeamForAttemptTeamMember>().Setup(name, spec, role, throughput);
         m_numMembers++;

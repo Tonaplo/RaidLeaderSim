@@ -89,7 +89,7 @@ public class ChooseRaidTeamForAttemptControllerScript : MonoBehaviour {
             GameObject newItem = Instantiate(RosterMemberPrefab) as GameObject;
             newItem.SetActive(true);
             newItem.name = gameObject.name + " item at (" + i + "," + j + ")";
-            newItem.transform.SetParent(RaidContainerRectTransform.transform);
+            newItem.transform.SetParent(RaidContainerRectTransform.transform, false);
 
             //move and size the new item
             RectTransform rectTransform = newItem.GetComponent<RectTransform>();

@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MainSceneItemsController : MonoBehaviour {
 
     public GameObject CategoryPrefab;
+    public Button PurchaseAttemptsButton;
+    public Text AttemptsLeftText;
 
     List<GameObject> buttons;
 
@@ -15,6 +18,7 @@ public class MainSceneItemsController : MonoBehaviour {
 
     public void Reactivate()
     {
+        PurchaseAttemptsButton.gameObject.SetActive(true);
         gameObject.SetActive(true);
         if (buttons != null)
         {
@@ -29,6 +33,8 @@ public class MainSceneItemsController : MonoBehaviour {
             buttons = new List<GameObject>();
         }
 
+        PurchaseAttemptsButton.interactable = (PlayerData.RaidTeamGold >= StaticValues.GoldCostOfAttempts);
+
         SetupCategories();
     }
 
@@ -36,7 +42,7 @@ public class MainSceneItemsController : MonoBehaviour {
     {
         float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
         float width = 200 * scale;
-        float height = 190 * scale;
+        float height = 210 * scale;
         float xPosStart = 125 * scale;
 
         for (int i = 0; i < (int)Enums.ConsumableType.NumTypes; i++)
@@ -48,5 +54,21 @@ public class MainSceneItemsController : MonoBehaviour {
             temp.GetComponent<MainSceneItemCategoryController>().Initialize((Enums.ConsumableType)i, this);
             buttons.Add(temp);
         }
+    }
+
+    public void PurchaseAttempts()
+    {
+        PlayerData.PurchaseAttempts();
+        if (PlayerData.AttemptsLeft > 0)
+        {
+            AttemptsLeftText.color = Color.green;
+        }
+        else
+        {
+            AttemptsLeftText.color = Color.red;
+        }
+        AttemptsLeftText.text = PlayerData.AttemptsLeft.ToString();
+
+        Reactivate();
     }
 }

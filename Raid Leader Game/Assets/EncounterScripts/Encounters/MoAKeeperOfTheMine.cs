@@ -88,9 +88,9 @@ public class MoAKeeperOfTheMine : BaseEncounter
                 return 150;
             case Enums.Difficulties.Normal:
             default:
-                return 225;
+                return 200;
             case Enums.Difficulties.Hard:
-                return 325;
+                return 250;
         }
     }
 

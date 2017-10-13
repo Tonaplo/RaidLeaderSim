@@ -97,7 +97,9 @@ public class RaidSceneController : MonoBehaviour {
 
             if(encounter.CurrentAbility != null)
                 EndCastingAbility(encounter.CurrentAbility);
-            
+
+            PositionalButton.gameObject.SetActive(false);
+
             currentStep++;
             AdvanceNextStep();
         }
@@ -189,7 +191,14 @@ public class RaidSceneController : MonoBehaviour {
     {
         int minutes = Mathf.RoundToInt(Time.time - m_fightStartTime) / 60;
         int seconds = Mathf.RoundToInt(Time.time - m_fightStartTime) % 60;
-        raidText.text = " <color=#ffff00ff>[" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "]:</color> " + text + "\n" + raidText.text;
+        string newText = " <color=#ffff00ff>[" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "]:</color> " + text + "\n";
+        raidText.text = newText + raidText.text;
+
+        if (raidText.text.Length > 1500)
+        {
+            Debug.Log(newText);
+            raidText.text = raidText.text.Remove(raidText.text.LastIndexOf("\n"));
+        }
     }
 
     public bool IsBossDead()
@@ -233,7 +242,7 @@ public class RaidSceneController : MonoBehaviour {
             default:
                 break;
         }
-        AddTextToEventLog(ab.Caster + " begins" + castOrChannel + "<color=#0000ffff>" + ab.Name + "</color>!");
+        AddTextToEventLog(ab.Caster + " begins" + castOrChannel + "<b>" + ab.Name + "</b>!");
 
         BossCastScript.InitiateCast(ab);
 

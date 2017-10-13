@@ -133,8 +133,8 @@ public class RaidSceneControlPanel : MonoBehaviour {
         float dpsStart = 55;
         if (tanksAndHeals.Count <= 4)
         {
-            OffensiveCooldownsBackGround.transform.SetPositionAndRotation(new Vector3(dpsStart, 125*m_scale, 0), Quaternion.identity);
             dpsStart = 90;
+            OffensiveCooldownsBackGround.transform.SetPositionAndRotation(new Vector3((dpsStart-15) * m_scale, 125 * m_scale, 0), Quaternion.identity);
         }
 
         dpsStart *= m_scale;

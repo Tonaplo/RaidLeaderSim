@@ -74,7 +74,7 @@ public class EncounterVictorySceneController : MonoBehaviour {
 
         float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
 
-        float xPos = 300 * scale;
+        float xPos = 225 * scale;
         float yPos = 380 * scale;
         float height = 31.5f * scale;
 
@@ -99,7 +99,7 @@ public class EncounterVictorySceneController : MonoBehaviour {
         m_lootButtons.Clear();
         float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
 
-        float xPos = 500 * scale;
+        float xPos = 475 * scale;
         float yPos = 375 * scale;
         float height = 41.5f * scale;
         float width = 95 * scale;

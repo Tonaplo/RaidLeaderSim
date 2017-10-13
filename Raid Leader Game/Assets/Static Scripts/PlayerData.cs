@@ -287,6 +287,16 @@ public static class PlayerData
         DataController.controller.Save();
     }
 
+    public static void PurchaseAttempts()
+    {
+        if (m_raidTeamGold >= StaticValues.GoldCostOfAttempts)
+        {
+            m_raidTeamGold -= StaticValues.GoldCostOfAttempts;
+            m_attemptsLeft += StaticValues.AttemptsPerDay;
+            DataController.controller.Save();
+        }
+    }
+
     public static bool UseConsumable(ConsumableItem item)
     {
 
@@ -437,8 +447,9 @@ public static class PlayerData
         if (cal.GetWeekOfYear(now, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) != cal.GetWeekOfYear(m_thisLockout, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday))
         {
             m_weeklyLockOut = RaidData.CreateNewRaidData();
+            m_attemptsLeft = StaticValues.AttemptsPerDay;
         }
-
+        
         m_thisLockout = now;
     }
 

@@ -15,7 +15,7 @@ public class BaseEncounter
     protected EncounterAbility m_currentAbility;
     protected Enums.Difficulties m_difficulty = Enums.Difficulties.Normal;
     protected List<EncounterAbility> m_encounterAbilities = new List<EncounterAbility>();
-    protected List<EncounterAttackDescription> m_attacks;
+    protected List<EncounterEnemyDescription> m_enemyDescription;
     protected List<CharacterItem> m_loot;
     protected List<EncounterEnemy> m_enemies;
 
@@ -27,7 +27,7 @@ public class BaseEncounter
     public Enums.Difficulties Difficulty { get { return m_difficulty; } }
     public EncounterAbility CurrentAbility { get { return m_currentAbility; } }
     public List<EncounterAbility> EncounterAbilities { get { return m_encounterAbilities; } }
-    public List<EncounterAttackDescription> EncounterAttacks { get { return m_attacks; } }
+    public List<EncounterEnemyDescription> EnemyDescription { get { return m_enemyDescription; } }
     public List<CharacterItem> Loot { get { return m_loot; } }
     public List<EncounterEnemy> Enemies { get { return m_enemies; } }
 
@@ -72,8 +72,7 @@ public class BaseEncounter
     {
         m_difficulty = diff;
         SetupLoot();
-        SetupDescription();
-        SetupAbilities();
+        SetupDescriptionAndAbilities();
     }
 
     public bool IsDead()
@@ -101,12 +100,7 @@ public class BaseEncounter
         Debug.LogAssertion("Calling SetupLoot on the BaseEncounter - this should always be overridden!");
     }
 
-    public virtual void SetupDescription()
-    {
-        Debug.LogAssertion("Calling SetupDescription on the BaseEncounter - this should always be overridden!");
-    }
-
-    public virtual void SetupAbilities()
+    public virtual void SetupDescriptionAndAbilities()
     {
         Debug.LogAssertion("Calling SetupAbilities on the BaseEncounter - this should always be overridden!");
     }

@@ -24,6 +24,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
     Enums.Difficulties m_encounterDifficulty;
     List<BaseEncounter> m_encounters;
     BaseEncounter m_currentlySelectedEncounter;
+    string m_currentlySelectedEnemy;
 
     List<GameObject> m_attackObjects = new List<GameObject>();
     List<GameObject> m_abilityObjects = new List<GameObject>();
@@ -93,8 +94,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
     }
 
     void PopulateLists() {
-        ClearAndPopulateAttackList();
-        ClearAndPopulateAbilityList();
+        ClearAndPopulateEnemiesList();
 
         string errorText = "";
         if (Utility.CanAttemptEncounter(m_currentlySelectedEncounter.EncounterEnum, m_currentlySelectedEncounter.Difficulty, out errorText))
@@ -109,7 +109,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         }
     }
 
-    void ClearAndPopulateAttackList()
+    void ClearAndPopulateEnemiesList()
     {
         for (int i = 0; i < m_attackObjects.Count; i++)
         {
@@ -117,10 +117,10 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         }
         m_attackObjects.Clear();
 
-        List<EncounterAttackDescription> attacks = m_currentlySelectedEncounter.EncounterAttacks;
+        List<EncounterEnemyDescription> enemies = m_currentlySelectedEncounter.EnemyDescription;
 
         //calculate the width and height of each child item.
-        int columnCount = attacks.Count;
+        int columnCount = enemies.Count;
         float width = 200;
         float height = 135;
         int rowCount = 1;
@@ -131,7 +131,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         AttackContent.offsetMax = new Vector2(scrollWidth / 2, AttackContent.offsetMax.y);
 
         int j = 0;
-        for (int i = 0; i < attacks.Count; i++)
+        for (int i = 0; i < enemies.Count; i++)
         {
             //this is used instead of a double for loop because itemCount may not fit perfectly into the rows/columns
             if (i % columnCount == 0)
@@ -155,11 +155,12 @@ public class ChooseEncounterSceneController : MonoBehaviour {
             y = rectTransform.offsetMin.y + height;
             rectTransform.offsetMax = new Vector2(x, y);
 
-            newItem.GetComponent<ChooseEncounterAttackPrefabScript>().Initialize(attacks[i].AttackName, attacks[i].AttackDescription);
+            newItem.GetComponent<ChooseEncounterEnemyPrefabScript>().Initialize(enemies[i].Name, enemies[i].Description, this);
             m_attackObjects.Add(newItem);
         }
 
         AttackScrollBar.value = 1.0f;
+        m_attackObjects[0].GetComponent<ChooseEncounterEnemyPrefabScript>().ClickButton();
     }
 
     void ClearAndPopulateAbilityList()
@@ -170,7 +171,10 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         }
         m_abilityObjects.Clear();
 
-        List<EncounterAbility> abilities = m_currentlySelectedEncounter.EncounterAbilities;
+        List<EncounterAbility> abilities = new List<EncounterAbility>(m_currentlySelectedEncounter.EncounterAbilities);
+        int previousCount = abilities.Count;
+        abilities.RemoveAll(x => x.Caster != m_currentlySelectedEnemy);
+        Debug.Log("m_currentlySelectedEnemy: " + m_currentlySelectedEnemy +", previousCount: " + previousCount +  ", current: " + abilities.Count);
 
         //calculate the width and height of each child item.
         int columnCount = abilities.Count;
@@ -213,5 +217,15 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         }
 
         AbilityScrollBar.value = 1.0f;
+    }
+
+    public void ClickViewButton(string enemy)
+    {
+        for (int i = 0; i < m_attackObjects.Count; i++)
+        {
+            m_attackObjects[i].GetComponent<ChooseEncounterEnemyPrefabScript>().ViewButton.interactable = true;
+        }
+        m_currentlySelectedEnemy = enemy;
+        ClearAndPopulateAbilityList();
     }
 }

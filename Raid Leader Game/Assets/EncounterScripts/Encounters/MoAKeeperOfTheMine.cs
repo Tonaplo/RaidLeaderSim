@@ -50,20 +50,18 @@ public class MoAKeeperOfTheMine : BaseEncounter
         GenerateLoot(50, 5);
     }
 
-    public override void SetupDescription()
+    public override void SetupDescriptionAndAbilities()
     {
-        m_description = Name + " guards the entrance to the Mine. He will give his life - and collapse the mine entirely - to ensure your party do not pass him.";
+        m_description = Name + " guards the entrance to the Mine. He will give his life - and collapse the entry to the mine entirely - to ensure your party do not pass him.";
 
-        m_attacks = new List<EncounterAttackDescription> {
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Club Swing", "The " + Name + " swings his mighty club at his target, dealing " + GetClubSwingDamage() + ", each hit increasing in damage by " + Utility.GetPercentIncreaseString(GetClubSwingIncrease()) +". Resets on target switch."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank, Enums.CharacterRole.Healer, Enums.CharacterRole.MeleeDPS, Enums.CharacterRole.RangedDPS}, "Pebble Slide", "Pebbles from the Cave randomly fall down, hitting "+ GetPebbleThrowTargetCount() + " random raid members for up to " + GetPebbleThrowDamage() + " damage."),
+        m_enemyDescription = new List<EncounterEnemyDescription> {
+            new EncounterEnemyDescription(Name, "The massive Keeper is the only enemy in this encounter."),
         };
-    }
 
-    public override void SetupAbilities()
-    {
         m_encounterAbilities = new List<EncounterAbility> {
             new EncounterAbility("Avalanche", Name, "Every " + GetAvalanceWaitTime() + " seconds, " + Name + " bashes the wall of the cave, causing an Avalanche, dealing " + GetAvalanceDamage() + " to all raid members.", GetAvalanceCastTime(),Enums.Ability.Interrupt, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Club Swing", Name,"The " + Name + " swings his mighty club at his target, dealing " + GetClubSwingDamage() + ", each hit increasing in damage by " + Utility.GetPercentIncreaseString(GetClubSwingIncrease()) +". Resets on target switch.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Pebble Slide",Name, "Pebbles from the Cave randomly fall down, hitting "+ GetPebbleThrowTargetCount() + " random raid members for up to " + GetPebbleThrowDamage() + " damage.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
         };
 
         if (m_difficulty == Enums.Difficulties.Hard)

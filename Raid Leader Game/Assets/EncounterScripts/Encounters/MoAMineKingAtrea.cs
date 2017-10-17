@@ -57,6 +57,12 @@ public class MoAMineKingAtrea : BaseEncounter
     string StenchOfDeathString = "Stench of Death";
     string EyeBeamString = "Eye Beam";
 
+    string LeftLegString = "Left Leg";
+    string RightLegString = "Right Leg";
+    string LeftArmString = "Left Arm";
+    string RightArmString = "Right Arm";
+    string VisageString = "Visage";
+
     // Misc
     MineKingPhase m_phase = MineKingPhase.Legs;
     float m_percentageOfMaxHealthToRemoveOnLimbKill = 0.2f;
@@ -112,32 +118,19 @@ public class MoAMineKingAtrea : BaseEncounter
         GenerateLoot(55, 5);
     }
 
-    public override void SetupDescription()
+    public override void SetupDescriptionAndAbilities()
     {
-        m_description = Name +" was once a mere mortal man. Through the power of earth and the magic of the council, he is now so much more. His sheer size means you must confront him one limb at a time.";
+        m_description = "His sheer size means you must confront him one limb at a time: First his Legs, then his Arms and finally his Visage.";
 
-        m_attacks = new List<EncounterAttackDescription> {
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, EngulfString, "Every " + GetEngulfCastTime() + " seconds, " + Name + " smashes the entire raid for " + GetEngulfBaseDamage() + " damage. Each hit increases the damage by " + Utility.GetPercentString(GetEngulfMultiplier() - 1.0f) + ". The increased damage resets when " + Name + " is taunted."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>(), KickString, "Every " + GetKickCastTime() + " seconds, " + Name + "'s Right Leg kicks the nearest " + GetNumKickTargets() +" raiders for " + GetKickDamage() + " damage."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Together We Fall", "Killing either the Left or Right Leg will cause the remaining leg to explode, killing it and dealing it's remaining health in damage split between the raid."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Out of my Way", "Killing either the Left or Right Arm will cause the remaining arm to cast " + Utility.GetPercentString(1.0f - ArmDeadBonusCastTimeMultiplierDisplay()) + " faster and deal "+ Utility.GetPercentString(ArmDeadBonusDamageMultiplierDisplay() - 1.0f) + " more damage." ),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Reflection", "Attacking "+ Name+" directly will reflect "+ Utility.GetPercentString(GetDamageReflectionMultiplier()) + " of the damage dealt back to the attacker." ),
+        m_enemyDescription = new List<EncounterEnemyDescription> {
+            new EncounterEnemyDescription(Name, Name + " was once a mere mortal man. Through the power of earth and the magic of the council, he is now so much more."),
+            new EncounterEnemyDescription(LeftLegString, ""),
+            new EncounterEnemyDescription(RightLegString, ""),
+            new EncounterEnemyDescription(LeftArmString, ""),
+            new EncounterEnemyDescription(RightArmString, ""),
+            new EncounterEnemyDescription(VisageString, ""),
         };
-
-        if (m_difficulty == Enums.Difficulties.Hard)
-        {
-            m_attacks.Add(new EncounterAttackDescription(new List<Enums.CharacterRole>(), "It's just a Stone Wound", "On Hard difficulty, killing off any of " + Name + "'s limbs will not deal any damage to him. His legs will enter the fight when he reaches 60% health and his Visage when he reaches 20% health."));
-            m_attacks.Add(new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Cave In", "If none of the Mineking's limbs are in the battle, he will deal " + GetCaveInBaseDamage() + " damage every second and gain a stack of Rage. Each Rage stack increases the damage of Cave In by 100%."));
-            m_attacks.Add(new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Regeneration", "If any of the Mineking's limbs are alive when he reaches " + m_healToFullPercent + "%, he will fully heal."));
-        }
-        else
-        {
-            m_attacks.Add(new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Part of a Whole", "Killing off any of " + Name + "'s limbs will take " + Utility.GetPercentString(m_percentageOfMaxHealthToRemoveOnLimbKill) + " of his health from him."));
-        }
-    }
-
-    public override void SetupAbilities()
-    {
+        
         m_encounterAbilities = new List<EncounterAbility> {
             new EncounterAbility(StompString,"Left Leg", "The Left Leg of Mineking Atrea will stomp in the ground every " + GetStompWaitTime() + " seconds, dealing " + GetStompDamage() + " damage to any raider caught in it.", GetStompCastTime(), Enums.Ability.PreMovePositional, Enums.AbilityCastType.Cast),
             new EncounterAbility(CrushingGripString,"Left Arm", "The Left Arm grips a random raid member, dealing " + GetCrushingGripTickDamage() + " damage every second for " + GetNumCrushingGripTicks() + " seconds.", GetCrushingGripCastTime(), Enums.Ability.Immune, Enums.AbilityCastType.Cast),
@@ -145,8 +138,26 @@ public class MoAMineKingAtrea : BaseEncounter
             new EncounterAbility(EyeBeamString,"Visage", "The Visage of "+ Name+" shoots a beam of liquid gold from his eyes, dealing " + GetEyeBeamDamage() + " damage every second to every raider still standing in the beam.", GetEyeBeamCastTime(), Enums.Ability.PreMovePositional, Enums.AbilityCastType.Channel),
             new EncounterAbility(BreathOfDeathString,"Visage", "Every " + GetBreathOfDeathWaitTime()+ " seconds, the Visage of "+ Name + " will soak " + GetNumStenchOfDeathTargets() + " raider" +(GetNumStenchOfDeathTargets() != 1 ? "s" : "") + " in the  " + StenchOfDeathString + " unless interrupted. Every successful interrupt reduces time between casts and casttime by " + Utility.GetPercentString(1.0f-GetBreathOfDeathCastTimeReduction()), GetBreathOfDeathCastTime(), Enums.Ability.Interrupt, Enums.AbilityCastType.Cast),
             new EncounterAbility(StenchOfDeathString,"Visage", "The horrible smell causes " + GetStenchOfDeathTickDamage() + " damage every second for to the afflicted target until dispelled.", 0.0f, Enums.Ability.Dispel, Enums.AbilityCastType.Cast),
+            new EncounterAbility(EngulfString, Name, "Every " + GetEngulfCastTime() + " seconds, " + Name + " smashes the entire raid for " + GetEngulfBaseDamage() + " damage. Each hit increases the damage by " + Utility.GetPercentString(GetEngulfMultiplier() - 1.0f) + ". The increased damage resets when " + Name + " is taunted.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility(KickString, RightLegString, "Every " + GetKickCastTime() + " seconds, " + Name + "'s Right Leg kicks the nearest " + GetNumKickTargets() +" raiders for " + GetKickDamage() + " damage.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Together We Fall", LeftLegString, "Killing either the Left or Right Leg will cause the remaining leg to explode, killing it and dealing it's remaining health in damage split between the raid.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Together We Fall", RightLegString, "Killing either the Left or Right Leg will cause the remaining leg to explode, killing it and dealing it's remaining health in damage split between the raid.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Out of my Way", LeftArmString, "Killing either the Left or Right Arm will cause the remaining arm to cast " + Utility.GetPercentString(1.0f - ArmDeadBonusCastTimeMultiplierDisplay()) + " faster and deal "+ Utility.GetPercentString(ArmDeadBonusDamageMultiplierDisplay() - 1.0f) + " more damage.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Out of my Way", RightArmString, "Killing either the Left or Right Arm will cause the remaining arm to cast " + Utility.GetPercentString(1.0f - ArmDeadBonusCastTimeMultiplierDisplay()) + " faster and deal "+ Utility.GetPercentString(ArmDeadBonusDamageMultiplierDisplay() - 1.0f) + " more damage.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Reflection", Name, "Attacking "+ Name+" directly will reflect "+ Utility.GetPercentString(GetDamageReflectionMultiplier()) + " of the damage dealt back to the attacker.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
         };
-   }
+
+        if (m_difficulty == Enums.Difficulties.Hard)
+        {
+            m_encounterAbilities.Add(new EncounterAbility("It's just a Stone Wound", Name, "On Hard difficulty, killing off any of " + Name + "'s limbs will not deal any damage to him. His legs will enter the fight when he reaches 60% health and his Visage when he reaches 20% health.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast));
+            m_encounterAbilities.Add(new EncounterAbility("Cave In", Name, "If none of the Mineking's limbs are in the battle, he will deal " + GetCaveInBaseDamage() + " damage every second and gain a stack of Rage. Each Rage stack increases the damage of Cave In by 100%.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast));
+            m_encounterAbilities.Add(new EncounterAbility("Regeneration", Name, "If any of the Mineking's limbs are alive when he reaches " + m_healToFullPercent + "%, he will fully heal.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast));
+        }
+        else
+        {
+            m_encounterAbilities.Add(new EncounterAbility("Part of a Whole", Name, "Killing off any of " + Name + "'s limbs will take " + Utility.GetPercentString(m_percentageOfMaxHealthToRemoveOnLimbKill) + " of his health from him.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast));
+        }
+    }
 
     public override void CurrentAbilityCountered()
     {

@@ -48,6 +48,11 @@ public class MoACouncilOfStone : BaseEncounter
     bool m_FETEcountered = false;
     int m_FETEHealthTarget = 0;
 
+    string VolcanusString = "Volcanus";
+    string GranitorString = "Granitor";
+    string ObsidianaString = "Obsidiana";
+    string MinisidianaString = "Minisidiana";
+
     public MoACouncilOfStone() : base("Council of Stone") { m_encounterEnum = Enums.EncounterEnum.MoACouncilOfStone; }
 
     public override void SetupEncounter()
@@ -95,32 +100,26 @@ public class MoACouncilOfStone : BaseEncounter
         GenerateLoot(50, 5);
     }
 
-    public override void SetupDescription()
+    public override void SetupDescriptionAndAbilities()
     {
-        m_description = Name + " is comprised of three members, each representing one of the most powerful elements of the earth:\n - The impenetrable Granitor\n - The molten Volcanus\n - And sharp and spiky Obsidiana";
+        m_description = Name + " is comprised of three members, each representing one of the most powerful elements of the earth. Can your team overcome to power of earth?";
 
-        m_attacks = new List<EncounterAttackDescription> {
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Acceleration", "Every " + GetAccelerationCastTime() + " seconds, the current council member smashes his current target for " + GetAccelerationDamage() + " damage. Each hit against the same target decreases cast time of this ability by " + Utility.GetPercentString(1.0f - GetAccelerationCastTimeDecrease()) + "."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ }, "Shattered Form", "Every time a council member dies, the shattered form hurls smaller rocks at the raid, dealing between " + GetShatteredFormMinDamage() + " and " + GetShatteredFormMaxDamage() + " damage to all raiders."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ }, "Burning Core", "While Volcanus is alive, the council member deals " + GetBurningCoreDamageBase() + " damage  to all raiders, every " + GetBurningCoreCastTime() + " seconds. Each time cast increases damage by " + Utility.GetPercentIncreaseString(GetBurningCoreMultiplier()) + "."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ }, "Pelt", "Minisidianas summoned by Obsidiana continuosly cast Pelt on a random raid member, dealing " + GetPeltDamage() + " damage."),
+        m_enemyDescription = new List<EncounterEnemyDescription> {
+            new EncounterEnemyDescription(Name, Name + " is comprised of three members, each representing one of the most powerful elements of the earth"),
+            new EncounterEnemyDescription(GranitorString, "The impenetrable " + GranitorString + " is made of solid granite."),
+            new EncounterEnemyDescription(VolcanusString, "The molten " + VolcanusString + " is made from a difference"),
+            new EncounterEnemyDescription(ObsidianaString, "The spiky " + ObsidianaString + " is made from obsidian, making every inch of her sharp and deadly."),
+            new EncounterEnemyDescription(MinisidianaString, ObsidianaString + " breaks of parts of herself to create " + MinisidianaString + "s to destroy her enemies."),
         };
-
-        if (m_difficulty == Enums.Difficulties.Hard)
-        {
-            m_attacks.Add(new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Council Assembled", "All three council members enter the battle at once."));
-        }
-        else {
-            m_attacks.Add(new EncounterAttackDescription(new List<Enums.CharacterRole>(), "Council Apart", "Granitor starts the fight, with Volcanus replacing him if he falls, and with Obsidina as the final obstacle."));
-        }
-    }
-
-    public override void SetupAbilities()
-    {
+        
         m_encounterAbilities = new List<EncounterAbility> {
-            new EncounterAbility("Sweeping Blow","Granitor", "While Granitor is alive, the council member deals " + GetSweepingBlowDamageBase() + " damage to " + GetNumSweepingBlowTargets() + " raiders, every " + GetSweepingBlowCastTime() + " seconds . For each " + m_sweepingBlowHealthPercentage + "% health Granitor is missing, damage is increased by " + Utility.GetPercentString(GetSweepingBlowMultiplier()) + "%.", GetSweepingBlowCastTime(), Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
-            new EncounterAbility("Summon Minisidiana","Obsidiana", "Every " + GetSummonMinisidianaWaitTime() + " seconds, Obsidiana summons Minisidianas with " + GetMinisidianaHealth() + " health with the Pelt attack. The number of Minisidianas summoned increases for each cast.", GetSummonMinisidianaCastTime(), Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
-            new EncounterAbility("Lava Flood","Volcanus", "Every " + GetLavaFloodWaitTime() + " seconds, Volcanus floods the raid with lava, dealing " + GetLavaFloodDamage() + " damage to all raiders every seconds they remain in the lava.", GetLavaFloodCastTime(), Enums.Ability.PostMovePositional, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Sweeping Blow", GranitorString , "While Granitor is alive, the council member deals " + GetSweepingBlowDamageBase() + " damage to " + GetNumSweepingBlowTargets() + " raiders, every " + GetSweepingBlowCastTime() + " seconds . For each " + m_sweepingBlowHealthPercentage + "% health Granitor is missing, damage is increased by " + Utility.GetPercentString(GetSweepingBlowMultiplier()) + "%.", GetSweepingBlowCastTime(), Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Summon Minisidiana", ObsidianaString, "Every " + GetSummonMinisidianaWaitTime() + " seconds, Obsidiana summons Minisidianas with " + GetMinisidianaHealth() + " health with the Pelt attack. The number of Minisidianas summoned increases for each cast.", GetSummonMinisidianaCastTime(), Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Lava Flood",VolcanusString, "Every " + GetLavaFloodWaitTime() + " seconds, Volcanus floods the raid with lava, dealing " + GetLavaFloodDamage() + " damage to all raiders every seconds they remain in the lava.", GetLavaFloodCastTime(), Enums.Ability.PostMovePositional, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Acceleration", Name, "Every " + GetAccelerationCastTime() + " seconds, the current council member smashes his current target for " + GetAccelerationDamage() + " damage. Each hit against the same target decreases cast time of this ability by " + Utility.GetPercentString(1.0f - GetAccelerationCastTimeDecrease()) + ".", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Shattered Form", Name, "Every time a council member dies, the shattered form hurls smaller rocks at the raid, dealing between " + GetShatteredFormMinDamage() + " and " + GetShatteredFormMaxDamage() + " damage to all raiders.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Burning Core", VolcanusString, "While Volcanus is alive, the council member deals " + GetBurningCoreDamageBase() + " damage  to all raiders, every " + GetBurningCoreCastTime() + " seconds. Each time cast increases damage by " + Utility.GetPercentIncreaseString(GetBurningCoreMultiplier()) + ".", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Pelt", MinisidianaString, "Minisidianas summoned by Obsidiana continuosly cast Pelt on a random raid member, dealing " + GetPeltDamage() + " damage.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
         };
 
         Enums.Ability FETEAbility;
@@ -133,7 +132,16 @@ public class MoACouncilOfStone : BaseEncounter
         else
             FETEAbility = Enums.Ability.Stun;
 
-        m_encounterAbilities.Add(new EncounterAbility("From Earth To Earth", "Granitor", "Every " + GetFETEWaitTime() + " seconds, Granitor mends the wounds of the lowest health council member, restoring " + Utility.GetPercentString(GetFETEHealPercent()) + " max health." + hardCounter, GetFETECastTime(), FETEAbility, Enums.AbilityCastType.Cast));
+        if (m_difficulty == Enums.Difficulties.Hard)
+        {
+            m_encounterAbilities.Add(new EncounterAbility("Council Assembled", Name, "All three council members enter the battle at once.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast));
+        }
+        else
+        {
+            m_encounterAbilities.Add(new EncounterAbility("Council Apart", Name, "Granitor starts the fight, with Volcanus replacing him if he falls, and with Obsidina as the final obstacle.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast));
+        }
+
+        m_encounterAbilities.Add(new EncounterAbility("From Earth To Earth", GranitorString, "Every " + GetFETEWaitTime() + " seconds, Granitor mends the wounds of the lowest health council member, restoring " + Utility.GetPercentString(GetFETEHealPercent()) + " max health." + hardCounter, GetFETECastTime(), FETEAbility, Enums.AbilityCastType.Cast));
     }
 
     public override void CurrentAbilityCountered()

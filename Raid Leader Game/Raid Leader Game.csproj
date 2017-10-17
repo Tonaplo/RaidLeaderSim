@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>2017.1.0p2</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -89,7 +87,7 @@
     <Compile Include="Assets\AwardLootItemInstanceScript.cs" />
     <Compile Include="Assets\Cheats.cs" />
     <Compile Include="Assets\ChooseEncounterAbilityPrefabScript.cs" />
-    <Compile Include="Assets\ChooseEncounterAttackPrefabScript.cs" />
+    <Compile Include="Assets\ChooseEncounterEnemyPrefabScript.cs" />
     <Compile Include="Assets\ChooseEncounterSceneController.cs" />
     <Compile Include="Assets\ChooseRaidTeamForAttemptControllerScript.cs" />
     <Compile Include="Assets\ChooseTeamForAttemptTeamController.cs" />
@@ -100,8 +98,8 @@
     <Compile Include="Assets\EncounterScripts\BaseCooldown.cs" />
     <Compile Include="Assets\EncounterScripts\BaseEncounter.cs" />
     <Compile Include="Assets\EncounterScripts\EncounterAbility.cs" />
-    <Compile Include="Assets\EncounterScripts\EncounterAttackDescription.cs" />
     <Compile Include="Assets\EncounterScripts\EncounterEnemy.cs" />
+    <Compile Include="Assets\EncounterScripts\EncounterEnemyDescription.cs" />
     <Compile Include="Assets\EncounterScripts\Encounters\MoACouncilOfStone.cs" />
     <Compile Include="Assets\EncounterScripts\Encounters\MoAKeeperOfTheMine.cs" />
     <Compile Include="Assets\EncounterScripts\Encounters\MoAMineKingAtrea.cs" />

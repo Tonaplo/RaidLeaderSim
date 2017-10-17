@@ -9,6 +9,7 @@ public class MoAVampiricus : BaseEncounter
     string ConsortString = "Consort of the Queen";
     string SummonConsortString = "Summon Consort of the Queen";
     string ScreechString = "Screech";
+    string AttacksOfYounglingsString = "Attacks of Younglings";
     string SwarmOfYounglingsString = "Swarm of Younglings";
     string VenomSprayString = "Venom Spray";
 
@@ -52,21 +53,21 @@ public class MoAVampiricus : BaseEncounter
     {
         GenerateLoot(50, 5);
     }
-
-    public override void SetupDescription()
+    
+    public override void SetupDescriptionAndAbilities()
     {
         m_description = "In the depths of the Mine, the Vampire Bat Queen lurks. Her and her flok are drawn by the blood in your veins - and seek to drain it for themselves.";
 
-        m_attacks = new List<EncounterAttackDescription> {
-            new EncounterAttackDescription(new List<Enums.CharacterRole>{ Enums.CharacterRole.Tank}, "Bleeding Bite", Name + " sinks her teeth into her target, dealing " + GetBleedingBiteDamage() + " damage and causing the target to bleed for " + GetBleedingBiteDoTDamage() * GetNumBleedingBiteTicks() + " damage over " + GetBleedingBiteTickLength()*GetNumBleedingBiteTicks() + " seconds. Every bite on the same target increases the bleed damage."),
-            new EncounterAttackDescription(new List<Enums.CharacterRole>(), SwarmOfYounglingsString, "The younger bats come to the aid of their queen, biting random raidmembers for " + GetSwarmOfYounglingsDamage() + " damage. Their incredible numbers translate to two attacks every second."),
+        m_enemyDescription = new List<EncounterEnemyDescription> {
+            new EncounterEnemyDescription(Name, Name + " is the great Vampire Bat Queen. She will protect her lair by any means necessary."),
+            new EncounterEnemyDescription(ConsortString, "These larger bats are the Queens chosen mates."),
+            new EncounterEnemyDescription(SwarmOfYounglingsString, "The majority of the brood consists of thousands of younglings. They too will come to their Queens aid."),
         };
-    }
 
-    public override void SetupAbilities()
-    {
         m_encounterAbilities = new List<EncounterAbility> {
             new EncounterAbility("Vampiric Bite", Name, "Every " + GetVampiricBiteWaitTime() + " seconds, " + Name + " rears up for a bite of a random target, dealing " + GetVampiricBiteDamage() + " damage and healing for " + Utility.GetPercentString(GetVampiricBiteHealAmount()) +" of her maximum health if successful.", GetVampiricBiteCastTime(),Enums.Ability.Immune, Enums.AbilityCastType.Cast),
+            new EncounterAbility("Bleeding Bite", Name, Name + " sinks her teeth into her target, dealing " + GetBleedingBiteDamage() + " damage and causing the target to bleed for " + GetBleedingBiteDoTDamage() * GetNumBleedingBiteTicks() + " damage over " + GetBleedingBiteTickLength()*GetNumBleedingBiteTicks() + " seconds. Every bite on the same target increases the bleed damage.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
+            new EncounterAbility(AttacksOfYounglingsString, SwarmOfYounglingsString, "The younger bats come to the aid of their queen, biting random raidmembers for " + GetSwarmOfYounglingsDamage() + " damage. Their incredible numbers translate to two attacks every second.", 0, Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
             new EncounterAbility(SummonConsortString, Name, "Every " + GetConsortSummonWaitTime() + " seconds, "  + Name + " summons her Consorts with " + GetConsortHealth() + " health. The Consorts use the Screech ability.", GetConsortSummonTime(), Enums.Ability.Uncounterable, Enums.AbilityCastType.Cast),
             new EncounterAbility(ScreechString, ConsortString, "Consorts summoned by " + Name + " will constantly screech, dealing " + GetScreechDamage() + " damage to the raid every second until defeated.", GetScreechCastTime(),Enums.Ability.Uncounterable, Enums.AbilityCastType.Channel),
         };
@@ -410,7 +411,7 @@ public class MoAVampiricus : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !IsDead())
         {
-            GetRandomRaidTargets(1)[0].TakeDamage(GetSwarmOfYounglingsDamage(), SwarmOfYounglingsString);
+            GetRandomRaidTargets(1)[0].TakeDamage(GetSwarmOfYounglingsDamage(), AttacksOfYounglingsString);
             m_rsc.StartCoroutine(CastSwarmOfYounglings(0.5f));
         }
     }

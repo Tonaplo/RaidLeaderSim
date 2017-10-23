@@ -538,6 +538,33 @@ public static class Utility
 
         return percentIncrease + "%";
     }
+
+    public static string GetStringForTrait(Enums.TraitType t)
+    {
+        switch (t)
+        {
+            case Enums.TraitType.Fleetfooted:
+                return "<color=#00ff00ff><b>Fleet footed</b>:\n+ 10% Positional skill.</color>";
+            case Enums.TraitType.Mechanical:
+                return "<color=#00ff00ff><b>Mechanical</b>:\n+ 10% Mechanical skill.</color>";
+            case Enums.TraitType.PowerHouse:
+                return "<color=#00ff00ff><b>Power House</b>:\n+ 10% Throughtput skill.</color>";
+            case Enums.TraitType.Cauticious:
+                return "<color=#00ff00ff><b>Cauticious</b>:\n10% less damage taken.</color>";
+            case Enums.TraitType.Oblivious:
+                return "<color=#ff0000ff><b>Oblivious</b>:\n- 10% Positional skill.</color>";
+            case Enums.TraitType.TunnelVision:
+                return "<color=#ff0000ff><b>Tunnel Vision</b>:\n- 10% Mechanical skill.</color>";
+            case Enums.TraitType.Inefficient:
+                return "<color=#ff0000ff><b>Inefficient</b>:\n- 10% Throughput skill.</color>";
+            case Enums.TraitType.Clumsy:
+                return "<color=#ff0000ff><b>Clumsy</b>:\n10% increased damage taken.</color>";
+            case Enums.TraitType.NumTraitTypes:
+            default:
+                return "Unknown Trait!";
+        }
+    }
+
     #endregion
 
     #region Encounter related

@@ -230,7 +230,7 @@ public class BaseEncounter
         List<RaiderScript> toBeRemoved = new List<RaiderScript>();
         for (int i = 0; i < m_positionalTargets.Count; i++)
         {
-            int chance = m_raid[i].Raider.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Positional);
+            int chance = m_raid[i].Raider.RaiderStats.GetPositionalSkillForEncounter();
             int roll = Random.Range(0, StaticValues.MaxSkill + 1);
             if (roll < chance)
             {

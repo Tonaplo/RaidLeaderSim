@@ -41,7 +41,7 @@ public class EncounterAbility : BaseAbility
         else {
             int roll = Random.Range(0, 100);
 
-            if(m_counter.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Mechanical) >= roll)
+            if(m_counter.RaiderStats.GetMechanicalSkillForEncounter() >= roll)
                 return true;
 
             return false;

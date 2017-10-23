@@ -15,4 +15,5 @@ public static class StaticValues {
     public static float DispellCooldown       = 15.0f;
     public static int AttemptsPerDay          = 6;
     public static int GoldCostOfAttempts      = 100;
+    public static int MaxNumRaiderTraits      = 3;
 }

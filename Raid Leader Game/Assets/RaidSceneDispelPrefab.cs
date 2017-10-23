@@ -42,7 +42,7 @@ public class RaidSceneDispelPrefab : MonoBehaviour {
 
         int roll = Random.Range(0, StaticValues.MaxSkill);
 
-        if (roll <= dispeller.Raider.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Mechanical))
+        if (roll <= dispeller.Raider.RaiderStats.GetMechanicalSkillForEncounter())
         {
             m_raider.RemoveDebuff();
             m_rscp.ReDrawDispelUI(false);

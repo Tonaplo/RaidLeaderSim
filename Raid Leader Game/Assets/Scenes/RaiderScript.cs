@@ -163,12 +163,19 @@ public class RaiderScript : MonoBehaviour {
 
         float reduction = 0.0f;
 
+        if (Raider.RaiderStats.Traits.Contains(Enums.TraitType.Cauticious))
+            damage = Mathf.RoundToInt(damage * 0.9f);
+
+        if (Raider.RaiderStats.Traits.Contains(Enums.TraitType.Clumsy))
+            damage = Mathf.RoundToInt(damage * 1.1f);
+
+
         //Tanks take up for 50% reduced damage, depending on their skill.
         //The idea is that they mitigate better, the more skilled they are.
         if (Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank)
         {
             
-            reduction = ((float)Raider.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Throughput) / (float)StaticValues.MaxSkill) * 0.5f;
+            reduction += ((float)Raider.RaiderStats.Skills.GetSkillLevel(Enums.SkillTypes.Throughput) / (float)StaticValues.MaxSkill) * 0.5f;
 
             //Guardians take 15% reduced damage
             if (Raider.RaiderStats.GetCurrentSpec() == Enums.CharacterSpec.Guardian)

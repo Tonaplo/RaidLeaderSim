@@ -49,8 +49,10 @@ public class RosterButtonScript : MonoBehaviour {
         m_headerText.text = m_raider.GetName();
         SetupClass();
 
-        if (m_rcs.SkillButton.IsInteractable())
+        if (!m_rcs.GearButton.IsInteractable())
             SetupGear();
+        else if(!m_rcs.TraitButton.IsInteractable())
+            SetupTraits();
         else
             SetupSkills();
 
@@ -91,10 +93,22 @@ public class RosterButtonScript : MonoBehaviour {
             m_rightBodyText.text += ((Enums.SkillTypes)i).ToString() + ": " + m_raider.RaiderStats.Skills.GetSkillLevel((Enums.SkillTypes)i) + " \\ 100\n";
         }
 
+        m_rightBodyText.text += "\nAverage Skilllevel: " + m_raider.RaiderStats.Skills.AverageSkillLevel + "\n";
+
         if (m_raider.IsInStatus(Enums.CharacterStatus.InTraining))
         {
             TimeSpan remaining = (m_raider.ActivityFinished - DateTime.Now);
             m_rightBodyText.text += "In training: " + ((int)remaining.TotalSeconds).ToString() + " sec left";
+        }
+    }
+
+    void SetupTraits()
+    {
+        m_rightBodyText.text = "Traits:\n";
+
+        for (int i = 0; i < StaticValues.MaxNumRaiderTraits; i++)
+        {
+            m_rightBodyText.text += Utility.GetStringForTrait(m_raider.RaiderStats.Traits[i]) + "\n";
         }
     }
 

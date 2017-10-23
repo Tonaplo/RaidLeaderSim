@@ -16,11 +16,13 @@ public class RaiderStats {
     Enums.CharacterSpec m_charSpec;
     BaseAbility m_ability;
     BaseCooldown m_cooldown;
+    List<Enums.TraitType> m_traits;
 
     public GearStats Gear { get { return m_gear; } }
     public SkillStats Skills { get { return m_skill; } }
     public BaseAbility Ability { get { return m_ability; } }
     public BaseCooldown Cooldown { get { return m_cooldown; } }
+    public List<Enums.TraitType> Traits { get { return m_traits; } }
 
     //per fight stats
     float m_varianceMultiplierThisAttempt = 0.0f;
@@ -52,8 +54,10 @@ public class RaiderStats {
             starterValues[i] = GenerateRandomLevelFromBase(baseGear);
         }
         m_gear = new GearStats(starterValues);
-        
+
+        m_traits = new List<Enums.TraitType>(GenerateTraits());
         m_variation = GenerateVariation();
+
         ComputeAverageThroughput();
     }
 
@@ -62,6 +66,7 @@ public class RaiderStats {
         m_gear = new GearStats(_gearLevel);
         m_skill = new SkillStats(_skillLevel);
         m_variation = _variation;
+        m_traits = new List<Enums.TraitType>(GenerateTraits());
         m_charRole = _charRole;
         m_charClass = _charClass;
         FinishRaiderStatGeneration();
@@ -76,6 +81,11 @@ public class RaiderStats {
     public void ReCalculateRaiderStats()
     {
         //SetTestValue();
+
+        if (m_traits == null || m_traits.Count != StaticValues.MaxNumRaiderTraits) {
+            m_traits = new List<Enums.TraitType>(GenerateTraits());
+        }
+
         Gear.CalculateItemlevels();
         Skills.CalculateAverageSkillLevel();
         SetAbilityFromSpec();
@@ -83,6 +93,30 @@ public class RaiderStats {
         ComputeAverageThroughput();
         ComputeSkillThisAttempt();
         ComputeThroughput();
+    }
+
+    public int GetPositionalSkillForEncounter()
+    {
+        float floatAmount = (float)m_skill.GetSkillLevel(Enums.SkillTypes.Positional);
+
+        if (m_traits.Contains(Enums.TraitType.Fleetfooted))
+            floatAmount *= 1.10f;
+        else if (m_traits.Contains(Enums.TraitType.Oblivious))
+            floatAmount *= 0.90f;
+
+        return Mathf.RoundToInt(floatAmount);
+    }
+
+    public int GetMechanicalSkillForEncounter()
+    {
+        float floatAmount = (float)m_skill.GetSkillLevel(Enums.SkillTypes.Mechanical);
+
+        if (m_traits.Contains(Enums.TraitType.Mechanical))
+            floatAmount *= 1.10f;
+        else if (m_traits.Contains(Enums.TraitType.TunnelVision))
+            floatAmount *= 0.90f;
+
+        return Mathf.RoundToInt(floatAmount);
     }
     
     public int ComputeThroughput()
@@ -104,6 +138,11 @@ public class RaiderStats {
         
         //Multiply with SkillLevel - increases the base by a percentage
         floatAmount *= (0.5f + ((float)m_skill.GetSkillLevel(Enums.SkillTypes.Throughput) / 100.0f));
+
+        if (m_traits.Contains(Enums.TraitType.PowerHouse))
+            floatAmount *= 1.10f;
+        else if (m_traits.Contains(Enums.TraitType.Inefficient))
+            floatAmount *= 0.90f;
 
         //Adjust so we always contribute 'something'
         floatAmount = StaticValues.MinimumThroughput > floatAmount ? StaticValues.MinimumThroughput : floatAmount;
@@ -310,6 +349,24 @@ public class RaiderStats {
 
         variation /= iterations;
         return variation;
+    }
+
+    static List<Enums.TraitType> GenerateTraits()
+    {
+        List<Enums.TraitType> newTraits = new List<Enums.TraitType>();
+        int numTraits = (int)Enums.TraitType.NumTraitTypes;
+        for (int i = 0; i < numTraits; i++)
+        {
+            newTraits.Add((Enums.TraitType)i);
+        }
+
+        for (int i = 0; i < (numTraits-StaticValues.MaxNumRaiderTraits); i++)
+        {
+
+            newTraits.RemoveAt(UnityEngine.Random.Range(0, newTraits.Count));
+        }
+
+        return newTraits;
     }
 
     static void FinishRaiderStatGeneration(ref RaiderStats rs)

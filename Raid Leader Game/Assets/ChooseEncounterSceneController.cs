@@ -174,7 +174,7 @@ public class ChooseEncounterSceneController : MonoBehaviour {
         List<EncounterAbility> abilities = new List<EncounterAbility>(m_currentlySelectedEncounter.EncounterAbilities);
         int previousCount = abilities.Count;
         abilities.RemoveAll(x => x.Caster != m_currentlySelectedEnemy);
-        Debug.Log("m_currentlySelectedEnemy: " + m_currentlySelectedEnemy +", previousCount: " + previousCount +  ", current: " + abilities.Count);
+        //Debug.Log("m_currentlySelectedEnemy: " + m_currentlySelectedEnemy +", previousCount: " + previousCount +  ", current: " + abilities.Count);
 
         //calculate the width and height of each child item.
         int columnCount = abilities.Count;

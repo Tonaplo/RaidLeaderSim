@@ -3,10 +3,6 @@ using System.Collections;
 
 public static class Enums{
 
-    public enum SaveVersion {
-        FirstSaveVersion,
-    }
-
     public enum CharacterRole {
         Tank,
         Healer,
@@ -19,7 +15,7 @@ public static class Enums{
         Fighter,    // Guardian / Berserker         -- Tank/MDPS
         Shadow,     // Assassin / Ranger            -- RDPS/MDPS
         Totemic,    // Naturalist / Elementalist    -- Heal/RDPS
-        Sorcerer,  // Diviner / Wizard         -- Heal/RDPS
+        Sorcerer,  // Diviner / Wizard              -- Heal/RDPS
         Paladin,    // Knight / Cleric              -- Tank/Heal
         Occultist,  // Scourge, Necromancer         -- MDPS/RDPS
     }
@@ -90,9 +86,9 @@ public static class Enums{
 
     public enum Difficulties
     {
-        Easy,       //60%
-        Normal,     //100%
-        Hard        //140%
+        Easy,       
+        Normal,     
+        Hard        
     }
 
     public enum CharacterStatus { 
@@ -163,5 +159,18 @@ public static class Enums{
         CurrentTarget,
         Enemy,
         Raider,
+    }
+
+    public enum TraitType
+    {
+        Fleetfooted,
+        Mechanical,
+        PowerHouse,
+        Cauticious,
+        Oblivious,
+        TunnelVision,
+        Inefficient,
+        Clumsy,
+        NumTraitTypes,
     }
 }

@@ -194,7 +194,7 @@ public class RaidSceneController : MonoBehaviour {
         string newText = " <color=#ffff00ff>[" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "]:</color> " + text + "\n";
         raidText.text = newText + raidText.text;
 
-        if (raidText.text.Length > 1500)
+        if (raidText.text.Length > 2000)
         {
             Debug.Log(newText);
             raidText.text = raidText.text.Remove(raidText.text.LastIndexOf("\n"));
@@ -307,7 +307,7 @@ public class RaidSceneController : MonoBehaviour {
 
         bool success = encounter.AttemptToCounterCurrentAbility(counter);
 
-        AddTextToEventLog(Utility.GetColoredRaiderName(counter) + " tried to counter <color=#0000ffff>" + encounter.CurrentAbility.Name + "</color> and" + (success ? " succeeded!" : " failed!"));
+        AddTextToEventLog(Utility.GetColoredRaiderName(counter) + " tried to counter <b>" + encounter.CurrentAbility.Name + "</b> and" + (success ? " succeeded!" : " failed!"));
         if (success)
         {
             EndCastingAbility(encounter.CurrentAbility);
@@ -322,7 +322,7 @@ public class RaidSceneController : MonoBehaviour {
 
     public void UseRaiderCooldown(RaiderScript raider)
     {
-        AddTextToEventLog(Utility.GetColoredRaiderName(raider.Raider) + " used " + raider.Raider.RaiderStats.Cooldown.Name + "!");
+        AddTextToEventLog(Utility.GetColoredRaiderName(raider.Raider) + " used <i>" + raider.Raider.RaiderStats.Cooldown.Name + "</i>!");
         if (raider.Raider.RaiderStats.Cooldown.Cooldowneffects.m_targets == Enums.CooldownTargets.Self)
         {
             raider.AddCooldown(raider.Raider.RaiderStats.Cooldown);

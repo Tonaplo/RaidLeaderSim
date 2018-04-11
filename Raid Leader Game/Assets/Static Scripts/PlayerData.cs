@@ -36,6 +36,7 @@ public static class PlayerData
     {
         m_roster = new List<Raider>();
         m_raidTeam = new List<Raider>();
+        m_consumables = new List<ConsumableItem>();
     }
 
     public static void InitializeDataFromSaveData(DataController.SaveData data)
@@ -184,7 +185,7 @@ public static class PlayerData
     public static void RecalculateRoster()
     {
         for (int i = 0; i < m_roster.Count; i++)
-        {
+        { 
             m_roster[i].RecalculateRaider();
         }
     }
@@ -458,9 +459,25 @@ public static class PlayerData
     //=======================================
     public static void GenerateDebugRoster()
     {
-        Raider player = new Raider("Mallusof", RaiderStats.GenerateRaiderStatsFromSpec(Enums.CharacterSpec.Naturalist, 10, 10));
-        GenerateNewGameRoster(player, 10);
-        m_raidTeam = new List<Raider>(m_roster);
+        int averageSkill = 50;
+        int averageGear = 60;
+        m_roster = new List<Raider>();
+        m_roster.Add(new Raider("Guardian", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.Tank, Enums.CharacterClass.Fighter)));
+        m_roster.Add(new Raider("Knight", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.Tank, Enums.CharacterClass.Paladin)));
+        m_roster.Add(new Raider("Cleric", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.Healer, Enums.CharacterClass.Paladin)));
+        m_roster.Add(new Raider("Diviner", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.Healer, Enums.CharacterClass.Sorcerer)));
+        m_roster.Add(new Raider("Naturalist", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.Healer, Enums.CharacterClass.Totemic)));
+        m_roster.Add(new Raider("Berserker", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Fighter)));
+        m_roster.Add(new Raider("Assassin", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Shadow)));
+        m_roster.Add(new Raider("Scourge", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.MeleeDPS, Enums.CharacterClass.Occultist)));
+        m_roster.Add(new Raider("Ranger", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Shadow)));
+        m_roster.Add(new Raider("Wizard", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Sorcerer)));
+        m_roster.Add(new Raider("Elementalist", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Totemic)));
+        m_roster.Add(new Raider("Necromancer", new RaiderStats(averageGear, averageSkill, 0, Enums.CharacterRole.RangedDPS, Enums.CharacterClass.Occultist)));
+
+        RecalculateRoster();
+
+        m_raidTeam = m_roster;
     }
 
     //=======================================

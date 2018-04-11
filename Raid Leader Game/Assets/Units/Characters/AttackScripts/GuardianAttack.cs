@@ -25,7 +25,8 @@ public class GuardianAttack : BaseHealOrAttackScript
         if (!rs.IsBossDead() && !rs.IsDead())
         {
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
-            rs.DealDamage(index, Name, thisAttack);
+            int unused = 0;
+            rs.DealDamage(index, Name, thisAttack, out unused, null);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
     }

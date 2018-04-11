@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 public class BaseEncounter
 {
+    
 
     #region variables and getters and setters
-
+    
     protected string m_name;
     protected string m_description;
-    protected int m_counter = 1;
     protected Enums.EncounterEnum m_encounterEnum;
     protected RaiderScript m_currentRaiderTarget;
     protected EncounterAbility m_currentAbility;
@@ -21,7 +21,6 @@ public class BaseEncounter
 
     public string Name { get { return m_name; } }
     public string Description { get { return m_description; } }
-    public int Stacks { get { return m_counter; } }
     public Enums.EncounterEnum EncounterEnum { get { return m_encounterEnum; } }
     public RaiderScript CurrentRaiderTarget { get { return m_currentRaiderTarget; } }
     public Enums.Difficulties Difficulty { get { return m_difficulty; } }
@@ -30,8 +29,7 @@ public class BaseEncounter
     public List<EncounterEnemyDescription> EnemyDescription { get { return m_enemyDescription; } }
     public List<CharacterItem> Loot { get { return m_loot; } }
     public List<EncounterEnemy> Enemies { get { return m_enemies; } }
-
-
+    
     protected GameObject m_healthBarPrefab;
     protected RaidSceneController m_rsc;
     protected List<RaiderScript> m_raid;
@@ -119,37 +117,50 @@ public class BaseEncounter
         Debug.LogAssertion("Calling CurrentAbilityCountered on the BaseEncounter - this should always be overridden!");
     }
 
-    public int TakeDamage(int damage, RaiderScript attacker)
+    public EncounterEnemy TakeDamage(int damage, RaiderScript attacker, out int actualDamageTaken)
     {
         EncounterEnemy currentTarget = m_enemies.Find(e => e.IsCurrentTarget());
+        actualDamageTaken = 0;
         if (currentTarget != null)
         {
-            int previousHealth = currentTarget.Healthbar.CurrentHealth;
-            currentTarget.Healthbar.ModifyHealth(-damage);
-
-            if (currentTarget.Healthbar.IsDead())
-            {
-                int newIndex = -1;
-                for (int i = 0; i < m_enemies.Count; i++)
-                {
-                    if (m_enemies.FindAll(e => e.Index == i).Count == 0) {
-                        newIndex = i;
-                        break;
-                    }
-                }
-                currentTarget.Index = newIndex;
-                currentTarget.ToggleTargetSetting();
-                currentTarget.DestroyHealthBar();
-                m_enemies.Remove(currentTarget);
-            }
-
-            int actualDamage = previousHealth - (int)currentTarget.Healthbar.CurrentHealth;
-            HandleOnTakeDamageEvent(actualDamage, attacker);
-
-            return actualDamage;
+            TakeDamageInternal(damage, attacker, out actualDamageTaken, currentTarget);
         }
 
-        return 0;
+        return currentTarget;
+    }
+
+    public EncounterEnemy TakeDamageSpecific(int damage, RaiderScript attacker, out int actualDamageTaken, EncounterEnemy target)
+    {
+        return TakeDamageInternal(damage, attacker, out actualDamageTaken, target);
+    }
+
+    EncounterEnemy TakeDamageInternal(int damage, RaiderScript attacker, out int actualDamageTaken, EncounterEnemy target)
+    {
+        int previousHealth = target.Healthbar.CurrentHealth;
+        target.Healthbar.ModifyHealth(-damage);
+
+        if (target.Healthbar.IsDead())
+        {
+            m_rsc.AddTextToEventLog("<i>" + target.Name + "</i> has died.", Enums.EventLogType.Boss);
+            int newIndex = -1;
+            for (int i = 0; i < m_enemies.Count; i++)
+            {
+                if (m_enemies.FindAll(e => e.Index == i).Count == 0)
+                {
+                    newIndex = i;
+                    break;
+                }
+            }
+            target.Index = newIndex;
+            target.ToggleTargetSetting();
+            target.DestroyHealthBar();
+            m_enemies.Remove(target);
+        }
+
+        actualDamageTaken = previousHealth - (int)target.Healthbar.CurrentHealth;
+        HandleOnTakeDamageEvent(actualDamageTaken, attacker);
+
+        return target;
     }
 
     public virtual void HandleOnTakeDamageEvent(int damage, RaiderScript attacker)
@@ -273,6 +284,9 @@ public class BaseEncounter
 
     protected bool CreateEnemy(string name, int addHealth, Enums.EncounterEnemyType enemyType)
     {
+        if(m_enemies.Count > 0)
+            m_rsc.AddTextToEventLog("<i>" + name + "</i> has entered the battlefield.", Enums.EventLogType.Boss);
+
         int index = -1;
         for (int i = 0; i < StaticValues.MaxNumberOfAliveAdds; i++)
         {
@@ -313,6 +327,29 @@ public class BaseEncounter
         for (int i = 0; i < m_enemies.Count; i++)
         {
             m_enemies[i].ToggleTargetSetting();
+        }
+    }
+
+    public int GetNumStacksForRaider(RaiderScript raider)
+    {
+        //This is purely for when we're showing off the abilities, so return 1
+        if (m_raid == null) {
+            return 1;
+        }
+
+        if (m_raid.Find(x => x == raider) != null)
+        {
+            return m_raid.Find(x => x == raider).HealthBar.Stacks();
+        }
+
+        return 0;
+    }
+
+    public void AddStackstoRaider(RaiderScript raider, int stacksToAdd, float totalDuration)
+    {
+        if (m_raid.Find(x => x == raider) != null)
+        {
+            m_raid.Find(x => x == raider).HealthBar.AddStacks(stacksToAdd, totalDuration);
         }
     }
 }

@@ -12,7 +12,7 @@ public static class Utility
     {
         Initialize();
         PlayerData.GenerateDebugRoster();
-        SetCurrentEncounter(new MoAKeeperOfTheMine());
+        SetCurrentEncounter(new MoACouncilOfStone());
     }
 
     public static void Initialize() {
@@ -727,7 +727,10 @@ public static class Utility
 
     public static bool IsAbleToRaid(out string errorString)
     {
+        Debug.Log("We are currently allowing you to do as many attempts as you'd Like. Look at IsAbleToRaid to change this");
         errorString = "";
+        return true;
+        /*
         int count = 0;
         for (int i = 0; i < PlayerData.Roster.Count; i++)
         {
@@ -746,7 +749,7 @@ public static class Utility
             Debug.Log(errorString);
             return false;
         }
-        return true;
+        return true;*/
     }
 
     public static float CalculateTotalProgressPercent()

@@ -5,35 +5,59 @@ using System;
 [Serializable]
 public class ScourgeAttack : BaseHealOrAttackScript
 {
-    float m_maxCastTime = 0.9f;
-    float m_minCastTime = 0.2f;
+    float m_percentCutoff = 0.80f;
+    float m_buff = 1.0f;
+    float m_buffDuration = 10.0f;
+    bool m_hasbuff = false;
+    IEnumerator m_coroutine;
 
-    public override string GetDescription() { return "Pauses between attacks can last as much as " + m_maxCastTime +" seconds, and as little as " + m_minCastTime + " seconds." ; }
+    public override string GetDescription() { return "Dealing damage to a target with over " + Utility.GetPercentString(m_percentCutoff) + " health increases damage done by " + Utility.GetPercentString(m_buff) + " for " + m_buffDuration +" secs."; }
+
 
     public override void Setup()
     {
         m_damageStruct = new DamageStruct();
-        m_castTime = (m_maxCastTime+m_minCastTime)/2.0f;
-        m_damageStruct.m_baseMultiplier = 1.0f;
-        m_name = "Chaos";
+        m_castTime = 1.0f;
+        m_damageStruct.m_baseMultiplier = 1.2f;
+        m_name = "Hatred of Life";
     }
 
     public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
+        rs.StartCoroutine(HatredOfLife(Utility.GetFussyCastTime(m_castTime), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
+    IEnumerator HatredOfLife(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
         if (!rs.IsBossDead() && !rs.IsDead())
         {
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
-            rs.DealDamage(index, Name, thisAttack);
+
+            if (m_hasbuff) {
+                thisAttack.m_baseMultiplier *=(m_buff + 1.0f);
+            }
+
+            int unused = 0;
+            EncounterEnemy thisAttackEnemy = rs.DealDamage(index, Name, thisAttack, out unused, null);
+            if (thisAttackEnemy.Healthbar.GetHealthPercent() >= (m_percentCutoff * 100.0f))
+            {
+                m_hasbuff = true;
+                if (m_coroutine != null)
+                    rs.StopCoroutine(m_coroutine);
+
+                m_coroutine = CancelBuff(m_buffDuration, attacker, rs);
+                rs.StartCoroutine(m_coroutine);
+            }
             
-            float newRandomCastTime = UnityEngine.Random.Range(m_minCastTime, m_maxCastTime);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(newRandomCastTime)), index, attacker, rs));
+            rs.StartCoroutine(HatredOfLife(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
+    }
+
+    IEnumerator CancelBuff(float castTime, Raider attacker, RaiderScript rs)
+    {
+        yield return new WaitForSeconds(castTime);
+        m_hasbuff = false;
     }
 }

@@ -8,6 +8,7 @@ public class BossCastBarScript : MonoBehaviour {
     public Text CastBarText;
     public Image Fill;
 
+    float m_scale;
     float m_totalCastTime = 1.0f;
     float m_progress = 0.0f;
     string m_spellName;
@@ -16,12 +17,11 @@ public class BossCastBarScript : MonoBehaviour {
 
     float m_realWidth;
     float m_height = 20.0f;
-    bool m_adjusted = false;
 
 	// Use this for initialization
 	void Start () {
         m_realWidth = Fill.rectTransform.sizeDelta.x;
-
+        m_height = Fill.rectTransform.sizeDelta.y;
     }
 	
 	// Update is called once per frame
@@ -54,14 +54,6 @@ public class BossCastBarScript : MonoBehaviour {
 
     public void InitiateCast(EncounterAbility ability)
     {
-        //Fuck variable screen sizes!
-        if (!m_adjusted)
-        {
-            float scale = GameObject.FindGameObjectWithTag("Canvas").transform.localScale.x;
-            gameObject.transform.SetParent(GameObject.FindGameObjectWithTag("Canvas").transform, false);
-            gameObject.transform.SetPositionAndRotation(new Vector3(50* scale, 360* scale, 0), Quaternion.identity);
-        }
-
         m_totalCastTime = ability.CastTime;
         m_spellName = ability.Name;
         m_castType = ability.CastType;

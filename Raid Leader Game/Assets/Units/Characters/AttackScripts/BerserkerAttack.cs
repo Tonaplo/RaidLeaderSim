@@ -5,19 +5,17 @@ using System;
 [Serializable]
 public class BerserkerAttack : BaseHealOrAttackScript
 {
-    int m_healthPercent = 20;
-    float m_damageTakenPercent = 0.02f;
-    float m_multiplier = 1.5f;
+    float m_multiplier = 3.0f;
 
-    public override string GetDescription() { return "While above " + m_healthPercent + " % health, " + Utility.GetPercentString(m_damageTakenPercent) + " health is sacrificed to deal " + Utility.GetPercentString(m_multiplier) + " damage."; }
+    public override string GetDescription() { return "Deals up to " + Utility.GetPercentString(m_multiplier) + " more damage, based on missing health. More health missing translates to more damage."; }
 
 
     public override void Setup()
     {
         m_damageStruct = new DamageStruct();
-        m_castTime = 1.5f;
-        m_damageStruct.m_baseMultiplier = 1.8f;
-        m_name = "Raging Blow";
+        m_castTime = 1.0f;
+        m_damageStruct.m_baseMultiplier = 1.1f;
+        m_name = "Berserker's Rage";
     }
 
     public override void StartFight(int index, Raider attacker, RaiderScript rs)
@@ -32,13 +30,13 @@ public class BerserkerAttack : BaseHealOrAttackScript
         if (!rs.IsBossDead() && !rs.IsDead())
         {
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
-            
-            if (rs.GetHealthPercent() > m_healthPercent) {
-                rs.TakeDamage((int)(rs.GetMaxHealth() * m_damageTakenPercent), Name);
+            float actualMultiplier = m_multiplier* (100.0f - rs.GetHealthPercent()) / 100.0f;
+
+            if (actualMultiplier > 1.0f)
                 thisAttack.m_baseMultiplier *= m_multiplier;
-            }
             
-            rs.DealDamage(index, Name, thisAttack);
+            int unused = 0;
+            rs.DealDamage(index, Name, thisAttack, out unused, null);
             rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
     }

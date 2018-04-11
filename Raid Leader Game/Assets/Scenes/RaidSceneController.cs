@@ -20,6 +20,12 @@ public class RaidSceneController : MonoBehaviour {
     public GameObject SetupPanel;
     public BossCastBarScript BossCastScript;
     public RaidSceneControlPanel ControlPanelController;
+    public Button TankCooldownButton;
+    public Button HealerCooldownButton;
+    public Button DPSCooldownButton;
+    public Text TankCooldownButtonText;
+    public Text HealerCooldownButtonText;
+    public Text DPSCooldownButtonText;
 
     Enums.EncounterSteps currentStep = Enums.EncounterSteps.EncounterStart;
     BaseEncounter encounter;
@@ -30,6 +36,9 @@ public class RaidSceneController : MonoBehaviour {
     float m_fightStartTime;
     int m_numDeadRaidMembers = 0;
     List<GameObject> m_consumableButtons = new List<GameObject>();
+    RaiderScript m_cachedCurrentTarget = null;
+    List<string> m_eventLogTexts = new List<string>();
+    Enums.EventLogType m_currentEventLogType;
 
     public BaseEncounter Encounter {get  { return encounter; } }
 
@@ -37,16 +46,18 @@ public class RaidSceneController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        /*Utility.DebugInitalize();
+        //Utility.DebugInitalize();
 
-        int whatevertwo = 9;
-        whatevertwo *= 9;
-        bool thisIsStupidtwo = whatevertwo == 54;
-        thisIsStupidtwo = !thisIsStupidtwo;*/
+        for (int i = 0; i < (int)Enums.EventLogType.NumEventLogTypes; i++)
+        {
+            m_eventLogTexts.Add("");
+        }
 
         all = PlayerData.RaidTeam;
         CreateRaidHealthBars();
         CreateEncounter();
+
+        
 
         //This random sequence of arithmetics makes Unity slow down enough to execute the previous functions fully,
         //before it continues. If this is not here, the previous functions will not have setup the things necessary
@@ -86,22 +97,47 @@ public class RaidSceneController : MonoBehaviour {
         m_healingMcs.CreateEntriesFromRaid(all);
 
         ControlPanelController.Initialize();
-    }
 
+        List<RaiderScript> dpsScripts = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
+        DPSCooldownButtonText.text = "DPS\nCooldowns\n(" + dpsScripts.FindAll(x => !x.CooldownUsed).Count + ")";
+
+        List<RaiderScript> healerScripts = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer);
+        HealerCooldownButtonText.text = "Healer\nCooldowns\n(" + healerScripts.FindAll(x => !x.CooldownUsed).Count + ")";
+
+        List<RaiderScript> tanks = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank);
+        TankCooldownButtonText.text = "Tank\nCooldowns\n(" + tanks.FindAll(x => !x.CooldownUsed).Count + ")";
+        
+    }
 	
 	// Update is called once per frame
 	void Update () {
         if (currentStep == Enums.EncounterSteps.FightInProgress && (IsBossDead() || (m_numDeadRaidMembers == StaticValues.RaidTeamSize)))
         {
+            
             BossCastScript.StopCasting();
+            
+            for (int i = 0; i < m_raiderScripts.Count; i++)
+            {
+                m_raiderScripts[i].HealthBar.FightEnded();
+            }
 
-            if(encounter.CurrentAbility != null)
+            if (encounter.CurrentAbility != null)
                 EndCastingAbility(encounter.CurrentAbility);
 
             PositionalButton.gameObject.SetActive(false);
 
             currentStep++;
             AdvanceNextStep();
+        }
+
+        if (currentStep == Enums.EncounterSteps.FightInProgress) {
+            if (m_cachedCurrentTarget != encounter.CurrentRaiderTarget) {
+                if (m_cachedCurrentTarget != null)
+                    m_cachedCurrentTarget.HealthBar.SetCurrentTank(false);
+
+                m_cachedCurrentTarget = encounter.CurrentRaiderTarget;
+                m_cachedCurrentTarget.HealthBar.SetCurrentTank(true);
+            }
         }
     }
 
@@ -126,6 +162,7 @@ public class RaidSceneController : MonoBehaviour {
                 break;
             case Enums.EncounterSteps.ReadyToPull:
                 ControlPanel.SetActive(true);
+                SetEventLogType(0);
                 SetupPanel.SetActive(false);
                 currentStep++;
                 AdvanceStepButtonText.text = "Pull " + encounter.Name + "!";
@@ -134,11 +171,12 @@ public class RaidSceneController : MonoBehaviour {
                 AdvanceStepButton.SetActive(false);
                 for (int i = 0; i < all.Count; i++)
                 {
-                    StartCoroutine(m_raiderScripts[i].StartFight(i*0.1f, i, all[i], this));
+                    m_raiderScripts[i].HealthBar.SetCurrentTank(i == 0); // Set the first tank to be the currencyTarget
+                    StartCoroutine(m_raiderScripts[i].StartFight(UnityEngine.Random.Range( 0.1f, 0.5f), i, all[i], this));
                 }
                 encounter.BeginEncounter();
                 m_fightStartTime = Time.time;
-                AddTextToEventLog(encounter.Name + " was pulled!");
+                AddTextToEventLog(encounter.Name + " was pulled!", Enums.EventLogType.Boss);
 
                 for (int i = 0; i < encounter.Enemies.Count; i++)
                 {
@@ -156,12 +194,12 @@ public class RaidSceneController : MonoBehaviour {
                 if (encounter.IsDead())
                 {
                     AdvanceStepButtonText.text = "Victory!";
-                    AddTextToEventLog(encounter.Name + " was defeated by " + PlayerData.RaidTeamName + "!");
+                    AddTextToEventLog(encounter.Name + " was defeated by " + PlayerData.RaidTeamName + "!", Enums.EventLogType.Boss);
                     GrantSkillIncreasesFromEncounterVictory();
                 }
                 else
                 {
-                    AddTextToEventLog(PlayerData.RaidTeamName + " was defeated by " + encounter.Name + "!");
+                    AddTextToEventLog(PlayerData.RaidTeamName + " was defeated by " + encounter.Name + "!", Enums.EventLogType.Boss);
                     AdvanceStepButtonText.text = "Defeat!";
                 }
                 PlayerData.ConsumeAttempt();
@@ -187,18 +225,31 @@ public class RaidSceneController : MonoBehaviour {
         }
     }
 
-    public void AddTextToEventLog(string text)
+    public void SetEventLogType(int intType)
+    {
+        Enums.EventLogType type = (Enums.EventLogType)intType;
+        m_currentEventLogType = type;
+        raidText.text = m_eventLogTexts[(int)type];
+    }
+
+    public void AddTextToEventLog(string text, Enums.EventLogType type)
     {
         int minutes = Mathf.RoundToInt(Time.time - m_fightStartTime) / 60;
         int seconds = Mathf.RoundToInt(Time.time - m_fightStartTime) % 60;
         string newText = " <color=#ffff00ff>[" + minutes + ":" + (seconds < 10 ? "0" : "") + seconds + "]:</color> " + text + "\n";
-        raidText.text = newText + raidText.text;
+        m_eventLogTexts[(int)type] = newText + m_eventLogTexts[(int)type];
 
-        if (raidText.text.Length > 2000)
+        if (m_currentEventLogType == type)
         {
-            Debug.Log(newText);
+            raidText.text = m_eventLogTexts[(int)type];
+        }
+
+        /*
+        if (raidText.text.Length > 1800)
+        {
             raidText.text = raidText.text.Remove(raidText.text.LastIndexOf("\n"));
         }
+        */
     }
 
     public bool IsBossDead()
@@ -211,9 +262,25 @@ public class RaidSceneController : MonoBehaviour {
         return m_numDeadRaidMembers == StaticValues.RaidTeamSize;
     }
 
-    public void DealDamage(int damage, RaiderScript attacker, int index) {
-        int actualdamage = encounter.TakeDamage(damage, attacker);
-        m_damageMcs.AddAmountToEntry(attacker.Raider.GetName(), index, actualdamage);
+    public EncounterEnemy DealDamage(int damage, RaiderScript attacker, int index, out int actualDamage) {
+        return DealDamageInternal(damage, attacker, index, out actualDamage, null);
+    }
+
+    public EncounterEnemy DealDamageToTarget(int damage, RaiderScript attacker, int index, out int actualDamage, EncounterEnemy target)
+    {
+        return DealDamageInternal(damage, attacker, index, out actualDamage, target);
+    }
+
+    EncounterEnemy DealDamageInternal(int damage, RaiderScript attacker, int index, out int actualDamage, EncounterEnemy target)
+    {
+        EncounterEnemy actualTarget = null;
+        if(target == null)
+            actualTarget = encounter.TakeDamage(damage, attacker, out actualDamage);
+        else 
+            actualTarget = encounter.TakeDamageSpecific(damage, attacker, out actualDamage, target);
+
+        m_damageMcs.AddAmountToEntry(attacker.Raider.GetName(), index, actualDamage);
+        return actualTarget;
     }
 
     public void DoHeal(int healAmount, string healer, string heal, int index)
@@ -221,11 +288,10 @@ public class RaidSceneController : MonoBehaviour {
         m_healingMcs.AddAmountToEntry(healer, index, healAmount);
     }
 
-    public void RaiderDied(string raiderName, string killedBy)
+    public void RaiderDied(string raiderName, string killedBy, int damageTaken, int overkill)
     {
-        AddTextToEventLog(raiderName + " died from " + killedBy);
+        AddTextToEventLog(raiderName + " died from <b>" + killedBy + "</b> (" + damageTaken + " damage taken, " + overkill +" overkill).", Enums.EventLogType.Deaths);
         m_numDeadRaidMembers++;
-        ControlPanelController.HandleStackUI();
     }
 
     public void BeginCastingAbility(EncounterAbility ab)
@@ -242,22 +308,19 @@ public class RaidSceneController : MonoBehaviour {
             default:
                 break;
         }
-        AddTextToEventLog(ab.Caster + " begins" + castOrChannel + "<b>" + ab.Name + "</b>!");
+        AddTextToEventLog(ab.Caster + " begins" + castOrChannel + "<b>" + ab.Name + "</b>!", Enums.EventLogType.Boss);
 
         BossCastScript.InitiateCast(ab);
 
         if (ab.Ability == Enums.Ability.Immune || ab.Ability == Enums.Ability.Interrupt || ab.Ability == Enums.Ability.Stun)
         {
-            for (int i = 0; i < m_raiderScripts.Count; i++)
+            List<RaiderScript> dps = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
+            for (int i = 0; i < dps.Count; i++)
             {
-                if (m_raiderScripts[i].Raider.RaiderStats.Ability.Ability == ab.Ability && !m_raiderScripts[i].IsDead())
+                if (dps[i].Raider.RaiderStats.Ability.Ability == ab.Ability && !dps[i].IsDead())
                 {
-                    m_raiderScripts[i].HealthBarButton.interactable = true;
-                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = Color.green;
-                }
-                else
-                {
-                    m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = Color.grey;
+                    dps[i].HealthBarButton.interactable = true;
+                    dps[i].HealthBarButton.GetComponent<Image>().color = Color.green;
                 }
             }
         }
@@ -273,10 +336,11 @@ public class RaidSceneController : MonoBehaviour {
     {
         if (ab.Ability == Enums.Ability.Immune || ab.Ability == Enums.Ability.Interrupt || ab.Ability == Enums.Ability.Stun)
         {
-            for (int i = 0; i < m_raiderScripts.Count; i++)
+            List<RaiderScript> dps = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
+            for (int i = 0; i < dps.Count; i++)
             {
-                m_raiderScripts[i].HealthBarButton.interactable = false;
-                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(0, 0, 0, 0);
+                dps[i].HealthBarButton.interactable = false;
+                dps[i].HealthBarButton.GetComponent<Image>().color = new Color(0, 0, 0, 0);
             }
         }
         else if (ab.Ability == Enums.Ability.PostMovePositional || ab.Ability == Enums.Ability.PreMovePositional)
@@ -300,14 +364,14 @@ public class RaidSceneController : MonoBehaviour {
             if (m_raiderScripts[i].Raider == counter)
             {
                 m_raiderScripts[i].HealthBarButton.interactable = false;
-                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = Color.grey;
+                m_raiderScripts[i].HealthBarButton.GetComponent<Image>().color = new Color(0,0,0,0);
                 break;
             }
         }
 
         bool success = encounter.AttemptToCounterCurrentAbility(counter);
 
-        AddTextToEventLog(Utility.GetColoredRaiderName(counter) + " tried to counter <b>" + encounter.CurrentAbility.Name + "</b> and" + (success ? " succeeded!" : " failed!"));
+        AddTextToEventLog(Utility.GetColoredRaiderName(counter) + " tried to counter <b>" + encounter.CurrentAbility.Name + "</b> and" + (success ? " succeeded!" : " failed!"), Enums.EventLogType.AbilityCounter);
         if (success)
         {
             EndCastingAbility(encounter.CurrentAbility);
@@ -315,14 +379,78 @@ public class RaidSceneController : MonoBehaviour {
         }
     }
 
-    public void DebuffsAdded()
+    public void UseTankCooldown()
     {
-        ControlPanelController.TryToUpdateDispellUI();
+        List<RaiderScript> tanks = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank);
+        for (int i = 0; i < tanks.Count; i++)
+        {
+            if (!tanks[i].CooldownUsed)
+            {
+                tanks[i].UseCooldown();
+                break;
+            }
+        }
+
+        if (tanks.FindAll(x => !x.CooldownUsed).Count == 0)
+        {
+            TankCooldownButton.interactable = false;
+            TankCooldownButtonText.text = "None Left!";
+            TankCooldownButton.GetComponent<Image>().color = Color.grey;
+        }
+        else {
+            TankCooldownButtonText.text = "Tank\nCooldowns\n(" + tanks.FindAll(x => !x.CooldownUsed).Count + ")";
+        }
+    }
+
+    public void UseHealerCooldown()
+    {
+        List<RaiderScript> healers = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer);
+        for (int i = 0; i < healers.Count; i++)
+        {
+            if (!healers[i].CooldownUsed) { 
+                healers[i].UseCooldown();
+                break;
+            }
+        }
+
+        if (healers.FindAll(x => !x.CooldownUsed).Count == 0)
+        {
+            HealerCooldownButton.interactable = false;
+            HealerCooldownButtonText.text = "None Left!";
+            HealerCooldownButton.GetComponent<Image>().color = Color.grey;
+        }
+        else
+        {
+            HealerCooldownButtonText.text = "Healer\nCooldowns\n(" + healers.FindAll(x => !x.CooldownUsed).Count + ")";
+        }
+    }
+
+    public void UseDPSCooldown()
+    {
+        List<RaiderScript> dps = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.MeleeDPS || x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.RangedDPS);
+        for (int i = 0; i < dps.Count; i++)
+        {
+            if (!dps[i].CooldownUsed) { 
+                dps[i].UseCooldown();
+                break;
+            }
+        }
+
+        if (dps.FindAll(x => !x.CooldownUsed).Count == 0)
+        {
+            DPSCooldownButton.interactable = false;
+            DPSCooldownButtonText.text = "None Left!";
+            DPSCooldownButton.GetComponent<Image>().color = Color.grey;
+        }
+        else
+        {
+            DPSCooldownButtonText.text = "DPS\nCooldowns\n(" + dps.FindAll(x => !x.CooldownUsed).Count + ")";
+        }
     }
 
     public void UseRaiderCooldown(RaiderScript raider)
     {
-        AddTextToEventLog(Utility.GetColoredRaiderName(raider.Raider) + " used <i>" + raider.Raider.RaiderStats.Cooldown.Name + "</i>!");
+        AddTextToEventLog(Utility.GetColoredRaiderName(raider.Raider) + " used <i>" + raider.Raider.RaiderStats.Cooldown.Name + "</i>!", Enums.EventLogType.Cooldown);
         if (raider.Raider.RaiderStats.Cooldown.Cooldowneffects.m_targets == Enums.CooldownTargets.Self)
         {
             raider.AddCooldown(raider.Raider.RaiderStats.Cooldown);
@@ -343,11 +471,13 @@ public class RaidSceneController : MonoBehaviour {
     public void RaiderTaunt(RaiderScript taunter)
     {
         encounter.SetCurrentRaiderTarget(taunter);
-    }
+        for (int i = 0; i < m_raiderScripts.Count; i++)
+        {
+            if(m_raiderScripts[i] != taunter)
+                m_raiderScripts[i].HealthBar.SetCurrentTank(false);
+        }
 
-    public void TankAbilityUsed()
-    {
-        ControlPanelController.HandleStackUI();
+        taunter.HealthBar.SetCurrentTank(true);
     }
 
     public void UseConsumable(ConsumableItem item)
@@ -416,7 +546,7 @@ public class RaidSceneController : MonoBehaviour {
             int maxRoll = ((StaticValues.MaxSkill - m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.AverageSkillLevel) % 20) + 1;
             int newSkillLevel = m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.GetSkillLevel(type) + UnityEngine.Random.Range(1, maxRoll);
             m_raiderScripts[indices[i]].Raider.RaiderStats.Skills.ModifySkill(newSkillLevel, type);
-            AddTextToEventLog(Utility.GetColoredRaiderName(m_raiderScripts[indices[i]].Raider) + " had " + type.ToString() + " skill increased to " + newSkillLevel + "!");
+            AddTextToEventLog(Utility.GetColoredRaiderName(m_raiderScripts[indices[i]].Raider) + " had " + type.ToString() + " skill increased to " + newSkillLevel + "!", Enums.EventLogType.Boss);
         }
 
     }
@@ -486,5 +616,38 @@ public class RaidSceneController : MonoBehaviour {
 
         encounter.InitializeForRaid(m_raiderScripts, this, temp);
         Utility.SetCurrentEncounter(encounter);
+    }
+
+    public void DebuffAdded()
+    {
+        List<RaiderScript> healers = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer);
+        for (int i = 0; i < healers.Count; i++)
+        {
+            healers[i].HealthBar.SetDispelState(true);
+        }
+    }
+
+    public void AttemptToDispel(RaiderScript dispeller)
+    {
+        bool success = UnityEngine.Random.Range(0, StaticValues.MaxSkill) <= dispeller.Raider.RaiderStats.GetMechanicalSkillForEncounter();
+        RaiderScript debuffed = GetRaid().FindAll(x => x.HasDebuffs())[0];
+        if (success)
+        {
+            debuffed.RemoveDebuff();
+        }
+
+
+        AddTextToEventLog(Utility.GetColoredRaiderName(dispeller.Raider) + " tried to dispel <b>" + Utility.GetColoredRaiderName(debuffed.Raider) + (success ? " succeeded!" : " failed!"), Enums.EventLogType.AbilityCounter);
+
+        dispeller.HealthBar.AttemptedToDispell();
+
+        if (GetRaid().FindAll(x => x.HasDebuffs()).Count == 0) {
+
+            List<RaiderScript> healers = m_raiderScripts.FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Healer);
+            for (int i = 0; i < healers.Count; i++)
+            {
+                healers[i].HealthBar.SetDispelState(false);
+            }
+        }
     }
 }

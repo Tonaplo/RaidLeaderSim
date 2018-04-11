@@ -5,51 +5,63 @@ using System;
 [Serializable]
 public class AssasinAttack : BaseHealOrAttackScript
 {
-    
-    float m_DoTMultiplier = 0.15f;
-    int m_poisonDuration = 5;
+    float m_maxBuffPerStack = 0.30f;
+    float m_minBuffPerStack = 0.05f;
+    float m_tickDuration = 1.0f;
+    float m_poisonDuration = 5.0f;
+    IEnumerator m_coroutine;  
 
-    public override string GetDescription() { return "Leaves a poison, dealing " + Utility.GetPercentString(m_DoTMultiplier) + " damage to enemies every second for  " + m_poisonDuration + " seconds."; }
+    public override string GetDescription() { return "Dealing damage to a target also applies a poison that deals between " + Utility.GetPercentString(m_minBuffPerStack *(m_poisonDuration/m_tickDuration)) + " and " + Utility.GetPercentString(m_maxBuffPerStack * (m_poisonDuration / m_tickDuration)) + " additional damage over " + m_poisonDuration +" seconds. The higher health the target is, the stronger the poison."; }
 
     public override void Setup()
     {
         m_damageStruct = new DamageStruct();
-        m_castTime = 0.5f;
-        m_damageStruct.m_baseMultiplier = 0.6f;
-        m_name = "Vein Slit";
+
+        m_name = "Poisonous Blades";
+        m_castTime = 1.2f;
+        m_damageStruct.m_baseMultiplier = 1.2f;
     }
 
     public override void StartFight(int index, Raider attacker, RaiderScript rs)
     {
-        rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
+        rs.StartCoroutine(BasicAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
     }
 
-    IEnumerator DoAttack(float castTime, int index, Raider attacker, RaiderScript rs)
+    IEnumerator BasicAttack(float castTime, int index, Raider attacker, RaiderScript rs)
     {
         yield return new WaitForSeconds(castTime);
 
         if (!rs.IsBossDead() && !rs.IsDead())
         {
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
+            int unused = 0;
+            EncounterEnemy thisAttackEnemy = rs.DealDamage(index, Name, thisAttack, out unused, null);
 
-            rs.DealDamage(index, Name, thisAttack);
-            rs.StartCoroutine(DoAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
+            float poisonMultiplier = (thisAttackEnemy.Healthbar.GetHealthPercent() / 100.0f) * m_maxBuffPerStack;
 
-            rs.StartCoroutine(DoPoisonDoT(1.0f, m_poisonDuration, index, attacker, rs));
+            //Make sure it never falls below the minimum
+            poisonMultiplier = poisonMultiplier < m_minBuffPerStack ? m_minBuffPerStack : poisonMultiplier;
+
+            rs.StartCoroutine(DoPoisonTick(m_tickDuration, index, poisonMultiplier,(int)(m_poisonDuration/m_tickDuration), attacker, rs, thisAttackEnemy));
+            
+            rs.StartCoroutine(BasicAttack(Utility.GetFussyCastTime(rs.ApplyCooldownCastTimeMultiplier(m_castTime)), index, attacker, rs));
         }
     }
 
-    IEnumerator DoPoisonDoT(float castTime, int counter, int index, Raider attacker, RaiderScript rs)
+    IEnumerator DoPoisonTick(float castTime, int index, float multiplier, int tickNumber, Raider attacker, RaiderScript rs, EncounterEnemy target)
     {
         yield return new WaitForSeconds(castTime);
 
-        if (counter > 0 && !rs.IsBossDead() && !rs.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead() && !target.Healthbar.IsDead())
         {
-            counter--;
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
-            thisAttack.m_baseMultiplier *= m_DoTMultiplier;
-            rs.DealDamage(index, Name, thisAttack);
-            rs.StartCoroutine(DoPoisonDoT(1.0f, counter, index, attacker, rs));
+            thisAttack.m_baseMultiplier *= multiplier;
+
+            int unused = 0;
+            rs.DealDamage(index, Name, thisAttack, out unused, target);
+            tickNumber--;
+            if (tickNumber >= 0)
+                rs.StartCoroutine(DoPoisonTick(m_tickDuration, index, multiplier, tickNumber, attacker, rs, target));
         }
     }
 }

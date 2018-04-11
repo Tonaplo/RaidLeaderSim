@@ -43,6 +43,7 @@ public static class Enums{
         Stun,
         Immune,
         Dispel,
+        Taunt,
         PreMovePositional,
         PostMovePositional,
         Damage,
@@ -158,7 +159,9 @@ public static class Enums{
     public enum HealthBarSetting {
         CurrentTarget,
         Enemy,
-        Raider,
+        DPS,
+        Tank,
+        Healer,
     }
 
     public enum TraitType
@@ -172,5 +175,14 @@ public static class Enums{
         Inefficient,
         Clumsy,
         NumTraitTypes,
+    }
+
+    public enum EventLogType
+    {
+        Boss = 0,
+        Cooldown = 1,
+        AbilityCounter = 2,
+        Deaths = 3,
+        NumEventLogTypes = 4,
     }
 }

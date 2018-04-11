@@ -23,7 +23,6 @@ public class MoAVampiricus : BaseEncounter
 
     public override void BeginEncounter()
     {
-        m_counter = 0;
         bool hasHitTank = false;
         for (int i = 0; i < m_raid.Count; i++)
         {
@@ -154,29 +153,31 @@ public class MoAVampiricus : BaseEncounter
 
     int GetBleedingBiteDamage()
     {
+        int numStacks = GetNumStacksForRaider(m_currentRaiderTarget);
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 25 * (m_counter + 1);
+                return 25 * (numStacks + 1);
             case Enums.Difficulties.Normal:
             default:
-                return 60 * (m_counter + 1);
+                return 60 * (numStacks + 1);
             case Enums.Difficulties.Hard:
-                return 100 * (m_counter + 1);
+                return 100 * (numStacks + 1);
         }
     }
 
     int GetBleedingBiteDoTDamage()
     {
+        int numStacks = GetNumStacksForRaider(m_currentRaiderTarget);
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 10 * (m_counter + 1);
+                return 10 * (numStacks + 1);
             case Enums.Difficulties.Normal:
             default:
-                return 30 * (m_counter + 1);
+                return 30 * (numStacks + 1);
             case Enums.Difficulties.Hard:
-                return 50 * (m_counter + 1);
+                return 50 * (numStacks + 1);
         }
     }
 
@@ -202,6 +203,20 @@ public class MoAVampiricus : BaseEncounter
     int GetNumBleedingBiteTicks()
     {
         return 5;
+    }
+
+    float GetBleedingBiteDebuffDuration()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return GetBleedingBiteCastTime()*2.5f;
+            case Enums.Difficulties.Normal:
+            default:
+                return GetBleedingBiteCastTime() * 2.5f;
+            case Enums.Difficulties.Hard:
+                return GetBleedingBiteCastTime() * 2.5f;
+        }
     }
 
     int GetSwarmOfYounglingsDamage()
@@ -346,22 +361,13 @@ public class MoAVampiricus : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !target.IsDead() && !IsDead())
         {
-            if (m_currentRaiderTarget == target)
-            {
-                target.TakeDamage(GetBleedingBiteDamage(), "Bleeding Bite");
-                m_counter++;
-            }
-            else
-            {
-                m_counter = 0;
-                target.TakeDamage(GetBleedingBiteDamage(), "Bleeding Bite");
-            }
+            m_currentRaiderTarget.TakeDamage(GetBleedingBiteDamage(), "Bleeding Bite");
+            AddStackstoRaider(m_currentRaiderTarget, 1, GetBleedingBiteDebuffDuration());
 
         }
         else if (target.IsDead())
         {
             m_currentRaiderTarget = null;
-            m_counter = 0;
             List<RaiderScript> otherTanks = m_rsc.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
             for (int i = 0; i < otherTanks.Count; i++)
             {
@@ -387,7 +393,6 @@ public class MoAVampiricus : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !IsDead())
         {
-            m_rsc.TankAbilityUsed();
             m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(GetBleedingBiteCastTime()), m_currentRaiderTarget));
             m_rsc.StartCoroutine(BleedingBiteDoTDamage(Utility.GetFussyCastTime(GetBleedingBiteTickLength()), GetBleedingBiteDoTDamage(), GetNumBleedingBiteTicks(), m_currentRaiderTarget));
         }
@@ -568,8 +573,6 @@ public class MoAVampiricus : BaseEncounter
                 temp.AddComponent<RaiderDebuff>().Initialize(debuffTargets[i], VenomSprayString, GetVenomSprayDoTDamage());
                 debuffTargets[i].AddDebuff(temp);
             }
-
-            m_rsc.DebuffsAdded();
 
             if(m_currentAbility != null && m_currentAbility.Name == VenomSprayString)
                 m_currentAbility = null;

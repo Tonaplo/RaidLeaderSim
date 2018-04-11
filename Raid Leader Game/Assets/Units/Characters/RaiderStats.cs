@@ -70,7 +70,7 @@ public class RaiderStats {
         m_charRole = _charRole;
         m_charClass = _charClass;
         FinishRaiderStatGeneration();
-        ComputeAverageThroughput();
+        ReCalculateRaiderStats();
     }
 
     public void TrainingFinished()
@@ -399,37 +399,37 @@ public class RaiderStats {
         switch (m_charSpec)
         {
             case Enums.CharacterSpec.Guardian:
-                m_ability = new BaseAbility("InterruptGuardian", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
+                m_ability = new BaseAbility("Divert", "Diverts the attention of the target, forcing it to attack the Guardian.", Enums.Ability.Taunt);
                 break;
             case Enums.CharacterSpec.Knight:
-                m_ability = new BaseAbility("KnightStun", "Provides the m_ability to stun", Enums.Ability.Stun);
+                m_ability = new BaseAbility("Provoke", "Provokes the target, causing it to attack the Knight.", Enums.Ability.Taunt);
                 break;
             case Enums.CharacterSpec.Cleric:
-                m_ability = new BaseAbility("ClericDispel", "Provides the m_ability to dispel", Enums.Ability.Dispel);
+                m_ability = new BaseAbility("Expel Darkness", "Calls upon the light to dispel the target.", Enums.Ability.Dispel);
                 break;
             case Enums.CharacterSpec.Diviner:
-                m_ability = new BaseAbility("DivinerDispel", "Provides the m_ability to dispel", Enums.Ability.Dispel);
+                m_ability = new BaseAbility("Arcane Cleanse", "Uses the Arcane to dispel the target.", Enums.Ability.Dispel);
                 break;
             case Enums.CharacterSpec.Naturalist:
-                m_ability = new BaseAbility("NaturalistDispel", "Provides the m_ability to dispel", Enums.Ability.Dispel);
+                m_ability = new BaseAbility("Restoration", "Attempts to restore the target by dispelling it.", Enums.Ability.Dispel);
                 break;
             case Enums.CharacterSpec.Berserker:
-                m_ability = new BaseAbility("StunBerserker", "Provides the m_ability to stun", Enums.Ability.Stun);
+                m_ability = new BaseAbility("BerserkerStun", "Provides the m_ability to stun", Enums.Ability.Stun);
                 break;
             case Enums.CharacterSpec.Assassin:
-                m_ability = new BaseAbility("InterruptAssassin", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
+                m_ability = new BaseAbility("AssassinInterrupt", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
                 break;
             case Enums.CharacterSpec.Ranger:
-                m_ability = new BaseAbility("RangerImmune", "Provides the m_ability to slow", Enums.Ability.Immune);
+                m_ability = new BaseAbility("RangerImmune", "Provides the m_ability to immune", Enums.Ability.Immune);
                 break;
             case Enums.CharacterSpec.Wizard:
-                m_ability = new BaseAbility("InterruptWizard", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
+                m_ability = new BaseAbility("WizardInterrupt", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
                 break;
             case Enums.CharacterSpec.Elementalist:
-                m_ability = new BaseAbility("ElementalistImmune", "Provides the m_ability to slow", Enums.Ability.Immune);
+                m_ability = new BaseAbility("ElementalistInterrupt", "Provides the m_ability to interrupt", Enums.Ability.Interrupt);
                 break;
             case Enums.CharacterSpec.Necromancer:
-                m_ability = new BaseAbility("NecromancerImmune", "Provides the m_ability to slow", Enums.Ability.Immune);
+                m_ability = new BaseAbility("NecromancerImmune", "Provides the m_ability to immune", Enums.Ability.Immune);
                 break;
             case Enums.CharacterSpec.Scourge:
                 m_ability = new BaseAbility("ScourgeStun", "Provides the m_ability to stun", Enums.Ability.Stun);
@@ -452,9 +452,9 @@ public class RaiderStats {
                 m_cooldown = new BaseCooldown("Protection", "The Guardian and the rest of the raid takes <dr> less damage for the next <dur>.", Enums.Cooldowns.TankCooldown, effects, 15.0f);
                 break;
             case Enums.CharacterSpec.Knight:
-                effects.m_leechMultiplier = 0.1f;
+                effects.m_maxHealthMultiplier = 1.5f;
                 effects.m_targets = Enums.CooldownTargets.Raid;
-                m_cooldown = new BaseCooldown("Light Infusion", "The Knight and the rest of the raid now heals for <leech> of damage dealt for the next <dur>.", Enums.Cooldowns.TankCooldown, effects, 15.0f);
+                m_cooldown = new BaseCooldown("Light Infusion", "The Knight and the rest of the raid gains <maxHP> Maximum Health for the next <dur>.", Enums.Cooldowns.TankCooldown, effects, 15.0f);
                 break;
             case Enums.CharacterSpec.Cleric:
                 effects.m_deepHealingMultiplier = 1.5f;

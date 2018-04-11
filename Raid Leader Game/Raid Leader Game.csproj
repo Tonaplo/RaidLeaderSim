@@ -114,10 +114,6 @@
     <Compile Include="Assets\ProgressBossPrefab.cs" />
     <Compile Include="Assets\RaidMemberItemReward.cs" />
     <Compile Include="Assets\RaidSceneControlPanel.cs" />
-    <Compile Include="Assets\RaidSceneCooldownPrefabScript.cs" />
-    <Compile Include="Assets\RaidSceneDispellerCooldownPrefab.cs" />
-    <Compile Include="Assets\RaidSceneDispelPrefab.cs" />
-    <Compile Include="Assets\RaidSceneTauntPrefabScript.cs" />
     <Compile Include="Assets\RaidTeamMemberSelectionPrefabScript.cs" />
     <Compile Include="Assets\RosterButtonScript.cs" />
     <Compile Include="Assets\RosterControllerScript.cs" />

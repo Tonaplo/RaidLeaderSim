@@ -17,5 +17,5 @@ public class DamageStruct
     public float m_baseMultiplier = 1.0f;
     public float m_baseLeech = 0.0f;
     public float m_baseCritEffect = 1.0f;
-    public int m_baseCritChance = 0;
+    public int m_baseCritChance = 0;//30;
 }

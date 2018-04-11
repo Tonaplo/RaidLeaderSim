@@ -68,7 +68,6 @@ public class MoACouncilOfStone : BaseEncounter
     public override void BeginEncounter()
     {
         m_currentNumberOfCouncilMembers = 1;
-        m_counter = 0;
         bool hasHitTank = false;
         for (int i = 0; i < m_raid.Count; i++)
         {
@@ -261,15 +260,30 @@ public class MoACouncilOfStone : BaseEncounter
 
     float GetAccelerationCastTime()
     {
+        int numStacks = GetNumStacksForRaider(m_currentRaiderTarget);
         switch (m_difficulty)
         {
             case Enums.Difficulties.Easy:
-                return 4.0f * Mathf.Pow(GetAccelerationCastTimeDecrease(), m_counter);
+                return 4.0f * Mathf.Pow(GetAccelerationCastTimeDecrease(), numStacks);
             case Enums.Difficulties.Normal:
             default:
-                return 3.5f * Mathf.Pow(GetAccelerationCastTimeDecrease(), m_counter);
+                return 3.5f * Mathf.Pow(GetAccelerationCastTimeDecrease(), numStacks);
             case Enums.Difficulties.Hard:
-                return 3.0f * Mathf.Pow(GetAccelerationCastTimeDecrease(), m_counter);
+                return 3.0f * Mathf.Pow(GetAccelerationCastTimeDecrease(), numStacks);
+        }
+    }
+
+    float GetAccelerationDuration()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 10.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 10.0f;
+            case Enums.Difficulties.Hard:
+                return 10.0f;
         }
     }
 
@@ -611,22 +625,13 @@ public class MoACouncilOfStone : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !target.IsDead() && !IsDead())
         {
-            if (m_currentRaiderTarget == target)
-            {
-                target.TakeDamage(GetAccelerationDamage(), "Acceleration");
-                m_counter++;
-            }
-            else
-            {
-                m_counter = 0;
-                target.TakeDamage(GetAccelerationDamage(), "Acceleration");
-            }
+            m_currentRaiderTarget.TakeDamage(GetAccelerationDamage(), "Acceleration");
+            AddStackstoRaider(m_currentRaiderTarget, 1, GetAccelerationDuration());
 
         }
         else if (target.IsDead())
         {
             m_currentRaiderTarget = null;
-            m_counter = 0;
             List<RaiderScript> otherTanks = m_rsc.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
             for (int i = 0; i < otherTanks.Count; i++)
             {
@@ -652,7 +657,6 @@ public class MoACouncilOfStone : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !IsDead())
         {
-            m_rsc.TankAbilityUsed();
             m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(GetAccelerationCastTime()), m_currentRaiderTarget));
         }
     }

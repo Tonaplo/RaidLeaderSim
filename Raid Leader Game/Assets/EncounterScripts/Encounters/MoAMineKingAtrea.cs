@@ -88,8 +88,7 @@ public class MoAMineKingAtrea : BaseEncounter
         CreateEnemy("Right Leg", Mathf.RoundToInt(15000 * GetDifficultyMultiplier()), Enums.EncounterEnemyType.Add);
         LeftLeg = m_enemies.Find(e => e.Name == "Left Leg");
         RightLeg = m_enemies.Find(e => e.Name == "Right Leg");
-
-        m_counter = 0;
+        
         bool hasHitTank = false;
         for (int i = 0; i < m_raid.Count; i++)
         {
@@ -414,27 +413,35 @@ public class MoAMineKingAtrea : BaseEncounter
                 return 1.30f;
         }
     }
-    
+
+    float GetEngulfDuration()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 10.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 12.0f;
+            case Enums.Difficulties.Hard:
+                return 15.0f;
+        }
+    }
+
     IEnumerator DoTankAttack(float castTime, RaiderScript target)
     {
         yield return new WaitForSeconds(castTime);
 
         if (!m_rsc.IsRaidDead() && !target.IsDead() && !IsDead())
         {
-            if (m_currentRaiderTarget == target)
-            {
-                m_counter++;
-            }
-            else if (m_currentRaiderTarget.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank)
-            {
-                m_counter = 0;
-            }
+            int numStacks = GetNumStacksForRaider(m_currentRaiderTarget);
 
             foreach (var raider in m_raid)
             {
-                raider.TakeDamage(Mathf.RoundToInt(GetEngulfBaseDamage() * Mathf.Pow(GetEngulfMultiplier(), m_counter)), "Engulf");
+                raider.TakeDamage(Mathf.RoundToInt(GetEngulfBaseDamage() * Mathf.Pow(GetEngulfMultiplier(), numStacks)), "Engulf");
             }
 
+            AddStackstoRaider(m_currentRaiderTarget, 1, GetEngulfDuration());
         }
         else if (target.IsDead())
         {
@@ -444,7 +451,6 @@ public class MoAMineKingAtrea : BaseEncounter
             {
                 if (!otherTanks[i].IsDead())
                 {
-                    m_counter = 0;
                     m_currentRaiderTarget = otherTanks[i];
                     break;
                 }
@@ -465,7 +471,6 @@ public class MoAMineKingAtrea : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !IsDead())
         {
-            m_rsc.TankAbilityUsed();
             m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(GetEngulfCastTime()), m_currentRaiderTarget));
         }
     }
@@ -996,8 +1001,6 @@ public class MoAMineKingAtrea : BaseEncounter
                 temp.AddComponent<RaiderDebuff>().Initialize(debuffTargets[i], StenchOfDeathString, GetStenchOfDeathTickDamage());
                 debuffTargets[i].AddDebuff(temp);
             }
-
-            m_rsc.DebuffsAdded();
         }
 
         if (m_currentAbility != null && m_currentAbility.Name == BreathOfDeathString)

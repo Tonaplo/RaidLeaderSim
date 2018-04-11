@@ -57,6 +57,13 @@ public class RaiderScript : MonoBehaviour {
         m_activeCooldowns.RemoveAll(x => toBeRemoved.Contains(x));
     }
 
+    public int GetStacks() { return HealthBar.Stacks(); }
+
+    public void AddStacks(int n, float t)
+    {
+        HealthBar.AddStacks(n, t);
+    }
+
     public bool IsDead()
     {
         return HealthBar.IsDead();
@@ -68,21 +75,56 @@ public class RaiderScript : MonoBehaviour {
     }
 
     public int GetHealth() { return (int)HealthBar.CurrentHealth; }
+
     public int GetMaxHealth() {
         if(m_activeConsumable != null && m_activeConsumable.ConsumableType == Enums.ConsumableType.HealthIncrease)
             return Mathf.RoundToInt(m_raider.GetMaxHealth() * m_activeConsumable.GetMultiplier());
         else
             return m_raider.GetMaxHealth();
     }
+
     public float GetHealthPercent() { return ((float)HealthBar.CurrentHealth / (float)m_raider.GetMaxHealth()) * 100.0f;  }
 
     public void Initialize(Raider raider, HealthBarScript hbs, Canvas parent, int index) {
         m_raider = raider;
         HealthBar = hbs;
-        HealthBar.SetupHealthBar(raider.GetName(), index, Enums.HealthBarSetting.Raider, m_raider.GetMaxHealth());
+        Enums.HealthBarSetting setting;
+        switch (raider.RaiderStats.GetRole())
+        {
+            case Enums.CharacterRole.Tank:
+                setting = Enums.HealthBarSetting.Tank;
+                break;
+            case Enums.CharacterRole.Healer:
+                setting = Enums.HealthBarSetting.Healer;
+                break;
+            case Enums.CharacterRole.RangedDPS:
+            case Enums.CharacterRole.MeleeDPS:
+            default:
+                setting = Enums.HealthBarSetting.DPS;
+                break;
+        }
+
+        
+        HealthBar.SetupHealthBar(raider.GetName(), index, setting, m_raider.GetMaxHealth());
         HealthBar.Fill.color = Utility.GetColorFromClass(m_raider.RaiderStats.GetClass());
         HealthBarButton = HealthBar.BarButton;
-        HealthBar.BarButton.onClick.AddListener( delegate () { AttemptToCounterAbility(); });
+
+        switch (raider.RaiderStats.GetRole())
+        {
+            case Enums.CharacterRole.Tank:
+                HealthBar.BarButton.onClick.AddListener( delegate () { m_rsc.RaiderTaunt(this); } );
+                break;
+            case Enums.CharacterRole.Healer:
+                setting = Enums.HealthBarSetting.Healer;
+                HealthBar.BarButton.onClick.AddListener(delegate () { m_rsc.AttemptToDispel(this); });
+                break;
+            case Enums.CharacterRole.RangedDPS:
+            case Enums.CharacterRole.MeleeDPS:
+            default:
+                HealthBar.BarButton.onClick.AddListener(delegate () { AttemptToCounterAbility(); });
+                break;
+        }
+        
     }
 
     public IEnumerator StartFight(float offset, int index, Raider attacker, RaidSceneController rsc)
@@ -104,7 +146,7 @@ public class RaiderScript : MonoBehaviour {
         }
     }
 
-    public int DealDamage(int index, string attackName, DamageStruct ds)
+    public EncounterEnemy DealDamage(int index, string attackName, DamageStruct ds, out int damageDealt, EncounterEnemy target)
     {
         int baseDamage = Raider.RaiderStats.GetAttackOrHealAmount();
 
@@ -130,9 +172,15 @@ public class RaiderScript : MonoBehaviour {
             Debug.Log("baseDamage: " + baseDamage + ", baseMultiplier: " + baseMultiplier + ", finaldamage: " + damage + ", critroll: " + roll + ", critchance: " + chance);
         }*/
 
+        damageDealt = 0;
         HandleLeechCooldownLeech(damage, index, ds.m_baseLeech);
-        m_rsc.DealDamage(damage, this, index);
-        return damage;
+        EncounterEnemy actualTarget = null;
+        if (target == null)
+            actualTarget = m_rsc.DealDamage(damage, this, index, out damageDealt);
+        else
+            actualTarget = m_rsc.DealDamageToTarget(damage, this, index, out damageDealt, target);
+
+        return actualTarget;
     }
 
     public int DoHealing(int index, string healName, ref HealStruct hs, RaiderScript target)
@@ -184,9 +232,9 @@ public class RaiderScript : MonoBehaviour {
 
         damage = ApplyCooldownDamageReduction(damage, reduction);
 
-        HealthBar.ModifyHealth(-damage);
+        int overKill = HealthBar.ModifyHealth(-damage);
         if (IsDead())
-            Die(attackName);
+            Die(attackName, damage, -overKill);
     }
 
     public void TakeHealing(string healName, string healerName, int index, int healing) {
@@ -200,11 +248,11 @@ public class RaiderScript : MonoBehaviour {
         m_rsc.DoHeal(actualHealing, healerName, healName, index);
     }
 
-    void Die(string killedBy)
+    void Die(string killedBy, int totaldamage, int overkill)
     {
         m_cooldownUsed = true;
         enabled = false;
-        m_rsc.RaiderDied(Raider.GetName(), killedBy);
+        m_rsc.RaiderDied(Raider.GetName(), killedBy, totaldamage, overkill);
     }
 
     void AttemptToCounterAbility()
@@ -215,6 +263,7 @@ public class RaiderScript : MonoBehaviour {
     public void AddDebuff(GameObject debuff)
     {
         m_activeDebuffs.Add(debuff);
+        m_rsc.DebuffAdded();
     }
 
     public void RemoveDebuff()
@@ -253,6 +302,11 @@ public class RaiderScript : MonoBehaviour {
         m_currentEffects.m_healingMultiplier *= cd.Cooldowneffects.m_healingMultiplier;
         m_currentEffects.m_HoTMultiplier += cd.Cooldowneffects.m_HoTMultiplier;
         m_currentEffects.m_leechMultiplier += cd.Cooldowneffects.m_leechMultiplier;
+        m_currentEffects.m_maxHealthMultiplier *= cd.Cooldowneffects.m_maxHealthMultiplier;
+
+        if(!Mathf.Approximately(cd.Cooldowneffects.m_maxHealthMultiplier, 1.0f)) 
+            HealthBar.SetHealthMultiplier(m_currentEffects.m_maxHealthMultiplier);
+
 
         m_activeCooldowns.Add(new ActiveCooldowns(cd));
     }
@@ -268,6 +322,10 @@ public class RaiderScript : MonoBehaviour {
         m_currentEffects.m_healingMultiplier /= cd.m_cooldown.Cooldowneffects.m_healingMultiplier;
         m_currentEffects.m_HoTMultiplier -= cd.m_cooldown.Cooldowneffects.m_HoTMultiplier;
         m_currentEffects.m_leechMultiplier -= cd.m_cooldown.Cooldowneffects.m_leechMultiplier;
+        m_currentEffects.m_maxHealthMultiplier /= cd.m_cooldown.Cooldowneffects.m_maxHealthMultiplier;
+
+        if (!Mathf.Approximately(cd.m_cooldown.Cooldowneffects.m_maxHealthMultiplier, 1.0f))
+            HealthBar.SetHealthMultiplier(1.0f / cd.m_cooldown.Cooldowneffects.m_maxHealthMultiplier);
     }
 
     public void AddConsumable(ConsumableItem item)

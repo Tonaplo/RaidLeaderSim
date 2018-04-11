@@ -15,6 +15,7 @@ public class BaseCooldown {
         public float m_critEffectIncrease = 0.0f;
         public float m_HoTMultiplier = 0.0f;
         public float m_deepHealingMultiplier = 1.0f;
+        public float m_maxHealthMultiplier = 1.0f;
         public Enums.CooldownTargets m_targets = Enums.CooldownTargets.Self;
     }
 
@@ -52,5 +53,8 @@ public class BaseCooldown {
         m_description = m_description.Replace("<critchance>", (m_effects.m_critChanceIncrease).ToString() + "%");
         m_description = m_description.Replace("<criteffect>", (m_effects.m_critEffectIncrease * 100.0f).ToString() + "%");
         m_description = m_description.Replace("<deep>", (m_effects.m_deepHealingMultiplier * 100).ToString() + "%");
+        m_description = m_description.Replace("<maxHP>", (m_effects.m_maxHealthMultiplier * 100.0f - 100.0f).ToString() + "%");
+
+        
     }
 }

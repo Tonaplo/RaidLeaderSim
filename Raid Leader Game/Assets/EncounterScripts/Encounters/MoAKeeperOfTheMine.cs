@@ -21,7 +21,6 @@ public class MoAKeeperOfTheMine : BaseEncounter
     {
         List<RaiderScript> pebbletargets = GetRandomRaidTargets(GetPebbleThrowTargetCount());
         m_currentRaiderTarget = null;
-        m_counter = 0;
         for (int i = 0; i < m_raid.Count; i++)
         {
             if(pebbletargets.Contains(m_raid[i]))
@@ -103,6 +102,20 @@ public class MoAKeeperOfTheMine : BaseEncounter
                 return 1.20f;
             case Enums.Difficulties.Hard:
                 return 1.30f;
+        }
+    }
+
+    float GetClubSwingDuration()
+    {
+        switch (m_difficulty)
+        {
+            case Enums.Difficulties.Easy:
+                return 10.0f;
+            case Enums.Difficulties.Normal:
+            default:
+                return 10.0f;
+            case Enums.Difficulties.Hard:
+                return 10.0f;
         }
     }
 
@@ -236,24 +249,15 @@ public class MoAKeeperOfTheMine : BaseEncounter
 
         if (!target.IsDead() && !IsDead())
         {
-            if (m_currentRaiderTarget == target)
-            {
-                int damage = Mathf.RoundToInt(GetClubSwingDamage() * Mathf.Pow(GetClubSwingIncrease(), m_counter));
-                target.TakeDamage(damage, "Club Swing");
-                m_counter++;
-            }
-            else
-            {
-                m_counter = 0;
-                int damage = Mathf.RoundToInt(GetClubSwingDamage() * Mathf.Pow(GetClubSwingIncrease(), m_counter));
-                target.TakeDamage(damage, "Club Swing");
-            }
+            int numStacks = GetNumStacksForRaider(m_currentRaiderTarget);
+            int damage = Mathf.RoundToInt(GetClubSwingDamage() * Mathf.Pow(GetClubSwingIncrease(), numStacks));
+            m_currentRaiderTarget.TakeDamage(damage, "Club Swing");
+            AddStackstoRaider(m_currentRaiderTarget, 1, GetClubSwingDuration());
 
         }
         else if (target.IsDead())
         {
             m_currentRaiderTarget = null;
-            m_counter = 0;
             List<RaiderScript> otherTanks = m_rsc.GetRaid().FindAll(x => x.Raider.RaiderStats.GetRole() == Enums.CharacterRole.Tank && x.Raider.GetName() != target.Raider.GetName());
             for (int i = 0; i < otherTanks.Count; i++)
             {
@@ -278,7 +282,6 @@ public class MoAKeeperOfTheMine : BaseEncounter
         }
         if (!m_rsc.IsRaidDead() && !IsDead())
         {
-            m_rsc.TankAbilityUsed();
             m_rsc.StartCoroutine(DoTankAttack(Utility.GetFussyCastTime(m_ClubSwingCastTime), m_currentRaiderTarget));
         }
     }

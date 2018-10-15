@@ -196,8 +196,8 @@ public class HealthBarScript : MonoBehaviour
         switch (m_setting)
         {
             case Enums.HealthBarSetting.CurrentTarget:
-                xPos = 233;
-                yPos = 240;
+                xPos = 240;
+                yPos = 250;
                 m_width = 330;
                 m_height = 32;
                 buttonHeightMultiplier = 1.0f;
@@ -205,7 +205,7 @@ public class HealthBarScript : MonoBehaviour
                 break;
             case Enums.HealthBarSetting.Enemy:
                 xPos = 65;
-                yPos = 175;
+                yPos = 198;
                 m_width = 80;
                 xPosOffset = m_width * 1.4f;
                 m_height = 25;
@@ -218,8 +218,8 @@ public class HealthBarScript : MonoBehaviour
             case Enums.HealthBarSetting.Tank:
             case Enums.HealthBarSetting.Healer:
             case Enums.HealthBarSetting.DPS:
-                xPos = 278;
-                yPos = 185;
+                xPos = 300;
+                yPos = 200;
                 m_width = 52;
                 xPosOffset = m_width*1.4f;
                 m_height = 20;

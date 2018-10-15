@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2017
+# Visual Studio 15
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Raid Leader Game", "Raid Leader Game.csproj", "{7C44F69D-7272-0C98-1EB6-2D733E39865B}"
 EndProject
 Global

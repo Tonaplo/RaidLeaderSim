@@ -273,8 +273,17 @@ public class RaidSceneController : MonoBehaviour {
 
     EncounterEnemy DealDamageInternal(int damage, RaiderScript attacker, int index, out int actualDamage, EncounterEnemy target)
     {
+        //We cant deal damage to any enemies if there if the fight is over.
+        //This can happen if we have DoT damage queued up and the raid dies.
+        if (target != null && target.Healthbar.IsDead())
+        {
+            target = null;
+            actualDamage = 0;
+            return null;
+        }
+
         EncounterEnemy actualTarget = null;
-        if(target == null)
+        if (target == null)
             actualTarget = encounter.TakeDamage(damage, attacker, out actualDamage);
         else 
             actualTarget = encounter.TakeDamageSpecific(damage, attacker, out actualDamage, target);

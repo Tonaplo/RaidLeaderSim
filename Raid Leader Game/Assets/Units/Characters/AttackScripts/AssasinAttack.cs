@@ -37,7 +37,7 @@ public class AssasinAttack : BaseHealOrAttackScript
             int unused = 0;
             EncounterEnemy thisAttackEnemy = rs.DealDamage(index, Name, thisAttack, out unused, null);
 
-            float poisonMultiplier = (thisAttackEnemy.Healthbar.GetHealthPercent() / 100.0f) * m_maxBuffPerStack;
+            float poisonMultiplier = (thisAttackEnemy == null) ? 0.0f : (thisAttackEnemy.Healthbar.GetHealthPercent() / 100.0f) * m_maxBuffPerStack;
 
             //Make sure it never falls below the minimum
             poisonMultiplier = poisonMultiplier < m_minBuffPerStack ? m_minBuffPerStack : poisonMultiplier;
@@ -52,7 +52,7 @@ public class AssasinAttack : BaseHealOrAttackScript
     {
         yield return new WaitForSeconds(castTime);
 
-        if (!rs.IsBossDead() && !rs.IsDead() && !target.Healthbar.IsDead())
+        if (!rs.IsBossDead() && !rs.IsDead() && (target != null) && !target.Healthbar.IsDead())
         {
             DamageStruct thisAttack = new DamageStruct(m_damageStruct);
             thisAttack.m_baseMultiplier *= multiplier;

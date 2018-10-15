@@ -41,7 +41,7 @@ public class ScourgeAttack : BaseHealOrAttackScript
 
             int unused = 0;
             EncounterEnemy thisAttackEnemy = rs.DealDamage(index, Name, thisAttack, out unused, null);
-            if (thisAttackEnemy.Healthbar.GetHealthPercent() >= (m_percentCutoff * 100.0f))
+            if (thisAttackEnemy != null && thisAttackEnemy.Healthbar.GetHealthPercent() >= (m_percentCutoff * 100.0f))
             {
                 m_hasbuff = true;
                 if (m_coroutine != null)

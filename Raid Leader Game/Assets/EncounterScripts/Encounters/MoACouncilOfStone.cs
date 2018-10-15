@@ -845,7 +845,7 @@ public class MoACouncilOfStone : BaseEncounter
 
         if (!m_rsc.IsRaidDead() && !IsDead())
         {
-            for (int i = 0; i < addCounter; i++)
+            for (int i = 0; i < (addCounter/2)+1; i++)
             {
                 CreateEnemy("Minisidiana", GetMinisidianaHealth(), Enums.EncounterEnemyType.Add);
             }
